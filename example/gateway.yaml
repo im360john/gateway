@@ -1,7 +1,7 @@
 type: pg
 params:
     hosts:
-        - localhost
+        - postgres
     user: postgres
     password: password
     database: mydb
