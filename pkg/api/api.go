@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/centralmind/gateway/pkg/swaggerator"
 	"github.com/doublecloud/transfer/library/go/slices"
+	"github.com/flowchartsman/swaggerui"
 	"net/http"
 	"strings"
 
@@ -24,13 +25,6 @@ func NewAPI(schema abstract.TableMap, sampleData map[abstract.TableID][]abstract
 		Schema:     schema,
 		SampleData: sampleData,
 	}
-}
-
-// ServeSwaggerJSON serves the generated OpenAPI JSON.
-func (api *API) ServeSwaggerJSON(w http.ResponseWriter, r *http.Request) {
-	swagger := swaggerator.Schema(api.Schema)
-	w.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode(swagger)
 }
 
 // ServeSampleData serves example data for a given table.
@@ -69,6 +63,9 @@ func (api *API) generateSwaggerJSON() *openapi3.T {
 
 // RegisterRoutes registers API endpoints.
 func (api *API) RegisterRoutes(mux *http.ServeMux) {
-	mux.HandleFunc("/swagger.json", api.ServeSwaggerJSON)
 	mux.HandleFunc("/sample/", api.ServeSampleData) // Handles /sample/{tableName}
+
+	swagger := swaggerator.Schema(api.Schema)
+	raw, _ := json.Marshal(swagger)
+	mux.Handle("/swagger/", http.StripPrefix("/swagger", swaggerui.Handler(raw)))
 }

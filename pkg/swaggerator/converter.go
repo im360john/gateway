@@ -12,8 +12,8 @@ func Schema(schema abstract.TableMap) *openapi3.T {
 	swagger := &openapi3.T{
 		OpenAPI: "3.0.0",
 		Info: &openapi3.Info{
-			Title:       "Dynamic Table Schema API",
-			Description: "API that dynamically generates table schemas",
+			Title:       "Data Gateway Schema API",
+			Description: "Gateway that dynamically generates accessor for data",
 			Version:     "1.0.0",
 		},
 		Components: &openapi3.Components{

@@ -4,6 +4,7 @@ go 1.22.5
 
 require (
 	github.com/doublecloud/transfer v0.0.0-rc9
+	github.com/flowchartsman/swaggerui v0.0.0-20221017034628-909ed4f3701b
 	github.com/getkin/kin-openapi v0.129.0
 	github.com/spf13/cobra v1.8.1
 	go.ytsaurus.tech/yt/go v0.0.24

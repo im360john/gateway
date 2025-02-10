@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"github.com/doublecloud/transfer/pkg/abstract/model"
 	"gopkg.in/yaml.v3"
 
@@ -23,7 +24,7 @@ func (g *Gateway) ParamRaw() string {
 	case string:
 		return p
 	default:
-		data, _ := yaml.Marshal(p)
+		data, _ := json.Marshal(p)
 		return string(data)
 	}
 }

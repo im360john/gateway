@@ -8,6 +8,7 @@ import (
 	"github.com/doublecloud/transfer/pkg/abstract"
 	"github.com/doublecloud/transfer/pkg/abstract/model"
 	"github.com/doublecloud/transfer/pkg/worker/tasks"
+
 	"net/http"
 	"os"
 
@@ -61,7 +62,8 @@ func run(configPath *string, port *string) func(cmd *cobra.Command, args []strin
 
 		mux := http.NewServeMux()
 		api.NewAPI(res.Schema, res.Preview).RegisterRoutes(mux)
-		return http.ListenAndServe(":8080", mux)
+
+		return http.ListenAndServe(*port, mux)
 	}
 }
 
