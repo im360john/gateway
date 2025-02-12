@@ -84,6 +84,55 @@ func (api *API) FetchData(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(res.AsMap())
 }
 
+func (api *API) SearchData(w http.ResponseWriter, r *http.Request) {
+	pathParts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
+	if len(pathParts) < 2 || pathParts[0] != "search" {
+		http.Error(w, `{"error": "invalid URL format, expected /search/{tableName}"}`, http.StatusBadRequest)
+		return
+	}
+	tableName := pathParts[1]
+
+	tid, err := abstract.ParseTableID(tableName)
+	if err != nil {
+		http.Error(w, fmt.Sprintf(`{"error": "unable to parse table name: %s"}`, tableName), http.StatusNotFound)
+		return
+	}
+
+	storage, err := api.SnapshotF.Storage()
+	if err != nil {
+		http.Error(w, fmt.Sprintf(`{"error": "unable to create storage: %s: %s"}`, tableName, err.Error()), http.StatusBadRequest)
+		return
+	}
+	filter := abstract.WhereStatement("1 = 1")
+	for col, value := range r.URL.Query() {
+		filter = abstract.WhereStatement(fmt.Sprintf("%s and %s = '%s'", filter, col, value[0]))
+	}
+
+	var res abstract.ChangeItem
+	if err := storage.LoadTable(context.Background(), abstract.TableDescription{
+		Name:   tid.Name,
+		Schema: tid.Namespace,
+		Filter: filter,
+		EtaRow: 0,
+		Offset: 0,
+	}, func(items []abstract.ChangeItem) error {
+		for _, row := range items {
+			if !row.IsRowEvent() {
+				continue
+			}
+			res = row
+			return nil
+		}
+		return nil
+	}); err != nil {
+		http.Error(w, fmt.Sprintf(`{"error": "unable to fetch data from storage: %s: %s"}`, tableName, err.Error()), http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(res.AsMap())
+}
+
 // ServeSampleData serves example data for a given table.
 func (api *API) ServeSampleData(w http.ResponseWriter, r *http.Request) {
 	// Extract table name from URL path
@@ -121,6 +170,7 @@ func (api *API) generateSwaggerJSON() *openapi3.T {
 // RegisterRoutes registers API endpoints.
 func (api *API) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/sample/", api.ServeSampleData) // Handles /sample/{tableName}
+	mux.HandleFunc("/search/", api.SearchData)      // Handles /sample/{tableName}
 	mux.HandleFunc("/", api.FetchData)              // Handles /{tableName}
 	swagger := swaggerator.Schema(api.Schema)
 	raw, _ := json.Marshal(swagger)

@@ -24,7 +24,8 @@ func Schema(schema abstract.TableMap) *openapi3.T {
 	// Iterate through tables and generate OpenAPI schemas
 	for tid, info := range schema {
 		schemaProps := make(map[string]*openapi3.SchemaRef)
-		var queryParams openapi3.Parameters
+		var keyParams openapi3.Parameters
+		var allParams openapi3.Parameters
 		tableName := strings.ReplaceAll(tid.Fqtn(), "\"", "")
 
 		for _, col := range info.Schema.Columns() {
@@ -36,8 +37,20 @@ func Schema(schema abstract.TableMap) *openapi3.T {
 				},
 			}
 
+			allParams = append(allParams, &openapi3.ParameterRef{
+				Value: &openapi3.Parameter{
+					Name:     col.ColumnName,
+					In:       "query",
+					Required: false,
+					Schema: &openapi3.SchemaRef{
+						Value: &openapi3.Schema{
+							Type: &openapi3.Types{mapDataTypeToOpenAPI(col.DataType)},
+						},
+					},
+				},
+			})
 			if col.IsKey() {
-				queryParams = append(queryParams, &openapi3.ParameterRef{
+				keyParams = append(keyParams, &openapi3.ParameterRef{
 					Value: &openapi3.Parameter{
 						Name:     col.ColumnName,
 						In:       "query",
@@ -80,12 +93,32 @@ func Schema(schema abstract.TableMap) *openapi3.T {
 					})),
 				},
 			}),
+			openapi3.WithPath("/search/"+tableName, &openapi3.PathItem{
+				Get: &openapi3.Operation{
+					Summary:     "Search for " + tableName,
+					Description: "Search data in " + tableName,
+					Tags:        []string{tableName},
+					Parameters:  allParams,
+					Responses: openapi3.NewResponses(openapi3.WithStatus(200, &openapi3.ResponseRef{
+						Value: &openapi3.Response{
+							//Description: "JSON object for " + tableName,
+							Content: openapi3.Content{
+								"application/json": &openapi3.MediaType{
+									Schema: &openapi3.SchemaRef{
+										Ref: "#/components/schemas/" + tableName,
+									},
+								},
+							},
+						},
+					})),
+				},
+			}),
 			openapi3.WithPath("/"+tableName, &openapi3.PathItem{
 				Get: &openapi3.Operation{
 					Summary:     "Get one row for " + tableName,
 					Description: "Get row in json format based on " + tableName,
 					Tags:        []string{tableName},
-					Parameters:  queryParams,
+					Parameters:  keyParams,
 					Responses: openapi3.NewResponses(openapi3.WithStatus(200, &openapi3.ResponseRef{
 						Value: &openapi3.Response{
 							//Description: "JSON object for " + tableName,
