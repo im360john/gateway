@@ -1,0 +1,100 @@
+item_key,item_name,desc,unit_price,man_country,supplier,unit
+I00001,A&W Root Beer - 12 oz cans,a. Beverage - Soda,11.5,Netherlands,Bolsius Boxmeer,cans
+I00002,A&W Root Beer Diet - 12 oz cans,a. Beverage - Soda,6.75,poland,CHROMADURLIN S.A.S,cans
+I00003,Barq's Root Beer - 12 oz cans,a. Beverage - Soda,6.75,Bangladesh,DENIMACH LTD,cans
+I00004,Cherry Coke 12oz,a. Beverage - Soda,6.75,Netherlands,Bolsius Boxmeer,cans
+I00005,Cherry Coke Zero 12 pack,a. Beverage - Soda,6.75,Finland,HARDFORD AB,cans
+I00006,Coke Classic 12 oz cans,a. Beverage - Soda,16.25,Lithuania,BIGSO AB,cans
+I00007,Coke Classic 12 oz cans,a. Beverage - Soda,6.75,India,Indo Count Industries Ltd,cans
+I00008,Coke Zero Sugar 12 oz cans,a. Beverage - Soda,16.25,India,Indo Count Industries Ltd,cans
+I00009,Diet Coke - 12 oz cans,a. Beverage - Soda,16.25,Netherlands,Bolsius Boxmeer,cans
+I00010,Diet Coke - 12 oz cans,a. Beverage - Soda,6.75,Lithuania,BIGSO AB,cans
+I00011,Diet Coke Caffeine Free 12oz cans,a. Beverage - Soda,6.75,Germany,Friedola 1888 GmbH,cans
+I00012,Diet Dr. Pepper - 12 oz cans,a. Beverage - Soda,16.25,China,"CHERRY GROUP CO.,LTD",cans
+I00013,Diet Gingerale 12 oz cans,a. Beverage - Soda,6.75,United States,MAESA SAS,cans
+I00014,Diet Mountain Dew 12oz cans,a. Beverage - Soda,6.75,Finland,HARDFORD AB,cans
+I00015,Diet Pepsi - 12 oz cans,a. Beverage - Soda,6.75,India,Indo Count Industries Ltd,cans
+I00016,Dr. Pepper - 12 oz cans,a. Beverage - Soda,16.25,China,"CHERRY GROUP CO.,LTD",cans
+I00017,Fresca Black Cherry - 12 oz cans,a. Beverage - Soda,6.75,Cambodia,NINGBO SEDUNO IMP & EXP CO.LTD,cans
+I00018,Fresca Original - 12 oz cans,a. Beverage - Soda,6.75,India,Indo Count Industries Ltd,cans
+I00019,Fresca Peach Citrus - 12 oz cans,a. Beverage - Soda,6.75,Finland,HARDFORD AB,cans
+I00020,Ginger Ale - 12 oz cans,a. Beverage - Soda,6.75,poland,CHROMADURLIN S.A.S,cans
+I00021,Hawaiian Punch - 12 oz cans,a. Beverage - Soda,6.75,Germany,Friedola 1888 GmbH,cans
+I00022,Mountain Dew - 12 oz cans,a. Beverage - Soda,16.25,Germany,Friedola 1888 GmbH,cans
+I00023,Pepsi - 12 oz cans,a. Beverage - Soda,6.75,Cambodia,NINGBO SEDUNO IMP & EXP CO.LTD,cans
+I00024,Pepsi - 12 oz cans,a. Beverage - Soda,16.25,Lithuania,BIGSO AB,cans
+I00025,Seven Up - 12 oz cans,a. Beverage - Soda,11.5,China,"CHERRY GROUP CO.,LTD",cans
+I00026,Sprite - 12 oz cans,a. Beverage - Soda,6.75,Lithuania,BIGSO AB,cans
+I00027,Sprite - 12 oz cans,a. Beverage - Soda,16.25,poland,CHROMADURLIN S.A.S,cans
+I00028,Sprite Zero - 12 pack,a. Beverage - Soda,6.75,poland,CHROMADURLIN S.A.S,cans
+I00029,Sunkist Orange - 12 oz cans,a. Beverage - Soda,11.5,Netherlands,Bolsius Boxmeer,cans
+I00030,La Croix Sparkling Berry 12 ozv,a. Beverage Sparkling Water,16,Finland,HARDFORD AB,cans
+I00031,La Croix Sparkling Coconut 12 oz,a. Beverage Sparkling Water,16,Bangladesh,DENIMACH LTD,cans
+I00032,La Croix Sparkling Cran-Raspberry 12 oz,a. Beverage Sparkling Water,16,Lithuania,BIGSO AB,cans
+I00033,La Croix Sparkling Grapefruit 12 oz,a. Beverage Sparkling Water,16,poland,CHROMADURLIN S.A.S,cans
+I00034,La Croix Sparkling Lemon 12 oz,a. Beverage Sparkling Water,16,Cambodia,NINGBO SEDUNO IMP & EXP CO.LTD,cans
+I00035,La Croix Sparkling Lime 12 oz,a. Beverage Sparkling Water,16,United States,MAESA SAS,cans
+I00036,La Croix Sparkling Orange 12 oz,a. Beverage Sparkling Water,16,China,"CHERRY GROUP CO.,LTD",cans
+I00037,La Croix Sparkling Pure 12 oz,a. Beverage Sparkling Water,16,Finland,HARDFORD AB,cans
+I00038,Perrier Flavors Sparkling Water 16.9oz,a. Beverage Sparkling Water,23,Cambodia,NINGBO SEDUNO IMP & EXP CO.LTD,bottles
+I00039,Perrier Sparkling Water glass 11oz,a. Beverage Sparkling Water,26,Bangladesh,DENIMACH LTD,bottles
+I00040,Perrier Sparkling Water plastic 16.9oz,a. Beverage Sparkling Water,22,Cambodia,NINGBO SEDUNO IMP & EXP CO.LTD,bottles
+I00041,San Pelligrino 16oz Plastic ,a. Beverage Sparkling Water,23,Finland,HARDFORD AB,bottles
+I00042,Topo Chico 12 oz glass,a. Beverage Sparkling Water,28,United States,MAESA SAS,bottles
+I00043,Topo Chico 20oz plastic,a. Beverage Sparkling Water,24,China,"CHERRY GROUP CO.,LTD",bottles
+I00044,Waterloo Sparkling Blackcherry 12oz,a. Beverage Sparkling Water,8,Cambodia,NINGBO SEDUNO IMP & EXP CO.LTD,cans
+I00045,Waterloo Sparkling Grapefruit 12oz,a. Beverage Sparkling Water,8,China,"CHERRY GROUP CO.,LTD",cans
+I00046,Waterloo Sparkling Lemon 12oz,a. Beverage Sparkling Water,8,Germany,Friedola 1888 GmbH,cans
+I00047,Waterloo Sparkling Lime 12oz,a. Beverage Sparkling Water,8,India,Indo Count Industries Ltd,cans
+I00048,Waterloo Sparkling Mango 12oz,a. Beverage Sparkling Water,8,Bangladesh,DENIMACH LTD,cans
+I00049,Waterloo Sparkling Original 12oz,a. Beverage Sparkling Water,8,Netherlands,Bolsius Boxmeer,cans
+I00050,Waterloo Sparkling Watermelon 12oz,a. Beverage Sparkling Water,8,poland,CHROMADURLIN S.A.S,cans
+I00051,Monster Java 15 oz,Beverage - Energy/Protein ,23,Germany,Friedola 1888 GmbH,cans
+I00052,Monster Lo-Carb 16 oz,Beverage - Energy/Protein,40,poland,CHROMADURLIN S.A.S,cans
+I00053,Monster Original Green 16 oz,Beverage - Energy/Protein,40,Netherlands,Bolsius Boxmeer,cans
+I00054,Monster Zero Ultra 16 oz,Beverage - Energy/Protein,40,poland,CHROMADURLIN S.A.S,cans
+I00055,Monster Zero Ultra Variety 16 oz,Beverage - Energy/Protein,40,Bangladesh,DENIMACH LTD,cans
+I00056,Muscle Milk Protein Shake Choc. 11oz,Beverage - Energy/Protein,24,Netherlands,Bolsius Boxmeer,bottles
+I00057,Muscle Milk Protein Shake Van. 11oz,Beverage - Energy/Protein,24,Germany,Friedola 1888 GmbH,bottles
+I00058,Premier Protein Shake Choc. 11oz,Beverage - Energy/Protein,22,United States,MAESA SAS,bottles
+I00059,Muscle Milk Protein Shake Van. 11oz,Beverage - Energy/Protein,22,Lithuania,BIGSO AB,bottles
+I00060,Muscle Milk Protein Shake Strbry. 11oz,Beverage - Energy/Protein,22,poland,CHROMADURLIN S.A.S,bottles
+I00061,Red Bull 12oz,Beverage - Energy/Protein,55,United States,MAESA SAS,cans
+I00062,Red Bull 16oz,Beverage - Energy/Protein,37,Bangladesh,DENIMACH LTD,cans
+I00063,Red Bull 8.4 oz,Beverage - Energy/Protein,40,Lithuania,BIGSO AB,cans
+I00064,Red Bull Sugar Free 8.4 oz,Beverage - Energy/Protein,40,Lithuania,BIGSO AB,cans
+I00065,G2 Lo Calorie Variety 20 oz,Beverage - Gatorade,20,Lithuania,BIGSO AB,bottles
+I00066,Gatorade Frost Variety 20 oz ,Beverage - Gatorade,20,Cambodia,NINGBO SEDUNO IMP & EXP CO.LTD,bottles
+I00067,Gatorade Lemon Lime 12oz,Beverage - Gatorade,8,Finland,HARDFORD AB,bottles
+I00068,Gatorade Liberty Variety 20 oz ,Beverage - Gatorade,20,India,Indo Count Industries Ltd,bottles
+I00069,Gatorade Frost Variety 12 oz,Beverage - Gatorade,17.5,Bangladesh,DENIMACH LTD,bottles
+I00070,Gatorade Liberty Variety 12 oz,Beverage - Gatorade,17.5,United States,MAESA SAS,bottles
+I00071,Gatorade Original Variety 12 oz,Beverage - Gatorade,17.5,Germany,Friedola 1888 GmbH,bottles
+I00072,Gatorade Variety 20 oz ,Beverage - Gatorade,20,Bangladesh,DENIMACH LTD,bottles
+I00073,Gatorade X-Factor Fierce Variety 20 oz,Beverage - Gatorade,20,Cambodia,NINGBO SEDUNO IMP & EXP CO.LTD,bottles
+I00074,Gatorade Zero Variety 20 oz,Beverage - Gatorade,20,Netherlands,Bolsius Boxmeer,bottles
+I00075,Brisk Lemon Iced Tea - 12 oz cans,Beverage - Iced Tea,15.5,United States,MAESA SAS,cans
+I00076,Diet Fuze Iced Tea,Beverage - Iced Tea,6.75,Germany,Friedola 1888 GmbH,cans
+I00077,Fuze Iced Tea,Beverage - Iced Tea,6.75,poland,CHROMADURLIN S.A.S,cans
+I00078,Pure Leaf Sweet Tea 8.5oz,Beverage - Iced Tea,17,Netherlands,Bolsius Boxmeer,bottles
+I00079,Pure Leaf Unsweetened Tea 18.5oz,Beverage - Iced Tea,17,China,"CHERRY GROUP CO.,LTD",bottles
+I00080,Snapple Variety Pack 20oz,Beverage - Iced Tea,22,Germany,Friedola 1888 GmbH,bottles
+I00081,Tejava Unsweetened Black Tea 16.9oz,Beverage - Iced Tea,29,China,"CHERRY GROUP CO.,LTD",bottles
+I00082,100% Juice Box Variety 6.75 oz ,Beverage - Juice,15,Lithuania,BIGSO AB,ct
+I00083,Ocean Spray Cranberry Juice Cocktail 15oz ,Beverage - Juice,14,Finland,HARDFORD AB,bottles
+I00084,Tropicana Apple Juice 10 oz 100% ,Beverage - Juice,18,Germany,Friedola 1888 GmbH,bottles
+I00085,Tropicana Orange Juice 10 oz 100% ,Beverage - Juice,18,Bangladesh,DENIMACH LTD,bottles
+I00086,V8 100% Vegetable Juice 11oz cans,Beverage - Juice,18,poland,CHROMADURLIN S.A.S,cans
+I00087,V-8 Splash Variety 20 oz,Beverage - Juice,15,China,"CHERRY GROUP CO.,LTD",bottles
+I00088,Welch's 100% Juice Variety10 oz,Beverage - Juice,17,Cambodia,NINGBO SEDUNO IMP & EXP CO.LTD,bottles
+I00089,AquaFina Purified Drinking Water 16oz,Beverage Water,9,Germany,Friedola 1888 GmbH,bottles
+I00090,Dasani Bottled Water 16.9 oz,Beverage Water,9,Bangladesh,DENIMACH LTD,bottles
+I00091,Nestle Purelife 16oz ,Beverage Water,7.5,Cambodia,NINGBO SEDUNO IMP & EXP CO.LTD,bottles
+I00092,Ozarka Spring Water 16.9 oz bottles,Beverage Water,10,Lithuania,BIGSO AB,bottles
+I00093,Ozarka Spring Water 20 oz,Beverage Water,13,Bangladesh,DENIMACH LTD,bottles
+I00094,Ozarka Spring Water Mini 8oz,Beverage Water,11,Netherlands,Bolsius Boxmeer,bottles
+I00095,Propel Zero Variety 20 oz,Beverage Water,16,Finland,HARDFORD AB,botlltes
+I00096,Sobe Zero Lifewater Variety 20 oz,Beverage Water,20,Cambodia,NINGBO SEDUNO IMP & EXP CO.LTD,bottles
+I00097,Vita Coconut Water 10oz ,Beverage Water,19,India,Indo Count Industries Ltd,cartons
+I00098,Coffee-Mate French Vanilla Cold,Coffee Cream,10,Finland,HARDFORD AB,oz
+I00099,Coffee-Mate Original Flavor Cold,Coffee Cream,6,Bangladesh,DENIMACH LTD,oz

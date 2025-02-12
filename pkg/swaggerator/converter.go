@@ -21,6 +21,7 @@ func Schema(schema abstract.TableMap) *openapi3.T {
 		},
 	}
 
+	var paths []openapi3.NewPathsOption
 	// Iterate through tables and generate OpenAPI schemas
 	for tid, info := range schema {
 		schemaProps := make(map[string]*openapi3.SchemaRef)
@@ -73,7 +74,7 @@ func Schema(schema abstract.TableMap) *openapi3.T {
 			},
 		}
 
-		swagger.Paths = openapi3.NewPaths(
+		paths = append(paths,
 			openapi3.WithPath("/sample/"+tableName, &openapi3.PathItem{
 				Get: &openapi3.Operation{
 					Summary:     "Get JSON example for " + tableName,
@@ -136,6 +137,7 @@ func Schema(schema abstract.TableMap) *openapi3.T {
 		)
 	}
 
+	swagger.Paths = openapi3.NewPaths(paths...)
 	return swagger
 }
 
