@@ -91,7 +91,7 @@ func run(configPath *string, port *string) func(cmd *cobra.Command, args []strin
 		if !ok {
 			return xerrors.Errorf("no snapshot provider: %T", transfer.Src)
 		}
-		api.NewAPI(res.Schema, res.Preview, sF).RegisterRoutes(mux)
+		api.NewAPI(res.Schema, res.Preview, sF, transfer).RegisterRoutes(mux)
 
 		return http.ListenAndServe(*port, mux)
 	}
