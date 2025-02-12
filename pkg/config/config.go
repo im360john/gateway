@@ -3,14 +3,17 @@ package config
 import (
 	"encoding/json"
 	"github.com/doublecloud/transfer/pkg/abstract/model"
+	"github.com/doublecloud/transfer/pkg/transformer"
 	"gopkg.in/yaml.v3"
 
 	"github.com/doublecloud/transfer/pkg/abstract"
 )
 
 type Gateway struct {
-	Type   abstract.ProviderType
-	Params any
+	Type         abstract.ProviderType     `yaml:"type"`
+	Params       any                       `yaml:"params"`
+	Objects      *model.DataObjects        `yaml:"objects"`
+	Transformers *transformer.Transformers `yaml:"transformers"`
 }
 
 func (g *Gateway) Endpoint() (model.Source, error) {

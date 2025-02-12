@@ -49,9 +49,19 @@ func run(configPath *string, port *string) func(cmd *cobra.Command, args []strin
 			return xerrors.Errorf("endpoint is invalid: %w", err)
 		}
 		transfer := &model.Transfer{
-			Type: abstract.TransferTypeSnapshotOnly,
-			Src:  endpoint,
-			Dst:  new(model.MockDestination),
+			Type:           abstract.TransferTypeSnapshotOnly,
+			Src:            endpoint,
+			Dst:            new(model.MockDestination),
+			DataObjects:    gw.Objects,
+			Transformation: nil,
+		}
+		if gw.Transformers != nil {
+			transfer.Transformation = &model.Transformation{
+				Transformers:      gw.Transformers,
+				ExtraTransformers: nil,
+				Executor:          nil,
+				RuntimeJobIndex:   0,
+			}
 		}
 		res := tasks.TestEndpoint(context.Background(), &tasks.TestEndpointParams{
 			Transfer:             transfer,
