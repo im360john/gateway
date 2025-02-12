@@ -65,7 +65,7 @@ func Schema(schema abstract.TableMap) *openapi3.T {
 				Get: &openapi3.Operation{
 					Summary:     "Get JSON example for " + tableName,
 					Description: "Generates example JSON based on " + tableName,
-					Tags:        []string{"schema"},
+					Tags:        []string{tableName},
 					Responses: openapi3.NewResponses(openapi3.WithStatus(200, &openapi3.ResponseRef{
 						Value: &openapi3.Response{
 							//Description: "JSON object for " + tableName,
@@ -84,7 +84,7 @@ func Schema(schema abstract.TableMap) *openapi3.T {
 				Get: &openapi3.Operation{
 					Summary:     "Get one row for " + tableName,
 					Description: "Get row in json format based on " + tableName,
-					Tags:        []string{"get-by-keys"},
+					Tags:        []string{tableName},
 					Parameters:  queryParams,
 					Responses: openapi3.NewResponses(openapi3.WithStatus(200, &openapi3.ResponseRef{
 						Value: &openapi3.Response{
