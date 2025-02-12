@@ -4,11 +4,14 @@ import (
 	"context"
 	"github.com/centralmind/gateway/pkg/api"
 	"github.com/centralmind/gateway/pkg/config"
+	"github.com/centralmind/gateway/pkg/logger"
+	"github.com/doublecloud/transfer/library/go/core/metrics/solomon"
 	"github.com/doublecloud/transfer/library/go/core/xerrors"
 	"github.com/doublecloud/transfer/pkg/abstract"
+	"github.com/doublecloud/transfer/pkg/abstract/coordinator"
 	"github.com/doublecloud/transfer/pkg/abstract/model"
+	"github.com/doublecloud/transfer/pkg/providers"
 	"github.com/doublecloud/transfer/pkg/worker/tasks"
-
 	"net/http"
 	"os"
 
@@ -59,9 +62,20 @@ func run(configPath *string, port *string) func(cmd *cobra.Command, args []strin
 			},
 			ParamsDst: nil,
 		}, abstract.NewTestResult())
-
+		if res.Err() != nil {
+			return xerrors.Errorf("unable to run source: %w", res.Err())
+		}
 		mux := http.NewServeMux()
-		api.NewAPI(res.Schema, res.Preview).RegisterRoutes(mux)
+		sF, ok := providers.Source[providers.Snapshot](
+			logger.NewConsoleLogger(),
+			solomon.NewRegistry(solomon.NewRegistryOpts()),
+			coordinator.NewFakeClient(),
+			transfer,
+		)
+		if !ok {
+			return xerrors.Errorf("no snapshot provider: %T", transfer.Src)
+		}
+		api.NewAPI(res.Schema, res.Preview, sF).RegisterRoutes(mux)
 
 		return http.ListenAndServe(*port, mux)
 	}

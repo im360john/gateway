@@ -23,8 +23,9 @@ func Schema(schema abstract.TableMap) *openapi3.T {
 
 	// Iterate through tables and generate OpenAPI schemas
 	for tid, info := range schema {
-		tableName := strings.ReplaceAll(tid.Fqtn(), "\"", "")
 		schemaProps := make(map[string]*openapi3.SchemaRef)
+		var queryParams openapi3.Parameters
+		tableName := strings.ReplaceAll(tid.Fqtn(), "\"", "")
 
 		for _, col := range info.Schema.Columns() {
 			colType := mapDataTypeToOpenAPI(col.DataType)
@@ -33,6 +34,21 @@ func Schema(schema abstract.TableMap) *openapi3.T {
 				Value: &openapi3.Schema{
 					Type: &openapi3.Types{colType},
 				},
+			}
+
+			if col.IsKey() {
+				queryParams = append(queryParams, &openapi3.ParameterRef{
+					Value: &openapi3.Parameter{
+						Name:     col.ColumnName,
+						In:       "query",
+						Required: false,
+						Schema: &openapi3.SchemaRef{
+							Value: &openapi3.Schema{
+								Type: &openapi3.Types{mapDataTypeToOpenAPI(col.DataType)},
+							},
+						},
+					},
+				})
 			}
 		}
 
@@ -44,25 +60,47 @@ func Schema(schema abstract.TableMap) *openapi3.T {
 			},
 		}
 
-		swagger.Paths = openapi3.NewPaths(openapi3.WithPath("/sample/"+tableName, &openapi3.PathItem{
-			Get: &openapi3.Operation{
-				Summary:     "Get JSON example for " + tableName,
-				Description: "Generates example JSON based on " + tableName,
-				Tags:        []string{"schema"},
-				Responses: openapi3.NewResponses(openapi3.WithStatus(200, &openapi3.ResponseRef{
-					Value: &openapi3.Response{
-						//Description: "JSON object for " + tableName,
-						Content: openapi3.Content{
-							"application/json": &openapi3.MediaType{
-								Schema: &openapi3.SchemaRef{
-									Ref: "#/components/schemas/" + tableName,
+		swagger.Paths = openapi3.NewPaths(
+			openapi3.WithPath("/sample/"+tableName, &openapi3.PathItem{
+				Get: &openapi3.Operation{
+					Summary:     "Get JSON example for " + tableName,
+					Description: "Generates example JSON based on " + tableName,
+					Tags:        []string{"schema"},
+					Responses: openapi3.NewResponses(openapi3.WithStatus(200, &openapi3.ResponseRef{
+						Value: &openapi3.Response{
+							//Description: "JSON object for " + tableName,
+							Content: openapi3.Content{
+								"application/json": &openapi3.MediaType{
+									Schema: &openapi3.SchemaRef{
+										Ref: "#/components/schemas/" + tableName,
+									},
 								},
 							},
 						},
-					},
-				})),
-			},
-		}))
+					})),
+				},
+			}),
+			openapi3.WithPath("/"+tableName, &openapi3.PathItem{
+				Get: &openapi3.Operation{
+					Summary:     "Get one row for " + tableName,
+					Description: "Get row in json format based on " + tableName,
+					Tags:        []string{"get-by-keys"},
+					Parameters:  queryParams,
+					Responses: openapi3.NewResponses(openapi3.WithStatus(200, &openapi3.ResponseRef{
+						Value: &openapi3.Response{
+							//Description: "JSON object for " + tableName,
+							Content: openapi3.Content{
+								"application/json": &openapi3.MediaType{
+									Schema: &openapi3.SchemaRef{
+										Ref: "#/components/schemas/" + tableName,
+									},
+								},
+							},
+						},
+					})),
+				},
+			}),
+		)
 	}
 
 	return swagger
