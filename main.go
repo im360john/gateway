@@ -11,6 +11,8 @@ import (
 	"github.com/doublecloud/transfer/pkg/abstract/coordinator"
 	"github.com/doublecloud/transfer/pkg/abstract/model"
 	"github.com/doublecloud/transfer/pkg/providers"
+	"github.com/doublecloud/transfer/pkg/transformer"
+	_ "github.com/doublecloud/transfer/pkg/transformer/registry"
 	"github.com/doublecloud/transfer/pkg/worker/tasks"
 	"net/http"
 	"os"
@@ -57,7 +59,11 @@ func run(configPath *string, port *string) func(cmd *cobra.Command, args []strin
 		}
 		if gw.Transformers != nil {
 			transfer.Transformation = &model.Transformation{
-				Transformers:      gw.Transformers,
+				Transformers: &transformer.Transformers{
+					DebugMode:    false,
+					Transformers: gw.Transformers,
+					ErrorsOutput: nil,
+				},
 				ExtraTransformers: nil,
 				Executor:          nil,
 				RuntimeJobIndex:   0,

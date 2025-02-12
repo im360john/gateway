@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/centralmind/gateway/pkg/swaggerator"
 	"github.com/doublecloud/transfer/library/go/slices"
+	"github.com/doublecloud/transfer/pkg/abstract/model"
 	"github.com/doublecloud/transfer/pkg/providers"
 	"github.com/flowchartsman/swaggerui"
 	"net/http"
@@ -20,6 +21,8 @@ type API struct {
 	Schema     abstract.TableMap
 	SampleData map[abstract.TableID][]abstract.ChangeItem
 	SnapshotF  providers.Snapshot
+
+	transfer *model.Transfer
 }
 
 // NewAPI initializes a new API instance.
@@ -27,11 +30,14 @@ func NewAPI(
 	schema abstract.TableMap,
 	sampleData map[abstract.TableID][]abstract.ChangeItem,
 	snapshot providers.Snapshot,
+	transfer *model.Transfer,
 ) *API {
 	return &API{
 		Schema:     schema,
 		SampleData: sampleData,
 		SnapshotF:  snapshot,
+
+		transfer: transfer,
 	}
 }
 

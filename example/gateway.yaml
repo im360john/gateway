@@ -6,3 +6,16 @@ params:
     password: password
     database: mydb
     port: 5432
+objects:
+    include_objects:
+        - public.personas
+transformers:
+    - mask_field:
+          mask_field:
+              columns:
+                  - name
+              maskFunctionHash:
+                  userDefinedSalt: random_secret_string
+              tables:
+                  includeTables:
+                      - public.personas
