@@ -1,6 +1,8 @@
 module github.com/centralmind/gateway
 
-go 1.22.5
+go 1.23
+
+toolchain go1.23.6
 
 require (
 	github.com/doublecloud/transfer v0.0.0-rc9
@@ -50,6 +52,7 @@ require (
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/klauspost/compress v1.17.9 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
+	github.com/mark3labs/mcp-go v0.8.4 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.15 // indirect
 	github.com/mattn/go-sqlite3 v1.14.24 // indirect
