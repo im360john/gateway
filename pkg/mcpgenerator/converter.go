@@ -51,6 +51,9 @@ func New(
 			arguments := request.Params.Arguments
 			filter := abstract.WhereStatement("1 = 1")
 			for col, value := range arguments {
+				if strings.HasSuffix(col, "_operand") {
+					continue
+				}
 				operand := " = "
 				if reqOp, ok := arguments[fmt.Sprintf("%s_operand", col)]; ok {
 					switch reqOp {
