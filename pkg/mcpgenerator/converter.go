@@ -71,7 +71,7 @@ func New(
 					Content: []interface{}{
 						mcp.TextContent{
 							Type: "text",
-							Text: fmt.Sprintf("Unable to construct storage: %w", err),
+							Text: fmt.Sprintf("Unable to construct storage: %s", err),
 						},
 					},
 					IsError: true,
@@ -101,7 +101,7 @@ func New(
 					Content: []interface{}{
 						mcp.TextContent{
 							Type: "text",
-							Text: fmt.Sprintf("Unable to find row: %w", err),
+							Text: fmt.Sprintf("Unable to find row: %s", err),
 						},
 					},
 					IsError: true,
