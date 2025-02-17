@@ -35,22 +35,32 @@ func New(
 			".",
 			"_",
 		)
+		tableName = strings.TrimLeft(tableName, "public_")
 
-		var requestOpts []mcp.ToolOption
-		requestOpts = append(requestOpts, mcp.WithDescription(fmt.Sprintf("Get exact record from %s", tableName)))
+		var allOptions []mcp.ToolOption
+		allOptions = append(allOptions, mcp.WithDescription(fmt.Sprintf("Find record from %s table, all columns is queriable", tableName)))
+		var keyOptions []mcp.ToolOption
+		keyOptions = append(keyOptions, mcp.WithDescription(fmt.Sprintf("Get exact record from %s", tableName)))
 		for _, col := range info.Schema.Columns() {
 			if col.IsKey() {
-				requestOpts = append(requestOpts, ArgumentOption(col))
+				keyOptions = append(keyOptions, ArgumentOption(col, mcp.Required()))
 			}
+			allOptions = append(allOptions, ArgumentOption(col), OperandOption(col))
 		}
-		srv.AddTool(mcp.NewTool(
-			fmt.Sprintf("get_%s", tableName),
-			requestOpts...,
-		), func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		var findRecord = func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			arguments := request.Params.Arguments
 			filter := abstract.WhereStatement("1 = 1")
 			for col, value := range arguments {
-				filter = abstract.WhereStatement(fmt.Sprintf("%s and %s = '%v'", filter, col, value))
+				operand := " = "
+				if reqOp, ok := arguments[fmt.Sprintf("%s_operand", col)]; ok {
+					switch reqOp {
+					case "more":
+						reqOp = " > "
+					case "less":
+						reqOp = " < "
+					}
+				}
+				filter = abstract.WhereStatement(fmt.Sprintf("%s and %s %s '%v'", filter, col, operand, value))
 			}
 			storage, err := snapshot.Storage()
 			if err != nil {
@@ -118,7 +128,15 @@ func New(
 					},
 				},
 			}, nil
-		})
+		}
+		srv.AddTool(mcp.NewTool(
+			fmt.Sprintf("find_%s", tableName),
+			allOptions...,
+		), findRecord)
+		srv.AddTool(mcp.NewTool(
+			fmt.Sprintf("get_%s", tableName),
+			keyOptions...,
+		), findRecord)
 	}
 
 	return &MCPServer{
@@ -139,11 +157,16 @@ func (s *MCPServer) ServeStdio() *server.StdioServer {
 	return server.NewStdioServer(s.server)
 }
 
-func ArgumentOption(col abstract.ColSchema) mcp.ToolOption {
-	var opts []mcp.PropertyOption
-	if col.Required {
-		opts = append(opts, mcp.Required())
-	}
+func OperandOption(col abstract.ColSchema) mcp.ToolOption {
+	return mcp.WithString(
+		fmt.Sprintf("%s_operator", col.ColumnName),
+		mcp.Enum("equal", "more", "less"),
+		mcp.DefaultString("equal"),
+		mcp.Description(fmt.Sprintf("what operator apply to query by `%s` field", col.ColumnName)),
+	)
+}
+
+func ArgumentOption(col abstract.ColSchema, opts ...mcp.PropertyOption) mcp.ToolOption {
 	opts = append(opts, mcp.Title(fmt.Sprintf("Column %s", col.ColumnName)))
 
 	switch col.DataType {

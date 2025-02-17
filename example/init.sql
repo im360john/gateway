@@ -1,5 +1,5 @@
 -- Create a demo table for personas
-CREATE TABLE IF NOT EXISTS personas (
+CREATE TABLE IF NOT EXISTS gachi_personas (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100),
     strength_level INT,
@@ -7,13 +7,13 @@ CREATE TABLE IF NOT EXISTS personas (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- -- Insert personas data
--- INSERT INTO personas (name, strength_level, special_move) VALUES
--- ('Billy Herrington', 100, 'Anvil Drop'),
--- ('Van Darkholme', 95, 'Whip of Submission'),
--- ('Ricardo Milos', 90, 'Twerk of Power'),
--- ('Mark Wolff', 85, 'Wolf Howl Slam'),
--- ('Kazuhiko', 80, 'Smiling Slam');
+-- Insert personas data
+INSERT INTO gachi_personas (name, strength_level, special_move) VALUES
+('Billy Herrington', 100, 'Anvil Drop'),
+('Van Darkholme', 95, 'Whip of Submission'),
+('Ricardo Milos', 90, 'Twerk of Power'),
+('Mark Wolff', 85, 'Wolf Howl Slam'),
+('Kazuhiko', 80, 'Smiling Slam');
 
 -- Set the session parameter for date parsing in DMY format (e.g., "20-05-2017 14:56")
 SET datestyle TO 'DMY';
