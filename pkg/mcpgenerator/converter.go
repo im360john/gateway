@@ -26,17 +26,25 @@ func New(
 	srv := server.NewMCPServer("mcp-data-gateway", "0.0.1")
 
 	for tid, info := range schema {
-		tableName := strings.ReplaceAll(tid.Fqtn(), "\"", "")
+		tableName := strings.ReplaceAll(
+			strings.ReplaceAll(
+				tid.Fqtn(),
+				"\"",
+				"",
+			),
+			".",
+			"_",
+		)
 
 		var requestOpts []mcp.ToolOption
 		requestOpts = append(requestOpts, mcp.WithDescription(fmt.Sprintf("Get exact record from %s", tableName)))
 		for _, col := range info.Schema.Columns() {
 			if col.IsKey() {
-				requestOpts = append(requestOpts, ColToolOption(col))
+				requestOpts = append(requestOpts, ArgumentOption(col))
 			}
 		}
 		srv.AddTool(mcp.NewTool(
-			"get_"+tableName,
+			fmt.Sprintf("get_%s", tableName),
 			requestOpts...,
 		), func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			arguments := request.Params.Arguments
@@ -105,7 +113,7 @@ func New(
 					},
 					mcp.TextContent{
 						Annotated: mcp.Annotated{},
-						Type:      "test",
+						Type:      "text",
 						Text:      jsonify(res.AsMap()),
 					},
 				},
@@ -131,7 +139,7 @@ func (s *MCPServer) ServeStdio() *server.StdioServer {
 	return server.NewStdioServer(s.server)
 }
 
-func ColToolOption(col abstract.ColSchema) mcp.ToolOption {
+func ArgumentOption(col abstract.ColSchema) mcp.ToolOption {
 	var opts []mcp.PropertyOption
 	if col.Required {
 		opts = append(opts, mcp.Required())
