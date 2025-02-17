@@ -127,6 +127,10 @@ func (s *MCPServer) ServeSSE(addr string) *server.SSEServer {
 	return server.NewSSEServer(s.server, fmt.Sprintf("http://%s", addr))
 }
 
+func (s *MCPServer) ServeStdio() *server.StdioServer {
+	return server.NewStdioServer(s.server)
+}
+
 func ColToolOption(col abstract.ColSchema) mcp.ToolOption {
 	var opts []mcp.PropertyOption
 	if col.Required {

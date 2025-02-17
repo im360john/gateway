@@ -17,5 +17,6 @@ func StartCommand() *cobra.Command {
 	cmd.PersistentFlags().StringVar(&addr, "addr", ":9090", "addr for gateway")
 	cobraaux.RegisterCommand(cmd, REST(&gatewayParams, &addr))
 	cobraaux.RegisterCommand(cmd, MCP(&gatewayParams, &addr))
+	cobraaux.RegisterCommand(cmd, MCPStdio(&gatewayParams))
 	return cmd
 }

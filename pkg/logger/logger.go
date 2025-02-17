@@ -45,6 +45,22 @@ func getEnvLogLevels() levels {
 	return levels{zapcore.InfoLevel, log.InfoLevel}
 }
 
+func NewFileLog(logFile string) log.Logger {
+	consoleLevel := getEnvLogLevels()
+	defaultPriority := levelEnablerFactory(consoleLevel.Zap)
+	file, err := os.OpenFile(logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		panic(err)
+	}
+	fileSync := zapcore.AddSync(file)
+	stdErrEncoder := zapcore.NewConsoleEncoder(zap.CLIConfig(consoleLevel.Log).EncoderConfig)
+	lbCore := zapcore.NewTee(
+		zapcore.NewCore(stdErrEncoder, fileSync, defaultPriority),
+	)
+
+	return newLogger(lbCore)
+}
+
 func NewConsoleLogger() log.Logger {
 	consoleLevel := getEnvLogLevels()
 	defaultPriority := levelEnablerFactory(consoleLevel.Zap)
