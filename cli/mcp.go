@@ -2,13 +2,9 @@ package cli
 
 import (
 	"context"
-	"github.com/centralmind/gateway/logger"
 	"github.com/centralmind/gateway/mcpgenerator"
-	"github.com/doublecloud/transfer/library/go/core/metrics/solomon"
-	"github.com/doublecloud/transfer/library/go/core/xerrors"
-	"github.com/doublecloud/transfer/pkg/abstract/coordinator"
-	"github.com/doublecloud/transfer/pkg/providers"
-	"github.com/doublecloud/transfer/pkg/runtime/local"
+	gw_model "github.com/centralmind/gateway/model"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"os"
 )
@@ -19,22 +15,17 @@ func MCP(configPath *string, addr *string) *cobra.Command {
 		Short: "MCP gateway",
 		Args:  cobra.MatchAll(cobra.ExactArgs(0)),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			transfer, _, res, err := PrepareConfig(configPath)
+			gwRaw, err := os.ReadFile(*configPath)
 			if err != nil {
-				return xerrors.Errorf("unable to prepare config: %w", err)
+				return errors.Errorf("unable to read yaml config file: %w", err)
 			}
-			sF, ok := providers.Source[providers.Snapshot](
-				logger.NewConsoleLogger(),
-				solomon.NewRegistry(solomon.NewRegistryOpts()),
-				coordinator.NewFakeClient(),
-				transfer,
-			)
-			if !ok {
-				return xerrors.Errorf("no snapshot provider: %T", transfer.Src)
-			}
-			srv, err := mcpgenerator.New(res.Schema, sF)
+			gw, err := gw_model.FromYaml(gwRaw)
 			if err != nil {
-				return xerrors.Errorf("unable to init mcp generator: %w", err)
+				return errors.Errorf("unable to parse config file: %w", err)
+			}
+			srv, err := mcpgenerator.New(*gw)
+			if err != nil {
+				return errors.Errorf("unable to init mcp generator: %w", err)
 			}
 			return srv.ServeSSE(*addr).Start(*addr)
 		},
@@ -48,23 +39,17 @@ func MCPStdio(configPath *string) *cobra.Command {
 		Short: "MCP gateway via std-io",
 		Args:  cobra.MatchAll(cobra.ExactArgs(0)),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			local.WithLogger(logger.NewFileLog(logFile))
-			transfer, _, res, err := PrepareConfig(configPath)
+			gwRaw, err := os.ReadFile(*configPath)
 			if err != nil {
-				return xerrors.Errorf("unable to prepare config: %w", err)
+				return errors.Errorf("unable to read yaml config file: %w", err)
 			}
-			sF, ok := providers.Source[providers.Snapshot](
-				logger.NewFileLog(logFile),
-				solomon.NewRegistry(solomon.NewRegistryOpts()),
-				coordinator.NewFakeClient(),
-				transfer,
-			)
-			if !ok {
-				return xerrors.Errorf("no snapshot provider: %T", transfer.Src)
-			}
-			srv, err := mcpgenerator.New(res.Schema, sF)
+			gw, err := gw_model.FromYaml(gwRaw)
 			if err != nil {
-				return xerrors.Errorf("unable to init mcp generator: %w", err)
+				return errors.Errorf("unable to parse config file: %w", err)
+			}
+			srv, err := mcpgenerator.New(*gw)
+			if err != nil {
+				return errors.Errorf("unable to init mcp generator: %w", err)
 			}
 			return srv.ServeStdio().Listen(context.Background(), os.Stdin, os.Stdout)
 		},

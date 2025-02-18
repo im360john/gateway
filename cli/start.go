@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"github.com/doublecloud/transfer/pkg/cobraaux"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
@@ -16,9 +15,9 @@ func StartCommand() *cobra.Command {
 	}
 	cmd.PersistentFlags().StringVar(&gatewayParams, "config", "./gateway.yaml", "path to yaml file with gateway configuration")
 	cmd.PersistentFlags().StringVar(&addr, "addr", ":9090", "addr for gateway")
-	cobraaux.RegisterCommand(cmd, REST(&gatewayParams, &addr))
-	cobraaux.RegisterCommand(cmd, MCP(&gatewayParams, &addr))
-	cobraaux.RegisterCommand(cmd, MCPStdio(&gatewayParams))
+	RegisterCommand(cmd, REST(&gatewayParams, &addr))
+	RegisterCommand(cmd, MCP(&gatewayParams, &addr))
+	RegisterCommand(cmd, MCPStdio(&gatewayParams))
 	return cmd
 }
 
