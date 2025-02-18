@@ -2,13 +2,11 @@ package cli
 
 import (
 	"github.com/centralmind/gateway/pkg/api"
-	"github.com/centralmind/gateway/pkg/logger"
-	"github.com/doublecloud/transfer/library/go/core/metrics/solomon"
-	"github.com/doublecloud/transfer/library/go/core/xerrors"
-	"github.com/doublecloud/transfer/pkg/abstract/coordinator"
-	"github.com/doublecloud/transfer/pkg/providers"
+	gw_model "github.com/centralmind/gateway/pkg/model"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"net/http"
+	"os"
 )
 
 func REST(configPath *string, addr *string) *cobra.Command {
@@ -17,22 +15,16 @@ func REST(configPath *string, addr *string) *cobra.Command {
 		Short: "REST gateway",
 		Args:  cobra.MatchAll(cobra.ExactArgs(0)),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			transfer, res, err := PrepareConfig(configPath)
+			gwRaw, err := os.ReadFile(*configPath)
 			if err != nil {
-				return xerrors.Errorf("unable to prepare config: %w", err)
+				return errors.Errorf("unable to read yaml config file: %w", err)
+			}
+			gw, err := gw_model.FromYaml(gwRaw)
+			if err != nil {
+				return errors.Errorf("unable to parse config file: %w", err)
 			}
 			mux := http.NewServeMux()
-			sF, ok := providers.Source[providers.Snapshot](
-				logger.NewConsoleLogger(),
-				solomon.NewRegistry(solomon.NewRegistryOpts()),
-				coordinator.NewFakeClient(),
-				transfer,
-			)
-			if !ok {
-				return xerrors.Errorf("no snapshot provider: %T", transfer.Src)
-			}
-			api.NewAPI(res.Schema, res.Preview, sF, transfer).RegisterRoutes(mux)
-
+			api.NewAPI(*gw).RegisterRoutes(mux)
 			return http.ListenAndServe(*addr, mux)
 		},
 	}

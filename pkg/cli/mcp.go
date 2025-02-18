@@ -19,7 +19,7 @@ func MCP(configPath *string, addr *string) *cobra.Command {
 		Short: "MCP gateway",
 		Args:  cobra.MatchAll(cobra.ExactArgs(0)),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			transfer, res, err := PrepareConfig(configPath)
+			transfer, _, res, err := PrepareConfig(configPath)
 			if err != nil {
 				return xerrors.Errorf("unable to prepare config: %w", err)
 			}
@@ -49,7 +49,7 @@ func MCPStdio(configPath *string) *cobra.Command {
 		Args:  cobra.MatchAll(cobra.ExactArgs(0)),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			local.WithLogger(logger.NewFileLog(logFile))
-			transfer, res, err := PrepareConfig(configPath)
+			transfer, _, res, err := PrepareConfig(configPath)
 			if err != nil {
 				return xerrors.Errorf("unable to prepare config: %w", err)
 			}

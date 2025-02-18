@@ -1,18 +1,129 @@
-type: pg
-params:
-    hosts:
-        - localhost
-    user: postgres
-    password: password
-    database: mydb
-    port: 5432
-transformers:
-    - mask_field:
-          mask_field:
-              columns:
-                  - name
-              maskFunctionHash:
-                  userDefinedSalt: random_secret_string
-              tables:
-                  includeTables:
-                      - public.personas
+api:
+    name: "Customer Order API"
+    version: "1.0"
+
+transformer:
+    pii_masker:
+        type: default
+
+database:
+    type: pg
+    connection:
+        hosts:
+            - localhost
+        user: postgres
+        password: password
+        database: mydb
+        port: 5432
+    tables:
+        - name: "fact_table"
+          columns:
+              - name: "payment_key"
+                type: "string"
+              - name: "customer_key"
+                type: "string"
+              - name: "time_key"
+                type: "string"
+              - name: "item_key"
+                type: "string"
+              - name: "store_key"
+                type: "string"
+              - name: "quantity"
+                type: "integer"
+              - name: "unit"
+                type: "string"
+              - name: "unit_price"
+                type: "number"
+              - name: "total_price"
+                type: "number"
+          endpoints:
+              - http_method: "GET"
+                http_path: "/customer/{customer_key}/orders"
+                summary: "Get customer orders"
+                description: >
+                    This endpoint returns a list of orders for the specified customer.
+                    You can filter orders by date range and total price.
+                query: |
+                    SELECT 
+                        f.payment_key AS order_id,
+                        t.date AS date,
+                        f.total_price AS total_price,
+                        p.trans_type AS payment_method,
+                        CONCAT(s.district, ', ', s.upazila) AS store_location
+                    FROM fact_table f
+                    JOIN time_dim t ON f.time_key = t.time_key
+                    JOIN payment_dim p ON f.payment_key = p.payment_key
+                    JOIN store_dim s ON f.store_key = s.store_key
+                    WHERE f.customer_key = :customer_key
+                        AND (:start_date IS NULL OR t.date >= :start_date)
+                        AND (:end_date IS NULL OR t.date <= :end_date)
+                        AND (:min_total IS NULL OR f.total_price >= :min_total)
+                        AND (:max_total IS NULL OR f.total_price <= :max_total)
+                    ORDER BY t.date DESC
+                    LIMIT :limit OFFSET :offset;
+                params:
+                    - name: "customer_key"
+                      type: "string"
+                      location: "path"
+                      required: true
+                    - name: "start_date"
+                      type: "string"
+                      format: "date"
+                      required: false
+                      default: null
+                    - name: "end_date"
+                      type: "string"
+                      format: "date"
+                      required: false
+                      default: null
+                    - name: "min_total"
+                      type: "number"
+                      required: false
+                      default: null
+                    - name: "max_total"
+                      type: "number"
+                      required: false
+                      default: null
+                    - name: "limit"
+                      type: "number"
+                      required: false
+                      default: 50
+                    - name: "offset"
+                      type: "number"
+                      required: false
+                      default: 0
+
+              - http_method: "GET"
+                http_path: "/customer/{customer_key}/order/{payment_key}"
+                summary: "Get order details"
+                description: >
+                    This endpoint returns detailed information about a specific order for the customer,
+                    including items, quantities, and prices.
+                query: |
+                    SELECT 
+                        f.payment_key AS order_id,
+                        t.date AS date,
+                        f.total_price AS total_price,
+                        p.trans_type AS payment_method,
+                        CONCAT(s.district, ', ', s.upazila) AS store_location,
+                        i.item_name AS item_name,
+                        f.quantity AS quantity,
+                        f.unit AS unit,
+                        f.unit_price AS unit_price,
+                        (f.quantity * f.unit_price) AS total_price
+                    FROM fact_table f
+                    JOIN time_dim t ON f.time_key = t.time_key
+                    JOIN payment_dim p ON f.payment_key = p.payment_key
+                    JOIN store_dim s ON f.store_key = s.store_key
+                    JOIN item_dim i ON f.item_key = i.item_key
+                    WHERE f.customer_key = :customer_key
+                      AND f.payment_key = :payment_key;
+                params:
+                    - name: "customer_key"
+                      type: "string"
+                      location: "path"
+                      required: true
+                    - name: "payment_key"
+                      type: "string"
+                      location: "path"
+                      required: true
