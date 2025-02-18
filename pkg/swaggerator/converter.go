@@ -3,7 +3,6 @@ package swaggerator
 import (
 	"github.com/centralmind/gateway/pkg/model"
 	"github.com/getkin/kin-openapi/openapi3"
-	"go.ytsaurus.tech/yt/go/schema"
 )
 
 // Schema dynamically generates an OpenAPI schema based on the given table schema.
@@ -25,7 +24,7 @@ func Schema(schema model.Gateway) *openapi3.T {
 	for _, info := range schema.Database.Tables {
 		schemaProps := make(map[string]*openapi3.SchemaRef)
 		for _, col := range info.Columns {
-			colType := mapDataTypeToOpenAPI(col.Type)
+			colType := col.Type
 
 			schemaProps[col.Name] = &openapi3.SchemaRef{
 				Value: &openapi3.Schema{
@@ -92,31 +91,4 @@ func Schema(schema model.Gateway) *openapi3.T {
 
 	swagger.Paths = openapi3.NewPaths(paths...)
 	return swagger
-}
-
-// mapDataTypeToOpenAPI converts column data types to OpenAPI types.
-func mapDataTypeToOpenAPI(dataType string) string {
-	switch dataType {
-	case schema.TypeInt64.String(), schema.TypeInt32.String(), schema.TypeInt16.String(), schema.TypeInt8.String(),
-		schema.TypeUint64.String(), schema.TypeUint32.String(), schema.TypeUint16.String(), schema.TypeUint8.String():
-		return "integer"
-
-	case schema.TypeFloat32.String(), schema.TypeFloat64.String():
-		return "number"
-
-	case schema.TypeBytes.String(), schema.TypeString.String():
-		return "string"
-
-	case schema.TypeBoolean.String():
-		return "boolean"
-
-	case schema.TypeAny.String():
-		return "object"
-
-	case schema.TypeDate.String(), schema.TypeDatetime.String(), schema.TypeTimestamp.String(), schema.TypeInterval.String():
-		return "string" // Dates are usually represented as ISO 8601 strings
-
-	default:
-		return "string"
-	}
 }
