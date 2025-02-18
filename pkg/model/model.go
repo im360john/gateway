@@ -2,19 +2,18 @@ package model
 
 import (
 	"encoding/json"
-	"github.com/doublecloud/transfer/pkg/abstract"
-	"github.com/doublecloud/transfer/pkg/abstract/model"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 )
 
-type Gateway struct {
-	API      APIParams `yaml:"api" json:"api"`
-	Database Database  `yaml:"database" json:"database"`
+type Config struct {
+	API     APIParams      `yaml:"api" json:"api"`
+	Gateway Database       `yaml:"database" json:"database"`
+	Plugins map[string]any `yaml:"plugins" json:"plugins"`
 }
 
-func FromYaml(raw []byte) (*Gateway, error) {
-	var gw Gateway
+func FromYaml(raw []byte) (*Config, error) {
+	var gw Config
 	err := yaml.Unmarshal(raw, &gw)
 	if err != nil {
 		return nil, errors.Errorf("unable to parse yaml: %w", err)
@@ -22,12 +21,8 @@ func FromYaml(raw []byte) (*Gateway, error) {
 	return &gw, nil
 }
 
-func (g *Gateway) Endpoint() (model.Source, error) {
-	return model.NewSource(abstract.ProviderType(g.Database.Type), g.ParamRaw())
-}
-
-func (g *Gateway) ParamRaw() string {
-	switch p := g.Database.Connection.(type) {
+func (g *Config) ParamRaw() string {
+	switch p := g.Gateway.Connection.(type) {
 	case []byte:
 		return string(p)
 	case string:

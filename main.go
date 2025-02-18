@@ -1,12 +1,13 @@
 package main
 
 import (
-	"github.com/centralmind/gateway/pkg/cli"
-	_ "github.com/doublecloud/transfer/pkg/transformer/registry"
 	"os"
 
-	"github.com/doublecloud/transfer/pkg/cobraaux"
 	"github.com/spf13/cobra"
+
+	"github.com/centralmind/gateway/pkg/cli"
+	_ "github.com/centralmind/gateway/pkg/plugins/lua_rls"
+	_ "github.com/centralmind/gateway/pkg/plugins/pii_masker"
 )
 
 func main() {
@@ -16,7 +17,7 @@ func main() {
 		Example:      "./gateway help",
 		SilenceUsage: true,
 	}
-	cobraaux.RegisterCommand(rootCommand, cli.StartCommand())
+	cli.RegisterCommand(rootCommand, cli.StartCommand())
 	err := rootCommand.Execute()
 	if err != nil {
 		os.Exit(1)

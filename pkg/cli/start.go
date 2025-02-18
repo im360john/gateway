@@ -2,6 +2,7 @@ package cli
 
 import (
 	"github.com/doublecloud/transfer/pkg/cobraaux"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
@@ -19,4 +20,31 @@ func StartCommand() *cobra.Command {
 	cobraaux.RegisterCommand(cmd, MCP(&gatewayParams, &addr))
 	cobraaux.RegisterCommand(cmd, MCPStdio(&gatewayParams))
 	return cmd
+}
+
+// RegisterCommand is like parent.AddCommand(child), but also
+// makes chaining of PersistentPreRunE and PersistentPreRun
+func RegisterCommand(parent, child *cobra.Command) {
+	parentPpre := parent.PersistentPreRunE
+	childPpre := child.PersistentPreRunE
+	if child.PersistentPreRunE == nil && child.PersistentPreRun != nil {
+		childPpre = func(cmd *cobra.Command, args []string) error {
+			child.PersistentPreRun(cmd, args)
+			return nil
+		}
+	}
+	if childPpre != nil {
+		child.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
+			if parentPpre != nil {
+				err := parentPpre(cmd, args)
+				if err != nil {
+					return errors.Errorf("cannot process parent PersistentPreRunE: %w", err)
+				}
+			}
+			return childPpre(cmd, args)
+		}
+	} else if parentPpre != nil {
+		child.PersistentPreRunE = parentPpre
+	}
+	parent.AddCommand(child)
 }

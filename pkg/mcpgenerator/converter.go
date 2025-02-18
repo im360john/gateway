@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/doublecloud/transfer/pkg/abstract"
-	"github.com/doublecloud/transfer/pkg/abstract/model"
 	"github.com/doublecloud/transfer/pkg/providers"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
@@ -19,9 +18,7 @@ type MCPServer struct {
 
 func New(
 	schema abstract.TableMap,
-	sampleData map[abstract.TableID][]abstract.ChangeItem,
 	snapshot providers.Snapshot,
-	transfer *model.Transfer,
 ) (*MCPServer, error) {
 	srv := server.NewMCPServer("mcp-data-gateway", "0.0.1")
 

@@ -10,7 +10,7 @@ import (
 	"os"
 )
 
-func PrepareConfig(configPath *string) (*model.Transfer, *gw_model.Gateway, *abstract.TestResult, error) {
+func PrepareConfig(configPath *string) (*model.Transfer, *gw_model.Config, *abstract.TestResult, error) {
 	gwRaw, err := os.ReadFile(*configPath)
 	if err != nil {
 		return nil, nil, nil, xerrors.Errorf("unable to read yaml config file: %w", err)

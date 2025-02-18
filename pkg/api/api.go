@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/centralmind/gateway/pkg/logger"
 	gw_model "github.com/centralmind/gateway/pkg/model"
+	"github.com/centralmind/gateway/pkg/plugins"
 	"github.com/centralmind/gateway/pkg/swaggerator"
 	"github.com/doublecloud/transfer/pkg/providers/postgres"
 	"github.com/flowchartsman/swaggerui"
@@ -16,16 +17,26 @@ import (
 
 // API handles OpenAPI schema generation and sample data serving.
 type API struct {
-	Schema gw_model.Gateway
+	Schema       gw_model.Config
+	interceptors []plugins.Interceptor
 }
 
 // NewAPI initializes a new API instance.
 func NewAPI(
-	schema gw_model.Gateway,
-) *API {
-	return &API{
-		Schema: schema,
+	schema gw_model.Config,
+) (*API, error) {
+	var interceptors []plugins.Interceptor
+	for k, v := range schema.Plugins {
+		interceptor, err := plugins.New(k, v)
+		if err != nil {
+			return nil, err
+		}
+		interceptors = append(interceptors, interceptor)
 	}
+	return &API{
+		Schema:       schema,
+		interceptors: interceptors,
+	}, nil
 }
 
 // RegisterRoutes registers API endpoints.
@@ -34,7 +45,7 @@ func (api *API) RegisterRoutes(mux *http.ServeMux) {
 	raw, _ := json.Marshal(swagger)
 	mux.Handle("/swagger/", http.StripPrefix("/swagger", swaggerui.Handler(raw)))
 	r := gin.Default()
-	for _, table := range api.Schema.Database.Tables {
+	for _, table := range api.Schema.Gateway.Tables {
 		for _, endpoint := range table.Endpoints {
 			r.Handle(endpoint.HTTPMethod, convertSwaggerToGin(endpoint.HTTPPath), api.Handler(endpoint))
 		}
@@ -85,6 +96,13 @@ func (api *API) Handler(endpoint gw_model.Endpoint) gin.HandlerFunc {
 			if err := rows.MapScan(row); err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
+			}
+			for _, interceptor := range api.interceptors {
+				r, skip := interceptor.Process(row, c.Request.Header)
+				if skip {
+					continue
+				}
+				row = r
 			}
 			res = append(res, row)
 		}

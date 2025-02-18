@@ -2,11 +2,28 @@ api:
     name: "Customer Order API"
     version: "1.0"
 
-transformer:
-    pii_masker:
-        type: default
+plugins:
+    lua_rls:
+        script: |
+          function check_visibility(row, headers)
+          		local row_user_id = row["user_id"]
+          		local token_user_id = headers["X-User-ID"]
 
-database:
+          		if row_user_id ~= nil and token_user_id ~= nil and tostring(row_user_id) == tostring(token_user_id) then
+          			return true
+          		end
+
+          		if row_user_id == nil then
+          			return true
+          		end
+
+          		return false
+          	end
+    pii_remover:
+        columns:
+          - address
+
+gateway:
     type: pg
     connection:
         hosts:

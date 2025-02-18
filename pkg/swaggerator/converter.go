@@ -6,12 +6,12 @@ import (
 )
 
 // Schema dynamically generates an OpenAPI schema based on the given table schema.
-func Schema(schema model.Gateway) *openapi3.T {
+func Schema(schema model.Config) *openapi3.T {
 	swagger := &openapi3.T{
 		OpenAPI: "3.0.0",
 		Info: &openapi3.Info{
 			Title:       schema.API.Name,
-			Description: "Gateway that dynamically generates accessor for data",
+			Description: "Config that dynamically generates accessor for data",
 			Version:     schema.API.Version,
 		},
 		Components: &openapi3.Components{
@@ -21,7 +21,7 @@ func Schema(schema model.Gateway) *openapi3.T {
 
 	var paths []openapi3.NewPathsOption
 	// Iterate through tables and generate OpenAPI schemas
-	for _, info := range schema.Database.Tables {
+	for _, info := range schema.Gateway.Tables {
 		schemaProps := make(map[string]*openapi3.SchemaRef)
 		for _, col := range info.Columns {
 			colType := col.Type

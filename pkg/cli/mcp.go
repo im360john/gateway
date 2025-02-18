@@ -32,7 +32,7 @@ func MCP(configPath *string, addr *string) *cobra.Command {
 			if !ok {
 				return xerrors.Errorf("no snapshot provider: %T", transfer.Src)
 			}
-			srv, err := mcpgenerator.New(res.Schema, res.Preview, sF, transfer)
+			srv, err := mcpgenerator.New(res.Schema, sF)
 			if err != nil {
 				return xerrors.Errorf("unable to init mcp generator: %w", err)
 			}
