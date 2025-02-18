@@ -1,9 +1,21 @@
-package piimasker
+package piiremover
 
-import "github.com/centralmind/gateway/plugins"
+import (
+	"github.com/centralmind/gateway/plugins"
+)
+
+func init() {
+	plugins.RegisterInterceptor[PIIInterceptorConfig](func(cfg PIIInterceptorConfig) (plugins.Interceptor, error) {
+		return New(cfg)
+	})
+}
 
 type PIIInterceptorConfig struct {
 	Columns []string `yaml:"columns" json:"columns"`
+}
+
+func (P PIIInterceptorConfig) Tag() string {
+	return "pii_remover"
 }
 
 type PIIInterceptor struct {
@@ -17,16 +29,6 @@ func (p *PIIInterceptor) Process(data map[string]any, context map[string][]strin
 		}
 	}
 	return procesed, false
-}
-
-func init() {
-	plugins.RegisterInterceptor("pii_remover", func(cfg any) (plugins.Interceptor, error) {
-		ccfg, err := plugins.Remap[PIIInterceptorConfig](cfg)
-		if err != nil {
-			return nil, err
-		}
-		return New(ccfg)
-	})
 }
 
 func New(config PIIInterceptorConfig) (plugins.Interceptor, error) {

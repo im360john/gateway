@@ -3,12 +3,21 @@ package luarls
 import (
 	"fmt"
 	"github.com/centralmind/gateway/plugins"
-
 	lua "github.com/yuin/gopher-lua"
 )
 
+func init() {
+	plugins.RegisterInterceptor[LuaRLSConfig](func(cfg LuaRLSConfig) (plugins.Interceptor, error) {
+		return New(cfg)
+	})
+}
+
 type LuaRLSConfig struct {
 	Script string
+}
+
+func (l LuaRLSConfig) Tag() string {
+	return "lua_rls"
 }
 
 type LuaRLS struct {
@@ -49,16 +58,6 @@ func (l LuaRLS) Process(row map[string]any, headers map[string][]string) (proces
 	st.Pop(1)
 
 	return row, lua.LVAsBool(ret)
-}
-
-func init() {
-	plugins.RegisterInterceptor("lua_rls", func(cfg any) (plugins.Interceptor, error) {
-		ccfg, err := plugins.Remap[LuaRLSConfig](cfg)
-		if err != nil {
-			return nil, err
-		}
-		return New(ccfg)
-	})
 }
 
 func New(config LuaRLSConfig) (plugins.Interceptor, error) {

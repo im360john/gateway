@@ -1,9 +1,13 @@
 package plugins
 
 import (
-	"encoding/json"
+	"github.com/centralmind/gateway/remapper"
 	"github.com/pkg/errors"
 )
+
+type Config interface {
+	Tag() string
+}
 
 type Interceptor interface {
 	Process(data map[string]any, context map[string][]string) (procesed map[string]any, skipped bool)
@@ -11,8 +15,15 @@ type Interceptor interface {
 
 var interceptors = map[string]func(any) (Interceptor, error){}
 
-func RegisterInterceptor(tag string, f func(cfg any) (Interceptor, error)) {
-	interceptors[tag] = f
+func RegisterInterceptor[TConfig Config](f func(cfg TConfig) (Interceptor, error)) {
+	var t TConfig
+	interceptors[t.Tag()] = func(a any) (Interceptor, error) {
+		cfg, err := remapper.Remap[TConfig](a)
+		if err != nil {
+			return nil, errors.Errorf("unable to rempa: %w", err)
+		}
+		return f(cfg)
+	}
 }
 
 func New(tag string, config any) (Interceptor, error) {
@@ -21,16 +32,4 @@ func New(tag string, config any) (Interceptor, error) {
 		return nil, errors.Errorf("plugin: %s not found", tag)
 	}
 	return f(config)
-}
-
-func Remap[TValue any](config any) (TValue, error) {
-	var t TValue
-	raw, err := json.Marshal(config)
-	if err != nil {
-		return t, err
-	}
-	if err := json.Unmarshal(raw, &t); err != nil {
-		return t, err
-	}
-	return t, nil
 }

@@ -1,16 +1,15 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
-	"github.com/centralmind/gateway/logger"
+	"github.com/centralmind/gateway/connectors"
 	gw_model "github.com/centralmind/gateway/model"
 	"github.com/centralmind/gateway/plugins"
 	"github.com/centralmind/gateway/swaggerator"
-	"github.com/doublecloud/transfer/pkg/providers/postgres"
 	"github.com/flowchartsman/swaggerui"
 	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v4/stdlib"
-	"github.com/jmoiron/sqlx"
+	"github.com/pkg/errors"
 	"net/http"
 	"regexp"
 )
@@ -19,6 +18,7 @@ import (
 type API struct {
 	Schema       gw_model.Config
 	interceptors []plugins.Interceptor
+	connector    connectors.Connector
 }
 
 // NewAPI initializes a new API instance.
@@ -33,9 +33,17 @@ func NewAPI(
 		}
 		interceptors = append(interceptors, interceptor)
 	}
+	connector, err := connectors.New(schema.Gateway.Type, schema.Gateway.Connection)
+	if err != nil {
+		return nil, errors.Errorf("unable to init connector: %w", err)
+	}
+	if err := connector.Ping(context.Background()); err != nil {
+		return nil, errors.Errorf("unable to ping: %w", err)
+	}
 	return &API{
 		Schema:       schema,
 		interceptors: interceptors,
+		connector:    connector,
 	}, nil
 }
 
@@ -74,33 +82,18 @@ func (api *API) Handler(endpoint gw_model.Endpoint) gin.HandlerFunc {
 			}
 		}
 
-		var src postgres.PgSource
-		if err := json.Unmarshal([]byte(api.Schema.ParamRaw()), &src); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-		cfg, err := postgres.MakeConnConfigFromStorage(logger.NewConsoleLogger(), src.ToStorageParams(nil))
+		raw, err := api.connector.Query(c.Request.Context(), endpoint, params)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		db := sqlx.NewDb(stdlib.OpenDB(*cfg), "pgx")
-		rows, err := db.NamedQueryContext(c.Request.Context(), endpoint.Query, params)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-		res := make([]map[string]any, 0)
-		for rows.Next() {
-			row := map[string]any{}
-			if err := rows.MapScan(row); err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-				return
-			}
+		var res []map[string]any
+	MAIN:
+		for _, row := range raw {
 			for _, interceptor := range api.interceptors {
 				r, skip := interceptor.Process(row, c.Request.Header)
 				if skip {
-					continue
+					continue MAIN
 				}
 				row = r
 			}
