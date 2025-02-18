@@ -2,7 +2,7 @@ package luarls
 
 import (
 	"fmt"
-	"github.com/centralmind/gateway/pkg/plugins"
+	"github.com/centralmind/gateway/plugins"
 
 	lua "github.com/yuin/gopher-lua"
 )

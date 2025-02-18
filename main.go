@@ -5,9 +5,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/centralmind/gateway/pkg/cli"
-	_ "github.com/centralmind/gateway/pkg/plugins/lua_rls"
-	_ "github.com/centralmind/gateway/pkg/plugins/pii_masker"
+	"github.com/centralmind/gateway/cli"
+	_ "github.com/centralmind/gateway/plugins/lua_rls"
+	_ "github.com/centralmind/gateway/plugins/pii_masker"
 )
 
 func main() {

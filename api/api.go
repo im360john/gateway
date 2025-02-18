@@ -2,10 +2,10 @@ package api
 
 import (
 	"encoding/json"
-	"github.com/centralmind/gateway/pkg/logger"
-	gw_model "github.com/centralmind/gateway/pkg/model"
-	"github.com/centralmind/gateway/pkg/plugins"
-	"github.com/centralmind/gateway/pkg/swaggerator"
+	"github.com/centralmind/gateway/logger"
+	gw_model "github.com/centralmind/gateway/model"
+	"github.com/centralmind/gateway/plugins"
+	"github.com/centralmind/gateway/swaggerator"
 	"github.com/doublecloud/transfer/pkg/providers/postgres"
 	"github.com/flowchartsman/swaggerui"
 	"github.com/gin-gonic/gin"

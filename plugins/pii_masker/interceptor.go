@@ -1,6 +1,6 @@
 package piimasker
 
-import "github.com/centralmind/gateway/pkg/plugins"
+import "github.com/centralmind/gateway/plugins"
 
 type PIIInterceptorConfig struct {
 	Columns []string `yaml:"columns" json:"columns"`

@@ -2,8 +2,8 @@ package cli
 
 import (
 	"context"
-	"github.com/centralmind/gateway/pkg/logger"
-	"github.com/centralmind/gateway/pkg/mcpgenerator"
+	"github.com/centralmind/gateway/logger"
+	"github.com/centralmind/gateway/mcpgenerator"
 	"github.com/doublecloud/transfer/library/go/core/metrics/solomon"
 	"github.com/doublecloud/transfer/library/go/core/xerrors"
 	"github.com/doublecloud/transfer/pkg/abstract/coordinator"
@@ -62,7 +62,7 @@ func MCPStdio(configPath *string) *cobra.Command {
 			if !ok {
 				return xerrors.Errorf("no snapshot provider: %T", transfer.Src)
 			}
-			srv, err := mcpgenerator.New(res.Schema, res.Preview, sF, transfer)
+			srv, err := mcpgenerator.New(res.Schema, sF)
 			if err != nil {
 				return xerrors.Errorf("unable to init mcp generator: %w", err)
 			}

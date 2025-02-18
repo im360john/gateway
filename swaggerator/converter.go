@@ -1,7 +1,7 @@
 package swaggerator
 
 import (
-	"github.com/centralmind/gateway/pkg/model"
+	"github.com/centralmind/gateway/model"
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
