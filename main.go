@@ -7,7 +7,7 @@ import (
 
 	"github.com/centralmind/gateway/cli"
 	_ "github.com/centralmind/gateway/plugins/lua_rls"
-	_ "github.com/centralmind/gateway/plugins/pii_masker"
+	_ "github.com/centralmind/gateway/plugins/pii_skipper"
 )
 
 func main() {
