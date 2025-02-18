@@ -1,4 +1,4 @@
-package api
+package restgenerator
 
 import (
 	"context"
