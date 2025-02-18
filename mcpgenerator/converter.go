@@ -4,10 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/centralmind/gateway/connectors"
 	"github.com/centralmind/gateway/model"
 	"github.com/centralmind/gateway/plugins"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
+	"github.com/pkg/errors"
 )
 
 type MCPServer struct {
@@ -26,6 +28,10 @@ func New(
 		}
 		interceptors = append(interceptors, interceptor)
 	}
+	connector, err := connectors.New(schema.Database.Type, schema.Database.Connection)
+	if err != nil {
+		return nil, errors.Errorf("unable to init connector: %w", err)
+	}
 	for _, info := range schema.Database.Tables {
 		for _, endpoint := range info.Endpoints {
 			var opts []mcp.ToolOption
@@ -41,8 +47,31 @@ func New(
 				endpoint.MCPMethod,
 				opts...,
 			), func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-
-				return nil, nil
+				res, err := connector.Query(ctx, endpoint, request.Params.Arguments)
+				if err != nil {
+					return &mcp.CallToolResult{
+						Content: []interface{}{
+							mcp.TextContent{
+								Type: "text",
+								Text: fmt.Sprintf("Unable to construct storage: %s", err),
+							},
+						},
+						IsError: true,
+					}, nil
+				}
+				return &mcp.CallToolResult{
+					Content: []interface{}{
+						mcp.TextContent{
+							Type: "text",
+							Text: fmt.Sprintf("Found a row: %v in %s.", request.Params.Arguments, info.Name),
+						},
+						mcp.TextContent{
+							Annotated: mcp.Annotated{},
+							Type:      "text",
+							Text:      jsonify(res),
+						},
+					},
+				}, nil
 			})
 		}
 	}
@@ -52,7 +81,7 @@ func New(
 	}, nil
 }
 
-func jsonify(asMap map[string]interface{}) string {
+func jsonify(asMap []map[string]interface{}) string {
 	res, _ := json.MarshalIndent(asMap, "", "  ")
 	return string(res)
 }

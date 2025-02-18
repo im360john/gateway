@@ -51,6 +51,7 @@ database:
                 type: "number"
           endpoints:
               - http_method: "GET"
+                mcp_method: search_customer_orders
                 http_path: "/customer/{customer_key}/orders"
                 summary: "Get customer orders"
                 description: >
@@ -107,6 +108,7 @@ database:
                       default: 0
 
               - http_method: "GET"
+                mcp_method: get_customer_order_payment
                 http_path: "/customer/{customer_key}/order/{payment_key}"
                 summary: "Get order details"
                 description: >
