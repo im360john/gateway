@@ -14,17 +14,17 @@ import (
 	"regexp"
 )
 
-// API handles OpenAPI schema generation and sample data serving.
-type API struct {
+// Rest handles OpenAPI schema generation and sample data serving.
+type Rest struct {
 	Schema       gw_model.Config
 	interceptors []plugins.Interceptor
 	connector    connectors.Connector
 }
 
-// NewAPI initializes a new API instance.
-func NewAPI(
+// New initializes a new Rest instance.
+func New(
 	schema gw_model.Config,
-) (*API, error) {
+) (*Rest, error) {
 	var interceptors []plugins.Interceptor
 	for k, v := range schema.Plugins {
 		interceptor, err := plugins.New(k, v)
@@ -40,28 +40,28 @@ func NewAPI(
 	if err := connector.Ping(context.Background()); err != nil {
 		return nil, errors.Errorf("unable to ping: %w", err)
 	}
-	return &API{
+	return &Rest{
 		Schema:       schema,
 		interceptors: interceptors,
 		connector:    connector,
 	}, nil
 }
 
-// RegisterRoutes registers API endpoints.
-func (api *API) RegisterRoutes(mux *http.ServeMux) {
-	swagger := swaggerator.Schema(api.Schema)
+// RegisterRoutes registers Rest endpoints.
+func (r *Rest) RegisterRoutes(mux *http.ServeMux) {
+	swagger := swaggerator.Schema(r.Schema)
 	raw, _ := json.Marshal(swagger)
 	mux.Handle("/swagger/", http.StripPrefix("/swagger", swaggerui.Handler(raw)))
-	r := gin.Default()
-	for _, table := range api.Schema.Gateway.Tables {
+	d := gin.Default()
+	for _, table := range r.Schema.Gateway.Tables {
 		for _, endpoint := range table.Endpoints {
-			r.Handle(endpoint.HTTPMethod, convertSwaggerToGin(endpoint.HTTPPath), api.Handler(endpoint))
+			d.Handle(endpoint.HTTPMethod, convertSwaggerToGin(endpoint.HTTPPath), r.Handler(endpoint))
 		}
 	}
-	mux.Handle("/", r.Handler())
+	mux.Handle("/", d.Handler())
 }
 
-func (api *API) Handler(endpoint gw_model.Endpoint) gin.HandlerFunc {
+func (r *Rest) Handler(endpoint gw_model.Endpoint) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		params := make(map[string]any)
 
@@ -82,7 +82,7 @@ func (api *API) Handler(endpoint gw_model.Endpoint) gin.HandlerFunc {
 			}
 		}
 
-		raw, err := api.connector.Query(c.Request.Context(), endpoint, params)
+		raw, err := r.connector.Query(c.Request.Context(), endpoint, params)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -90,7 +90,7 @@ func (api *API) Handler(endpoint gw_model.Endpoint) gin.HandlerFunc {
 		var res []map[string]any
 	MAIN:
 		for _, row := range raw {
-			for _, interceptor := range api.interceptors {
+			for _, interceptor := range r.interceptors {
 				r, skip := interceptor.Process(row, c.Request.Header)
 				if skip {
 					continue MAIN

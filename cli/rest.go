@@ -24,7 +24,7 @@ func REST(configPath *string, addr *string) *cobra.Command {
 				return errors.Errorf("unable to parse config file: %w", err)
 			}
 			mux := http.NewServeMux()
-			a, err := restgenerator.NewAPI(*gw)
+			a, err := restgenerator.New(*gw)
 			if err != nil {
 				return errors.Errorf("unable to init api: %w", err)
 			}
