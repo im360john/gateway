@@ -26,7 +26,7 @@ func New(
 		}
 		interceptors = append(interceptors, interceptor)
 	}
-	for _, info := range schema.Gateway.Tables {
+	for _, info := range schema.Database.Tables {
 		for _, endpoint := range info.Endpoints {
 			var opts []mcp.ToolOption
 			for _, col := range endpoint.Params {

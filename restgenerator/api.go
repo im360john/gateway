@@ -33,7 +33,7 @@ func New(
 		}
 		interceptors = append(interceptors, interceptor)
 	}
-	connector, err := connectors.New(schema.Gateway.Type, schema.Gateway.Connection)
+	connector, err := connectors.New(schema.Database.Type, schema.Database.Connection)
 	if err != nil {
 		return nil, errors.Errorf("unable to init connector: %w", err)
 	}
@@ -53,7 +53,7 @@ func (r *Rest) RegisterRoutes(mux *http.ServeMux) {
 	raw, _ := json.Marshal(swagger)
 	mux.Handle("/swagger/", http.StripPrefix("/swagger", swaggerui.Handler(raw)))
 	d := gin.Default()
-	for _, table := range r.Schema.Gateway.Tables {
+	for _, table := range r.Schema.Database.Tables {
 		for _, endpoint := range table.Endpoints {
 			d.Handle(endpoint.HTTPMethod, convertSwaggerToGin(endpoint.HTTPPath), r.Handler(endpoint))
 		}

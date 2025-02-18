@@ -28,7 +28,7 @@ func (p *PIIInterceptor) Process(data map[string]any, context map[string][]strin
 			data[k] = nil
 		}
 	}
-	return procesed, false
+	return data, false
 }
 
 func New(config PIIInterceptorConfig) (plugins.Interceptor, error) {

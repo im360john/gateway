@@ -26,6 +26,9 @@ type LuaRLS struct {
 
 func (l LuaRLS) Process(row map[string]any, headers map[string][]string) (processed map[string]any, skipped bool) {
 	st := lua.NewState()
+	if err := st.DoString(l.script); err != nil {
+		return nil, false
+	}
 	fn := st.GetGlobal("check_visibility")
 	if fn == lua.LNil {
 		return nil, false
@@ -62,6 +65,9 @@ func (l LuaRLS) Process(row map[string]any, headers map[string][]string) (proces
 
 func New(config LuaRLSConfig) (plugins.Interceptor, error) {
 	st := lua.NewState()
+	if err := st.DoString(config.Script); err != nil {
+		return nil, err
+	}
 	fn := st.GetGlobal("check_visibility")
 	if fn == lua.LNil {
 		return nil, fmt.Errorf("entry point check_visibility not found")

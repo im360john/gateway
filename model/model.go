@@ -7,9 +7,9 @@ import (
 )
 
 type Config struct {
-	API     APIParams      `yaml:"api" json:"api"`
-	Gateway Database       `yaml:"database" json:"database"`
-	Plugins map[string]any `yaml:"plugins" json:"plugins"`
+	API      APIParams      `yaml:"api" json:"api"`
+	Database Database       `yaml:"database" json:"database"`
+	Plugins  map[string]any `yaml:"plugins" json:"plugins"`
 }
 
 func FromYaml(raw []byte) (*Config, error) {
@@ -22,7 +22,7 @@ func FromYaml(raw []byte) (*Config, error) {
 }
 
 func (g *Config) ParamRaw() string {
-	switch p := g.Gateway.Connection.(type) {
+	switch p := g.Database.Connection.(type) {
 	case []byte:
 		return string(p)
 	case string:

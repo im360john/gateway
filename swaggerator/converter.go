@@ -21,7 +21,7 @@ func Schema(schema model.Config) *openapi3.T {
 
 	var paths []openapi3.NewPathsOption
 	// Iterate through tables and generate OpenAPI schemas
-	for _, info := range schema.Gateway.Tables {
+	for _, info := range schema.Database.Tables {
 		schemaProps := make(map[string]*openapi3.SchemaRef)
 		for _, col := range info.Columns {
 			colType := col.Type
