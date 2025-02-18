@@ -53,7 +53,11 @@ func (l LuaRLS) Process(row map[string]any, headers map[string][]string) (proces
 
 func init() {
 	plugins.RegisterInterceptor("lua_rls", func(cfg any) (plugins.Interceptor, error) {
-		return New(cfg.(LuaRLSConfig))
+		ccfg, err := plugins.Remap[LuaRLSConfig](cfg)
+		if err != nil {
+			return nil, err
+		}
+		return New(ccfg)
 	})
 }
 

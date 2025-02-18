@@ -1,6 +1,9 @@
 package plugins
 
-import "github.com/pkg/errors"
+import (
+	"encoding/json"
+	"github.com/pkg/errors"
+)
 
 type Interceptor interface {
 	Process(data map[string]any, context map[string][]string) (procesed map[string]any, skipped bool)
@@ -18,4 +21,16 @@ func New(tag string, config any) (Interceptor, error) {
 		return nil, errors.Errorf("plugin: %s not found", tag)
 	}
 	return f(config)
+}
+
+func Remap[TValue any](config any) (TValue, error) {
+	var t TValue
+	raw, err := json.Marshal(config)
+	if err != nil {
+		return t, err
+	}
+	if err := json.Unmarshal(raw, &t); err != nil {
+		return t, err
+	}
+	return t, nil
 }

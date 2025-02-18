@@ -21,7 +21,11 @@ func (p *PIIInterceptor) Process(data map[string]any, context map[string][]strin
 
 func init() {
 	plugins.RegisterInterceptor("pii_remover", func(cfg any) (plugins.Interceptor, error) {
-		return New(cfg.(PIIInterceptorConfig))
+		ccfg, err := plugins.Remap[PIIInterceptorConfig](cfg)
+		if err != nil {
+			return nil, err
+		}
+		return New(ccfg)
 	})
 }
 
