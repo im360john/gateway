@@ -1,0 +1,6 @@
+hosts:
+  - localhost
+user: postgres
+password: password
+database: mydb
+port: 5432

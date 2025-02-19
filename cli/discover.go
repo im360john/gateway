@@ -133,7 +133,6 @@ func Discover(configPath *string) *cobra.Command {
 	}
 	cmd.Flags().StringVar(&databaseType, "db-type", "postgres", "Type of database")
 	cmd.Flags().StringVar(&openAPIKey, "open-ai-key", "open-ai-key", "OpenAI token")
-	cmd.Flags().StringVar(&openAPIKey, "open-ai-key", "open-ai-key", "OpenAI token")
 	cmd.Flags().StringVar(&output, "output", "gateway.yaml", "Resulted yaml path")
 	return cmd
 }

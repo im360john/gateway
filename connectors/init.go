@@ -2,10 +2,10 @@ package connectors
 
 import (
 	"context"
-	"encoding/json"
 	"github.com/centralmind/gateway/model"
 	"github.com/centralmind/gateway/remapper"
 	"github.com/pkg/errors"
+	"gopkg.in/yaml.v3"
 )
 
 type Config interface {
@@ -36,16 +36,16 @@ func New(tag string, config any) (Connector, error) {
 	switch v := config.(type) {
 	case string:
 		var r any
-		if err := json.Unmarshal([]byte(v), &r); err != nil {
+		if err := yaml.Unmarshal([]byte(v), &r); err != nil {
 			return nil, err
 		}
-		config = v
+		config = r
 	case []byte:
 		var r any
-		if err := json.Unmarshal(v, &r); err != nil {
+		if err := yaml.Unmarshal(v, &r); err != nil {
 			return nil, err
 		}
-		config = v
+		config = r
 	}
 	f, ok := interceptors[tag]
 	if !ok {
