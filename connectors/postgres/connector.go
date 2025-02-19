@@ -30,7 +30,7 @@ type Connector struct {
 }
 
 func (c Connector) Sample(ctx context.Context, table model.Table) ([]map[string]any, error) {
-	rows, err := c.db.NamedQueryContext(ctx, fmt.Sprintf("select * from %s limit 10", table.Name), nil)
+	rows, err := c.db.NamedQueryContext(ctx, fmt.Sprintf("select * from %s limit 10", table.Name), map[string]any{})
 	if err != nil {
 		return nil, errors.Errorf("unable to ping db: %w", err)
 	}
@@ -69,7 +69,7 @@ func (c Connector) Discovery(ctx context.Context) ([]model.Table, error) {
 		}
 		tables = append(tables, model.Table{Name: tableName, Columns: columns})
 	}
-	return nil, nil
+	return tables, nil
 }
 
 func (c Connector) Ping(ctx context.Context) error {

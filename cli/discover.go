@@ -73,6 +73,7 @@ func Discover(configPath *string) *cobra.Command {
 			if err != nil {
 				return err
 			}
+			logrus.Infof("Step 2: Found: %v tables", len(allTables))
 			tableSet := map[string]bool{}
 			for _, table := range tables {
 				tableSet[table] = true
