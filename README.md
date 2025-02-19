@@ -35,3 +35,30 @@ go build .
 ```shell
 docker compose up ./example/docker-compose.yml
 ```
+
+### MCP Protocol
+
+Gateway implement MCP protocol, for easy access to your data right from claude, to use it
+
+1. Build binary
+    ```shell
+    go build .
+    ```
+2. Add gateway to claude integrations config:
+   ```json
+   {
+    "mcpServers": {
+        "gateway": {
+            "command": "PATH_TO_GATEWAY_BINARY",
+            "args": [
+                "start", 
+                "--config",
+                "PATH_TO_GATEWAY_YAML_CONFIG", 
+                "mcp-stdio"
+            ]
+        }
+    }
+   }
+   ```
+3. Ask something regards your data:
+   ![claude_integration.png](./assets/claude_integration.png)

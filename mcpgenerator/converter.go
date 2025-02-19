@@ -59,6 +59,21 @@ func New(
 						IsError: true,
 					}, nil
 				}
+				if len(res) == 0 {
+					return &mcp.CallToolResult{
+						Content: []interface{}{
+							mcp.TextContent{
+								Type: "text",
+								Text: fmt.Sprintf("Found a row: %v in %s.", request.Params.Arguments, info.Name),
+							},
+							mcp.TextContent{
+								Annotated: mcp.Annotated{},
+								Type:      "text",
+								Text:      jsonify(res[0]),
+							},
+						},
+					}, nil
+				}
 				return &mcp.CallToolResult{
 					Content: []interface{}{
 						mcp.TextContent{
@@ -81,8 +96,8 @@ func New(
 	}, nil
 }
 
-func jsonify(asMap []map[string]interface{}) string {
-	res, _ := json.MarshalIndent(asMap, "", "  ")
+func jsonify(data any) string {
+	res, _ := json.Marshal(data)
 	return string(res)
 }
 
