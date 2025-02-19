@@ -50,6 +50,7 @@ func Discover(configPath *string) *cobra.Command {
 	var tables []string
 	var openAPIKey string
 	var output string
+	var extraPrompt string
 	cmd := &cobra.Command{
 		Use:   "discover",
 		Short: "Discover generates gateway config",
@@ -99,13 +100,13 @@ func Discover(configPath *string) *cobra.Command {
 				})
 			}
 			logrus.Info("Step 3: Prepare prompt to AI")
-			fullPrompt := generatePrompt(databaseType, tablesToGenerate)
+			fullPrompt := generatePrompt(databaseType, extraPrompt, tablesToGenerate)
 			promptFilename := "prompt.txt"
 			if err := saveToFile(promptFilename, fullPrompt); err != nil {
 				logrus.Error("failed to save prompt:", err)
 			}
 
-			logrus.Infof("✅ Step 3 done. Prompt: %s", promptFilename)
+			logrus.Infof("Step 3 done. Prompt: %s", promptFilename)
 
 			logrus.Info("Step 4: Do AI Magic")
 			config, err := callOpenAI(openAPIKey, fullPrompt)
@@ -135,10 +136,11 @@ func Discover(configPath *string) *cobra.Command {
 	cmd.Flags().StringVar(&databaseType, "db-type", "postgres", "Type of database")
 	cmd.Flags().StringVar(&openAPIKey, "open-ai-key", "open-ai-key", "OpenAI token")
 	cmd.Flags().StringVar(&output, "output", "gateway.yaml", "Resulted yaml path")
+	cmd.Flags().StringVar(&extraPrompt, "prompt", "generate reasonable set of API-s for this data", "Custom input to generate API-s")
 	return cmd
 }
 
-func generatePrompt(databaseType string, tables []TableData) string {
+func generatePrompt(databaseType, extraPrompt string, tables []TableData) string {
 	res := "I need a config for an automatic API that will be used by another AI bot or LLMs..."
 	res += "\n"
 	res += strings.ReplaceAll(basePrompt, "{database_type}", databaseType)
@@ -153,7 +155,7 @@ Data Sample:
 </%[1]s>`, table.Name, yamlify(table.Columns), yamlify(table.Sample), len(table.Sample), len(table.Columns))
 	}
 
-	return res + "\n\n" + string(apiConfigSchema)
+	return res + "\n\n" + string(apiConfigSchema) + "\n\n" + extraPrompt
 }
 
 func yamlify(sample any) string {
