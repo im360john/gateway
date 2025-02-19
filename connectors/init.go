@@ -2,6 +2,7 @@ package connectors
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/centralmind/gateway/model"
 	"github.com/centralmind/gateway/remapper"
 	"github.com/pkg/errors"
@@ -14,6 +15,8 @@ type Config interface {
 type Connector interface {
 	Ping(ctx context.Context) error
 	Query(ctx context.Context, endpoint model.Endpoint, params map[string]any) ([]map[string]any, error)
+	Discovery(ctx context.Context) ([]model.Table, error)
+	Sample(ctx context.Context, table model.Table) ([]map[string]any, error)
 }
 
 var interceptors = map[string]func(any) (Connector, error){}
@@ -30,6 +33,20 @@ func Register[TConfig Config](f func(cfg TConfig) (Connector, error)) {
 }
 
 func New(tag string, config any) (Connector, error) {
+	switch v := config.(type) {
+	case string:
+		var r any
+		if err := json.Unmarshal([]byte(v), &r); err != nil {
+			return nil, err
+		}
+		config = v
+	case []byte:
+		var r any
+		if err := json.Unmarshal(v, &r); err != nil {
+			return nil, err
+		}
+		config = v
+	}
 	f, ok := interceptors[tag]
 	if !ok {
 		return nil, errors.Errorf("connector: %s not found", tag)

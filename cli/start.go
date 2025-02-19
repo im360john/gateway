@@ -18,6 +18,7 @@ func StartCommand() *cobra.Command {
 	RegisterCommand(cmd, REST(&gatewayParams, &addr))
 	RegisterCommand(cmd, MCP(&gatewayParams, &addr))
 	RegisterCommand(cmd, MCPStdio(&gatewayParams))
+	RegisterCommand(cmd, Discover(&gatewayParams))
 	return cmd
 }
 
