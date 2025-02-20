@@ -6,7 +6,9 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/centralmind/gateway/cli"
+	_ "github.com/centralmind/gateway/connectors/mysql"
 	_ "github.com/centralmind/gateway/connectors/postgres"
+	_ "github.com/centralmind/gateway/connectors/snowflake"
 	_ "github.com/centralmind/gateway/plugins/lua_rls"
 	_ "github.com/centralmind/gateway/plugins/pii_remover"
 )
