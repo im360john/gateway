@@ -59,33 +59,20 @@ func New(
 						IsError: true,
 					}, nil
 				}
-				if len(res) == 0 {
-					return &mcp.CallToolResult{
-						Content: []interface{}{
-							mcp.TextContent{
-								Type: "text",
-								Text: fmt.Sprintf("Found a row: %v in %s.", request.Params.Arguments, info.Name),
-							},
-							mcp.TextContent{
-								Annotated: mcp.Annotated{},
-								Type:      "text",
-								Text:      jsonify(res[0]),
-							},
-						},
-					}, nil
+				var content []interface{}
+				content = append(content, mcp.TextContent{
+					Type: "text",
+					Text: fmt.Sprintf("Found a %s row-(s) in %s.", len(res), info.Name),
+				})
+				for _, row := range res {
+					content = append(content, mcp.TextContent{
+						Type: "text",
+						Text: jsonify(row),
+					})
 				}
+
 				return &mcp.CallToolResult{
-					Content: []interface{}{
-						mcp.TextContent{
-							Type: "text",
-							Text: fmt.Sprintf("Found a row: %v in %s.", request.Params.Arguments, info.Name),
-						},
-						mcp.TextContent{
-							Annotated: mcp.Annotated{},
-							Type:      "text",
-							Text:      jsonify(res),
-						},
-					},
+					Content: content,
 				}, nil
 			})
 		}
