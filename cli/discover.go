@@ -57,7 +57,7 @@ func Discover(configPath *string) *cobra.Command {
 		Args:  cobra.MatchAll(cobra.ExactArgs(0)),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			startTime := time.Now()
-			logrus.Infof("Steap 1: Read configs")
+			logrus.Infof("Step 1: Read configs")
 			configRaw, err := os.ReadFile(*configPath)
 			if err != nil {
 				return err
@@ -69,7 +69,7 @@ func Discover(configPath *string) *cobra.Command {
 			if err := connector.Ping(context.Background()); err != nil {
 				return err
 			}
-			logrus.Infof("Steap 2: Discover data")
+			logrus.Infof("Step 2: Discover data")
 			allTables, err := connector.Discovery(context.Background())
 			if err != nil {
 				return err
@@ -115,6 +115,7 @@ func Discover(configPath *string) *cobra.Command {
 				return
 			}
 
+			config.Database.Type = databaseType
 			config.Database.Connection = configRaw
 
 			configData, err := yaml.Marshal(config)
@@ -133,6 +134,7 @@ func Discover(configPath *string) *cobra.Command {
 			return nil
 		},
 	}
+	cmd.Flags().StringSliceVar(&tables, "tables", nil, "List of table to include")
 	cmd.Flags().StringVar(&databaseType, "db-type", "postgres", "Type of database")
 	cmd.Flags().StringVar(&openAPIKey, "open-ai-key", "open-ai-key", "OpenAI token")
 	cmd.Flags().StringVar(&output, "output", "gateway.yaml", "Resulted yaml path")
@@ -144,18 +146,21 @@ func generatePrompt(databaseType, extraPrompt string, tables []TableData) string
 	res := "I need a config for an automatic API that will be used by another AI bot or LLMs..."
 	res += "\n"
 	res += strings.ReplaceAll(basePrompt, "{database_type}", databaseType)
-
+	res += "\n" + string(apiConfigSchema) + "\n" + extraPrompt + "\n\n"
 	for _, table := range tables {
-		res += fmt.Sprintf(`<%[1]s number_columns=%[5]v number_rows=%[4]v>
-Schema:
+		res += fmt.Sprintf(`
+<%[1]s number_columns=%[5]v number_rows=%[4]v>
+schema:
 %[2]s
 ---
-Data Sample:
+data_sample:
 %[3]s
-</%[1]s>`, table.Name, yamlify(table.Columns), yamlify(table.Sample), len(table.Sample), len(table.Columns))
+</%[1]s>
+
+`, table.Name, yamlify(table.Columns), yamlify(table.Sample), len(table.Sample), len(table.Columns))
 	}
 
-	return res + "\n\n" + string(apiConfigSchema) + "\n\n" + extraPrompt
+	return res
 }
 
 func yamlify(sample any) string {
