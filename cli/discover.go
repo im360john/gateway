@@ -4,16 +4,18 @@ import (
 	"context"
 	_ "embed"
 	"fmt"
-	"github.com/centralmind/gateway/connectors"
-	"github.com/pkg/errors"
-	"gopkg.in/yaml.v3"
 	"os"
 	"strings"
 	"time"
 
-	gw_model "github.com/centralmind/gateway/model"
+	"github.com/pkg/errors"
+	openai "github.com/sashabaranov/go-openai"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
+
+	"github.com/centralmind/gateway/connectors"
+	gw_model "github.com/centralmind/gateway/model"
 )
 
 var (
@@ -172,6 +174,30 @@ func saveToFile(filename, data string) error {
 	return os.WriteFile(filename, []byte(data), 0644)
 }
 
-func callOpenAI(prompt string, fullPrompt string) (*gw_model.Config, error) {
-	return nil, errors.New("not implemented")
+func callOpenAI(apiKey string, prompt string) (*gw_model.Config, error) {
+	client := openai.NewClient(apiKey)
+
+	resp, err := client.CreateChatCompletion(
+		context.TODO(),
+		openai.ChatCompletionRequest{
+			Model:           "o3-mini",
+			Messages:        []openai.ChatCompletionMessage{{Role: "user", Content: prompt}},
+			ReasoningEffort: "high",
+		},
+	)
+	if err != nil {
+		return nil, errors.Errorf("fail to call open-ai: %w", err)
+	}
+	logrus.Infof("Step 4: open-ai usage: %v", resp.Usage)
+
+	answerText := strings.TrimSpace(resp.Choices[0].Message.Content)
+	if err := saveToFile("open-ai-raw.log", answerText); err != nil {
+		return nil, errors.Errorf("unable to save raw response: %w", err)
+	}
+
+	var res gw_model.Config
+	if err := yaml.Unmarshal([]byte(answerText), &res); err != nil {
+		return nil, errors.Errorf("unable to unmarshal response: %w", err)
+	}
+	return &res, nil
 }

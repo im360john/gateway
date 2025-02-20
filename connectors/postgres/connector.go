@@ -30,12 +30,12 @@ type Connector struct {
 }
 
 func (c Connector) Sample(ctx context.Context, table model.Table) ([]map[string]any, error) {
-	rows, err := c.db.NamedQueryContext(ctx, fmt.Sprintf("select * from %s limit 10", table.Name), map[string]any{})
+	rows, err := c.db.NamedQueryContext(ctx, fmt.Sprintf("select * from %s limit 5", table.Name), map[string]any{})
 	if err != nil {
 		return nil, errors.Errorf("unable to ping db: %w", err)
 	}
 	defer rows.Close()
-	res := make([]map[string]any, 0, 10)
+	res := make([]map[string]any, 0, 5)
 	for rows.Next() {
 		row := map[string]any{}
 		if err := rows.MapScan(row); err != nil {
