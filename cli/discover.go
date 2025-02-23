@@ -118,7 +118,7 @@ func Discover(configPath *string) *cobra.Command {
 			}
 
 			config.Database.Type = databaseType
-			config.Database.Connection = configRaw
+			config.Database.Connection = string(configRaw)
 
 			configData, err := yaml.Marshal(config)
 			if err != nil {
