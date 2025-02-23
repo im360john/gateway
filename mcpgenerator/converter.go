@@ -47,13 +47,19 @@ func New(
 				endpoint.MCPMethod,
 				opts...,
 			), func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+				arg := request.Params.Arguments
+				for _, param := range endpoint.Params {
+					if _, ok := arg[param.Name]; !ok {
+						arg[param.Name] = nil
+					}
+				}
 				res, err := connector.Query(ctx, endpoint, request.Params.Arguments)
 				if err != nil {
 					return &mcp.CallToolResult{
 						Content: []interface{}{
 							mcp.TextContent{
 								Type: "text",
-								Text: fmt.Sprintf("Unable to construct storage: %s", err),
+								Text: fmt.Sprintf("Unable to query: %s", err),
 							},
 						},
 						IsError: true,
@@ -62,7 +68,7 @@ func New(
 				var content []interface{}
 				content = append(content, mcp.TextContent{
 					Type: "text",
-					Text: fmt.Sprintf("Found a %s row-(s) in %s.", len(res), info.Name),
+					Text: fmt.Sprintf("Found a %v row-(s) in %s.", len(res), info.Name),
 				})
 				for _, row := range res {
 					content = append(content, mcp.TextContent{
