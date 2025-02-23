@@ -7,6 +7,7 @@ import (
 	"github.com/centralmind/gateway/model"
 	"github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
+	"golang.org/x/xerrors"
 )
 
 func init() {
