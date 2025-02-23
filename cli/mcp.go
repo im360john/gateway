@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/centralmind/gateway/mcpgenerator"
 	gw_model "github.com/centralmind/gateway/model"
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	"golang.org/x/xerrors"
 	"os"
 )
 
@@ -17,15 +17,15 @@ func MCP(configPath *string, addr *string) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			gwRaw, err := os.ReadFile(*configPath)
 			if err != nil {
-				return errors.Errorf("unable to read yaml config file: %w", err)
+				return xerrors.Errorf("unable to read yaml config file: %w", err)
 			}
 			gw, err := gw_model.FromYaml(gwRaw)
 			if err != nil {
-				return errors.Errorf("unable to parse config file: %w", err)
+				return xerrors.Errorf("unable to parse config file: %w", err)
 			}
 			srv, err := mcpgenerator.New(*gw)
 			if err != nil {
-				return errors.Errorf("unable to init mcp generator: %w", err)
+				return xerrors.Errorf("unable to init mcp generator: %w", err)
 			}
 			return srv.ServeSSE(*addr).Start(*addr)
 		},
@@ -41,15 +41,15 @@ func MCPStdio(configPath *string) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			gwRaw, err := os.ReadFile(*configPath)
 			if err != nil {
-				return errors.Errorf("unable to read yaml config file: %w", err)
+				return xerrors.Errorf("unable to read yaml config file: %w", err)
 			}
 			gw, err := gw_model.FromYaml(gwRaw)
 			if err != nil {
-				return errors.Errorf("unable to parse config file: %w", err)
+				return xerrors.Errorf("unable to parse config file: %w", err)
 			}
 			srv, err := mcpgenerator.New(*gw)
 			if err != nil {
-				return errors.Errorf("unable to init mcp generator: %w", err)
+				return xerrors.Errorf("unable to init mcp generator: %w", err)
 			}
 			return srv.ServeStdio().Listen(context.Background(), os.Stdin, os.Stdout)
 		},

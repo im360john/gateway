@@ -9,7 +9,7 @@ import (
 	"github.com/centralmind/gateway/swaggerator"
 	"github.com/flowchartsman/swaggerui"
 	"github.com/gin-gonic/gin"
-	"github.com/pkg/errors"
+	"golang.org/x/xerrors"
 	"net/http"
 	"regexp"
 )
@@ -35,10 +35,10 @@ func New(
 	}
 	connector, err := connectors.New(schema.Database.Type, schema.Database.Connection)
 	if err != nil {
-		return nil, errors.Errorf("unable to init connector: %w", err)
+		return nil, xerrors.Errorf("unable to init connector: %w", err)
 	}
 	if err := connector.Ping(context.Background()); err != nil {
-		return nil, errors.Errorf("unable to ping: %w", err)
+		return nil, xerrors.Errorf("unable to ping: %w", err)
 	}
 	return &Rest{
 		Schema:       schema,

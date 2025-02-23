@@ -2,7 +2,6 @@ package plugins
 
 import (
 	"github.com/centralmind/gateway/remapper"
-	"github.com/pkg/errors"
 )
 
 type Config interface {
@@ -20,7 +19,7 @@ func RegisterInterceptor[TConfig Config](f func(cfg TConfig) (Interceptor, error
 	interceptors[t.Tag()] = func(a any) (Interceptor, error) {
 		cfg, err := remapper.Remap[TConfig](a)
 		if err != nil {
-			return nil, errors.Errorf("unable to rempa: %w", err)
+			return nil, xerrors.Errorf("unable to rempa: %w", err)
 		}
 		return f(cfg)
 	}
@@ -29,7 +28,7 @@ func RegisterInterceptor[TConfig Config](f func(cfg TConfig) (Interceptor, error
 func New(tag string, config any) (Interceptor, error) {
 	f, ok := interceptors[tag]
 	if !ok {
-		return nil, errors.Errorf("plugin: %s not found", tag)
+		return nil, xerrors.Errorf("plugin: %s not found", tag)
 	}
 	return f(config)
 }

@@ -4,11 +4,11 @@ import (
 	"context"
 	_ "embed"
 	"fmt"
+	"golang.org/x/xerrors"
 	"os"
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
 	openai "github.com/sashabaranov/go-openai"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -32,7 +32,8 @@ var (
 	- Endpoints that return lists must include pagination parameters (offset and limit).
 	- Consistent Endpoint Definitions: Each table defined in the DDL should have corresponding endpoints as specified by the JSON schema, including method, path, description, SQL query, and parameters.
 	- Sensitive Data Handling: If any columns contain sensitive data, they must be flagged appropriately (e.g., using a "pii" flag).
-	- Each Parameter in API endpoints must have default value taken from corresponded example rows
+	- Each Parameter in API endpoints may have default value taken from corresponded example rows, only if it's generic enough
+	- If some entity require pagination, there should be separate API that calculate total_count, so pagination can be queried
 `
 )
 
@@ -186,18 +187,18 @@ func callOpenAI(apiKey string, prompt string) (*gw_model.Config, error) {
 		},
 	)
 	if err != nil {
-		return nil, errors.Errorf("fail to call open-ai: %w", err)
+		return nil, xerrors.Errorf("fail to call open-ai: %w", err)
 	}
 	logrus.Infof("Step 4: open-ai usage: %v", resp.Usage)
 
 	answerText := strings.TrimSpace(resp.Choices[0].Message.Content)
 	if err := saveToFile("open-ai-raw.log", answerText); err != nil {
-		return nil, errors.Errorf("unable to save raw response: %w", err)
+		return nil, xerrors.Errorf("unable to save raw response: %w", err)
 	}
 
 	var res gw_model.Config
 	if err := yaml.Unmarshal([]byte(answerText), &res); err != nil {
-		return nil, errors.Errorf("unable to unmarshal response: %w", err)
+		return nil, xerrors.Errorf("unable to unmarshal response: %w", err)
 	}
 	return &res, nil
 }

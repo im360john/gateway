@@ -9,7 +9,7 @@ import (
 	"github.com/centralmind/gateway/plugins"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
-	"github.com/pkg/errors"
+	"golang.org/x/xerrors"
 )
 
 type MCPServer struct {
@@ -30,7 +30,7 @@ func New(
 	}
 	connector, err := connectors.New(schema.Database.Type, schema.Database.Connection)
 	if err != nil {
-		return nil, errors.Errorf("unable to init connector: %w", err)
+		return nil, xerrors.Errorf("unable to init connector: %w", err)
 	}
 	for _, info := range schema.Database.Tables {
 		for _, endpoint := range info.Endpoints {

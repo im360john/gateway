@@ -7,18 +7,17 @@ import (
 	"github.com/centralmind/gateway/model"
 	"github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
-	"github.com/pkg/errors"
 )
 
 func init() {
 	connectors.Register[Config](func(cfg Config) (connectors.Connector, error) {
 		dsn, err := cfg.MakeDSN()
 		if err != nil {
-			return nil, errors.Errorf("unable to prepare mysql config: %w", err)
+			return nil, xerrors.Errorf("unable to prepare mysql config: %w", err)
 		}
 		db, err := sqlx.Open("mysql", dsn)
 		if err != nil {
-			return nil, errors.Errorf("unable to open mysql db: %w", err)
+			return nil, xerrors.Errorf("unable to open mysql db: %w", err)
 		}
 		return &Connector{
 			config: cfg,
@@ -62,7 +61,7 @@ type Connector struct {
 func (c Connector) Sample(ctx context.Context, table model.Table) ([]map[string]any, error) {
 	rows, err := c.db.QueryxContext(ctx, fmt.Sprintf("SELECT * FROM %s LIMIT 5", table.Name))
 	if err != nil {
-		return nil, errors.Errorf("unable to query db: %w", err)
+		return nil, xerrors.Errorf("unable to query db: %w", err)
 	}
 	defer rows.Close()
 
@@ -70,7 +69,7 @@ func (c Connector) Sample(ctx context.Context, table model.Table) ([]map[string]
 	for rows.Next() {
 		row := make(map[string]any)
 		if err := rows.MapScan(row); err != nil {
-			return nil, errors.Errorf("unable to scan row: %w", err)
+			return nil, xerrors.Errorf("unable to scan row: %w", err)
 		}
 		res = append(res, row)
 	}
@@ -106,7 +105,7 @@ func (c Connector) Ping(ctx context.Context) error {
 func (c Connector) Query(ctx context.Context, endpoint model.Endpoint, params map[string]any) ([]map[string]any, error) {
 	rows, err := c.db.NamedQueryContext(ctx, endpoint.Query, params)
 	if err != nil {
-		return nil, errors.Errorf("unable to query db: %w", err)
+		return nil, xerrors.Errorf("unable to query db: %w", err)
 	}
 	defer rows.Close()
 
@@ -114,7 +113,7 @@ func (c Connector) Query(ctx context.Context, endpoint model.Endpoint, params ma
 	for rows.Next() {
 		row := map[string]any{}
 		if err := rows.MapScan(row); err != nil {
-			return nil, errors.Errorf("unable to scan row: %w", err)
+			return nil, xerrors.Errorf("unable to scan row: %w", err)
 		}
 		res = append(res, row)
 	}

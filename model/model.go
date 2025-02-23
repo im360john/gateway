@@ -2,7 +2,7 @@ package model
 
 import (
 	"encoding/json"
-	"github.com/pkg/errors"
+	"golang.org/x/xerrors"
 	"gopkg.in/yaml.v3"
 )
 
@@ -16,7 +16,7 @@ func FromYaml(raw []byte) (*Config, error) {
 	var gw Config
 	err := yaml.Unmarshal(raw, &gw)
 	if err != nil {
-		return nil, errors.Errorf("unable to parse yaml: %w", err)
+		return nil, xerrors.Errorf("unable to parse yaml: %w", err)
 	}
 	return &gw, nil
 }

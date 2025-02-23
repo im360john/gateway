@@ -1,8 +1,8 @@
 package cli
 
 import (
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	"golang.org/x/xerrors"
 )
 
 func StartCommand() *cobra.Command {
@@ -38,7 +38,7 @@ func RegisterCommand(parent, child *cobra.Command) {
 			if parentPpre != nil {
 				err := parentPpre(cmd, args)
 				if err != nil {
-					return errors.Errorf("cannot process parent PersistentPreRunE: %w", err)
+					return xerrors.Errorf("cannot process parent PersistentPreRunE: %w", err)
 				}
 			}
 			return childPpre(cmd, args)

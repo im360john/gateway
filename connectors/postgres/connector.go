@@ -7,14 +7,14 @@ import (
 	"github.com/centralmind/gateway/model"
 	"github.com/jackc/pgx/v4/stdlib"
 	"github.com/jmoiron/sqlx"
-	"github.com/pkg/errors"
+	"golang.org/x/xerrors"
 )
 
 func init() {
 	connectors.Register[Config](func(cfg Config) (connectors.Connector, error) {
 		c, err := cfg.MakeConfig()
 		if err != nil {
-			return nil, errors.Errorf("unable to prepare pg config: %w", err)
+			return nil, xerrors.Errorf("unable to prepare pg config: %w", err)
 		}
 		db := sqlx.NewDb(stdlib.OpenDB(*c), "pgx")
 		return &Connector{
@@ -32,14 +32,14 @@ type Connector struct {
 func (c Connector) Sample(ctx context.Context, table model.Table) ([]map[string]any, error) {
 	rows, err := c.db.NamedQueryContext(ctx, fmt.Sprintf("select * from %s limit 5", table.Name), map[string]any{})
 	if err != nil {
-		return nil, errors.Errorf("unable to ping db: %w", err)
+		return nil, xerrors.Errorf("unable to ping db: %w", err)
 	}
 	defer rows.Close()
 	res := make([]map[string]any, 0, 5)
 	for rows.Next() {
 		row := map[string]any{}
 		if err := rows.MapScan(row); err != nil {
-			return nil, errors.Errorf("unable to scan row: %w", err)
+			return nil, xerrors.Errorf("unable to scan row: %w", err)
 		}
 		res = append(res, row)
 	}
@@ -49,7 +49,7 @@ func (c Connector) Sample(ctx context.Context, table model.Table) ([]map[string]
 func (c Connector) Discovery(ctx context.Context) ([]model.Table, error) {
 	cfg, err := c.config.MakeConfig()
 	if err != nil {
-		return nil, errors.Errorf("unable to prepare pg config: %w", err)
+		return nil, xerrors.Errorf("unable to prepare pg config: %w", err)
 	}
 	db := sqlx.NewDb(stdlib.OpenDB(*cfg), "pgx")
 	rows, err := db.Query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'")
@@ -75,17 +75,17 @@ func (c Connector) Discovery(ctx context.Context) ([]model.Table, error) {
 func (c Connector) Ping(ctx context.Context) error {
 	rows, err := c.db.QueryContext(ctx, "select 1+1")
 	if err != nil {
-		return errors.Errorf("unable to ping db: %w", err)
+		return xerrors.Errorf("unable to ping db: %w", err)
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var res int
 		if err := rows.Scan(&res); err != nil {
-			return errors.Errorf("unable to scan ping result: %w", err)
+			return xerrors.Errorf("unable to scan ping result: %w", err)
 		}
 	}
 	if rows.Err() != nil {
-		return errors.Errorf("rows fetcher failed: %w", err)
+		return xerrors.Errorf("rows fetcher failed: %w", err)
 	}
 	return nil
 }
@@ -93,14 +93,14 @@ func (c Connector) Ping(ctx context.Context) error {
 func (c Connector) Query(ctx context.Context, endpoint model.Endpoint, params map[string]any) ([]map[string]any, error) {
 	rows, err := c.db.NamedQueryContext(ctx, endpoint.Query, params)
 	if err != nil {
-		return nil, errors.Errorf("unable to ping db: %w", err)
+		return nil, xerrors.Errorf("unable to ping db: %w", err)
 	}
 	defer rows.Close()
 	res := make([]map[string]any, 0)
 	for rows.Next() {
 		row := map[string]any{}
 		if err := rows.MapScan(row); err != nil {
-			return nil, errors.Errorf("unable to scan row: %w", err)
+			return nil, xerrors.Errorf("unable to scan row: %w", err)
 		}
 		res = append(res, row)
 	}
