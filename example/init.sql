@@ -1,12 +1,4 @@
 -- Create a demo table for personas
-CREATE TABLE IF NOT EXISTS gachi_personas (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(100),
-    strength_level INT,
-    special_move VARCHAR(100),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
 CREATE TABLE gachi_teams (
     id SERIAL PRIMARY KEY,
     team_name VARCHAR(50) NOT NULL,
