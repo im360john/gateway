@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/centralmind/gateway/model"
 	"github.com/centralmind/gateway/remapper"
+	"golang.org/x/xerrors"
 	"gopkg.in/yaml.v3"
 )
 

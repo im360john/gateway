@@ -2,6 +2,7 @@ package plugins
 
 import (
 	"github.com/centralmind/gateway/remapper"
+	"golang.org/x/xerrors"
 )
 
 type Config interface {
