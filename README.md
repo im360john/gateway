@@ -21,7 +21,7 @@ Our first users are companies deploying AI agents for customer support and analy
 
 </div>
 
-![img.png](assets/img.png)
+![img.png](assets/diagram.png)
 
 ## How to run
 
