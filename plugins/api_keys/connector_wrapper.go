@@ -21,8 +21,8 @@ func (c Connector) Query(ctx context.Context, endpoint model.Endpoint, params ma
 		return nil, xerrors.Errorf("empty token: %w", errors.ErrNotAuthorized)
 	}
 	found := false
-	for _, token := range c.config.Tokens {
-		if token.Token == authToken {
+	for _, token := range c.config.Keys {
+		if token.Key == authToken {
 			found = true
 			if !token.Allowed(endpoint.MCPMethod) {
 				return nil, xerrors.Errorf("method: %s is not authorized for this token: %w", endpoint.MCPMethod, errors.ErrNotAuthorized)

@@ -7,9 +7,9 @@ plugins:
       api_keys:
         name: 'X-GW-Auth-Token'
         location: 'header'
-        tokens:
-          - token: 'all_methods'
-          - token: 'only_orders'
+        keys:
+          - key: 'all_methods'
+          - key: 'only_orders'
             allowed_methods:
               - search_customer_orders
               - get_customer_order_payment

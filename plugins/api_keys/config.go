@@ -1,22 +1,22 @@
 package api_keys
 
 type Config struct {
-	Name      string  `yaml:"name"`
-	Tokens    []Token `yaml:"tokens"`
-	TokenFile string  `yaml:"token_file"`
-	Location  string  `yaml:"location"`
+	Name     string `yaml:"name"`
+	Keys     []Key  `yaml:"keys"`
+	KeysFile string `yaml:"keys_file"`
+	Location string `yaml:"location"`
 }
 
 func (c Config) Tag() string {
 	return "api_keys"
 }
 
-type Token struct {
-	Token          string   `yaml:"token"`
+type Key struct {
+	Key            string   `yaml:"key"`
 	AllowedMethods []string `yaml:"allowed_methods"`
 }
 
-func (t *Token) Allowed(method string) bool {
+func (t *Key) Allowed(method string) bool {
 	if len(t.AllowedMethods) == 0 {
 		return true
 	}
