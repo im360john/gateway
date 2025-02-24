@@ -6,7 +6,7 @@ import (
 )
 
 // Schema dynamically generates an OpenAPI schema based on the given table schema.
-func Schema(schema model.Config) *openapi3.T {
+func Schema(schema model.Config, address string) *openapi3.T {
 	swagger := &openapi3.T{
 		OpenAPI: "3.0.0",
 		Info: &openapi3.Info{
@@ -16,6 +16,15 @@ func Schema(schema model.Config) *openapi3.T {
 		},
 		Components: &openapi3.Components{
 			Schemas: openapi3.Schemas{},
+		},
+		Servers: openapi3.Servers{
+			&openapi3.Server{
+				Extensions:  nil,
+				Origin:      nil,
+				URL:         address,
+				Description: "Local host address",
+				Variables:   nil,
+			},
 		},
 	}
 

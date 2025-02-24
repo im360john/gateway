@@ -56,8 +56,8 @@ func New(
 }
 
 // RegisterRoutes registers Rest endpoints.
-func (r *Rest) RegisterRoutes(mux *http.ServeMux) {
-	swagger := swaggerator.Schema(r.Schema)
+func (r *Rest) RegisterRoutes(mux *http.ServeMux, address string) {
+	swagger := swaggerator.Schema(r.Schema, address)
 	raw, _ := json.Marshal(swagger)
 	mux.Handle("/swagger/", http.StripPrefix("/swagger", swaggerui.Handler(raw)))
 	d := gin.Default()
