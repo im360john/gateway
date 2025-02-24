@@ -25,7 +25,7 @@ func (c Connector) Ping(ctx context.Context) error {
 
 func (c Connector) Query(ctx context.Context, endpoint model.Endpoint, params map[string]any) ([]map[string]any, error) {
 	tracer := c.tp.Tracer("database-connector")
-	ctx, span := tracer.Start(ctx, "Connector.Query",
+	ctx, span := tracer.Start(ctx, endpoint.MCPMethod,
 		trace.WithAttributes(
 			attribute.String("api.http_path", endpoint.HTTPPath),
 			attribute.String("api.mcp_method", endpoint.MCPMethod),
