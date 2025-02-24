@@ -3,6 +3,7 @@ package clickhouse
 import (
 	"context"
 	"fmt"
+	_ "github.com/ClickHouse/clickhouse-go/v2"
 	"github.com/centralmind/gateway/connectors"
 	"github.com/centralmind/gateway/model"
 	"github.com/jmoiron/sqlx"
