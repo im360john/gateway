@@ -5,7 +5,7 @@ api:
 plugins:
     plugins:
       api_keys:
-        name: 'X-GW-Auth-Token'
+        name: 'X-GW-API-Key'
         location: 'header'
         keys:
           - key: 'all_methods'
