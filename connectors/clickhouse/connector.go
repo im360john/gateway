@@ -99,7 +99,6 @@ func (c Connector) Query(ctx context.Context, endpoint model.Endpoint, params ma
 		return nil, xerrors.Errorf("unable to query db: %w", err)
 	}
 	defer rows.Close()
-
 	res := make([]map[string]any, 0)
 	for rows.Next() {
 		row := map[string]any{}

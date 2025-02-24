@@ -1,14 +1,16 @@
 package remapper
 
-import "encoding/json"
+import (
+	"gopkg.in/yaml.v3"
+)
 
 func Remap[TValue any](config any) (TValue, error) {
 	var t TValue
-	raw, err := json.Marshal(config)
+	raw, err := yaml.Marshal(config)
 	if err != nil {
 		return t, err
 	}
-	if err := json.Unmarshal(raw, &t); err != nil {
+	if err := yaml.Unmarshal(raw, &t); err != nil {
 		return t, err
 	}
 	return t, nil

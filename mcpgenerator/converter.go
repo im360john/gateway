@@ -22,15 +22,23 @@ func New(
 	srv := server.NewMCPServer("mcp-data-gateway", "0.0.1")
 	var interceptors []plugins.Interceptor
 	for k, v := range schema.Plugins {
-		interceptor, err := plugins.New(k, v)
+		plugin, err := plugins.New(k, v)
 		if err != nil {
 			return nil, err
+		}
+		interceptor, ok := plugin.(plugins.Interceptor)
+		if !ok {
+			continue
 		}
 		interceptors = append(interceptors, interceptor)
 	}
 	connector, err := connectors.New(schema.Database.Type, schema.Database.Connection)
 	if err != nil {
 		return nil, xerrors.Errorf("unable to init connector: %w", err)
+	}
+	connector, err = plugins.Wrap(schema.Plugins, connector)
+	if err != nil {
+		return nil, xerrors.Errorf("unable to init connector plugins: %w", err)
 	}
 	for _, info := range schema.Database.Tables {
 		for _, endpoint := range info.Endpoints {

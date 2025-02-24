@@ -7,7 +7,7 @@ import (
 )
 
 func init() {
-	plugins.RegisterInterceptor[LuaRLSConfig](func(cfg LuaRLSConfig) (plugins.Interceptor, error) {
+	plugins.Register[LuaRLSConfig](func(cfg LuaRLSConfig) (plugins.Interceptor, error) {
 		return New(cfg)
 	})
 }
@@ -22,6 +22,12 @@ func (l LuaRLSConfig) Tag() string {
 
 type LuaRLS struct {
 	script string
+}
+
+func (l LuaRLS) Doc() string {
+	return `
+Allow to execute lua script for every row in result set
+`
 }
 
 func (l LuaRLS) Process(row map[string]any, headers map[string][]string) (processed map[string]any, skipped bool) {

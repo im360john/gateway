@@ -1,6 +1,7 @@
 package plugins
 
 import (
+	"github.com/centralmind/gateway/connectors"
 	"github.com/centralmind/gateway/remapper"
 	"golang.org/x/xerrors"
 )
@@ -9,15 +10,27 @@ type Config interface {
 	Tag() string
 }
 
+type Plugin interface {
+	Doc() string
+}
+
 type Interceptor interface {
+	Plugin
 	Process(data map[string]any, context map[string][]string) (procesed map[string]any, skipped bool)
 }
 
-var interceptors = map[string]func(any) (Interceptor, error){}
+type Wrapper interface {
+	Plugin
+	Wrap(connector connectors.Connector) (connectors.Connector, error)
+}
 
-func RegisterInterceptor[TConfig Config](f func(cfg TConfig) (Interceptor, error)) {
+var (
+	plugins = map[string]func(any) (Plugin, error){}
+)
+
+func Register[TConfig Config, TPlugin Plugin](f func(cfg TConfig) (TPlugin, error)) {
 	var t TConfig
-	interceptors[t.Tag()] = func(a any) (Interceptor, error) {
+	plugins[t.Tag()] = func(a any) (Plugin, error) {
 		cfg, err := remapper.Remap[TConfig](a)
 		if err != nil {
 			return nil, xerrors.Errorf("unable to rempa: %w", err)
@@ -26,10 +39,31 @@ func RegisterInterceptor[TConfig Config](f func(cfg TConfig) (Interceptor, error
 	}
 }
 
-func New(tag string, config any) (Interceptor, error) {
-	f, ok := interceptors[tag]
+func New(tag string, config any) (Plugin, error) {
+	f, ok := plugins[tag]
 	if !ok {
 		return nil, xerrors.Errorf("plugin: %s not found", tag)
 	}
 	return f(config)
+}
+
+func Wrap(pluginsCfg map[string]any, connector connectors.Connector) (connectors.Connector, error) {
+	for k, v := range pluginsCfg {
+		if _, ok := plugins[k]; !ok {
+			continue
+		}
+		plugin, err := plugins[k](v)
+		if err != nil {
+			return nil, xerrors.Errorf("unable to construct: %s: %w", k, err)
+		}
+		wrapper, ok := plugin.(Wrapper)
+		if !ok {
+			continue
+		}
+		connector, err = wrapper.Wrap(connector)
+		if err != nil {
+			return nil, xerrors.Errorf("unable to wrap: %s: %w", k, err)
+		}
+	}
+	return connector, nil
 }

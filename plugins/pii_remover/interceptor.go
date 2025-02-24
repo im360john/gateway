@@ -5,7 +5,7 @@ import (
 )
 
 func init() {
-	plugins.RegisterInterceptor[PIIInterceptorConfig](func(cfg PIIInterceptorConfig) (plugins.Interceptor, error) {
+	plugins.Register[PIIInterceptorConfig](func(cfg PIIInterceptorConfig) (plugins.Interceptor, error) {
 		return New(cfg)
 	})
 }
@@ -20,6 +20,12 @@ func (P PIIInterceptorConfig) Tag() string {
 
 type PIIInterceptor struct {
 	columns map[string]bool
+}
+
+func (p *PIIInterceptor) Doc() string {
+	return `
+Remove certain column from result
+`
 }
 
 func (p *PIIInterceptor) Process(data map[string]any, context map[string][]string) (procesed map[string]any, skipped bool) {

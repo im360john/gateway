@@ -1,6 +1,19 @@
 version: '3.8'
 
 services:
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger
+    restart: unless-stopped
+    environment:
+      COLLECTOR_OTLP_ENABLED: true
+    ports:
+      - "16686:16686" # Jaeger UI
+      - "14250:14250" # Jaeger GRPC
+      - "14268:14268" # OTLP HTTP
+      - "4317:4317"   # OTLP gRPC receiver
+      - "4318:4318"   # OTLP Protobuf or OTLP JSON
+
   postgres:
     image: postgres:latest
     container_name: postgres

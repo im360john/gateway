@@ -27,15 +27,23 @@ func New(
 ) (*Rest, error) {
 	var interceptors []plugins.Interceptor
 	for k, v := range schema.Plugins {
-		interceptor, err := plugins.New(k, v)
+		plugin, err := plugins.New(k, v)
 		if err != nil {
 			return nil, err
+		}
+		interceptor, ok := plugin.(plugins.Interceptor)
+		if !ok {
+			continue
 		}
 		interceptors = append(interceptors, interceptor)
 	}
 	connector, err := connectors.New(schema.Database.Type, schema.Database.Connection)
 	if err != nil {
 		return nil, xerrors.Errorf("unable to init connector: %w", err)
+	}
+	connector, err = plugins.Wrap(schema.Plugins, connector)
+	if err != nil {
+		return nil, xerrors.Errorf("unable to init connector plugins: %w", err)
 	}
 	if err := connector.Ping(context.Background()); err != nil {
 		return nil, xerrors.Errorf("unable to ping: %w", err)
