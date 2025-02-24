@@ -3,8 +3,10 @@ api:
     version: "1.0"
 
 plugins:
-    plugins:
-      api_keys:
+    lru_cache:
+        max_size: 1024
+        ttl: 15s
+    api_keys:
         name: 'x-api-key'
         location: 'header'
         keys:

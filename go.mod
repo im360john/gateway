@@ -11,6 +11,7 @@ require (
 	github.com/getkin/kin-openapi v0.129.0
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-sql-driver/mysql v1.7.1
+	github.com/hashicorp/golang-lru/v2 v2.0.7
 	github.com/jackc/pgx/v4 v4.18.3
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/mark3labs/mcp-go v0.8.4
@@ -32,6 +33,7 @@ require (
 	go.uber.org/zap v1.27.0
 	go.ytsaurus.tech/library/go/core/log v0.0.4
 	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028
+	google.golang.org/grpc v1.69.2
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -172,7 +174,6 @@ require (
 	golang.org/x/tools v0.30.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20250102185135-69823020774d // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250102185135-69823020774d // indirect
-	google.golang.org/grpc v1.69.2 // indirect
 	google.golang.org/protobuf v1.36.3 // indirect
 )
 
