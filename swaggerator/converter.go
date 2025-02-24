@@ -2,6 +2,7 @@ package swaggerator
 
 import (
 	"github.com/centralmind/gateway/model"
+	"github.com/centralmind/gateway/plugins"
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
@@ -99,5 +100,6 @@ func Schema(schema model.Config, address string) *openapi3.T {
 	}
 
 	swagger.Paths = openapi3.NewPaths(paths...)
+	swagger, _ = plugins.Enrich(schema.Plugins, swagger)
 	return swagger
 }

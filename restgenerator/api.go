@@ -4,11 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/centralmind/gateway/connectors"
+	gw_errors "github.com/centralmind/gateway/errors"
 	gw_model "github.com/centralmind/gateway/model"
 	"github.com/centralmind/gateway/plugins"
 	"github.com/centralmind/gateway/swaggerator"
+	"github.com/centralmind/gateway/xcontext"
 	"github.com/flowchartsman/swaggerui"
 	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
 	"golang.org/x/xerrors"
 	"net/http"
 	"regexp"
@@ -72,7 +75,8 @@ func (r *Rest) RegisterRoutes(mux *http.ServeMux, address string) {
 func (r *Rest) Handler(endpoint gw_model.Endpoint) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		params := make(map[string]any)
-
+		ctx := c.Request.Context()
+		ctx = xcontext.WithHeader(ctx, c.Request.Header)
 		for _, param := range c.Params {
 			params[param.Key] = param.Value
 		}
@@ -90,9 +94,13 @@ func (r *Rest) Handler(endpoint gw_model.Endpoint) gin.HandlerFunc {
 			}
 		}
 
-		raw, err := r.connector.Query(c.Request.Context(), endpoint, params)
+		raw, err := r.connector.Query(ctx, endpoint, params)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			code := http.StatusInternalServerError
+			if errors.Is(err, gw_errors.ErrNotAuthorized) {
+				code = http.StatusUnauthorized
+			}
+			c.JSON(code, gin.H{"error": err.Error()})
 			return
 		}
 		var res []map[string]any

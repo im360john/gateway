@@ -7,7 +7,7 @@ import (
 )
 
 func init() {
-	plugins.Register[LuaRLSConfig](func(cfg LuaRLSConfig) (plugins.Interceptor, error) {
+	plugins.Register(func(cfg LuaRLSConfig) (plugins.Interceptor, error) {
 		return New(cfg)
 	})
 }

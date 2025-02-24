@@ -5,7 +5,7 @@ import (
 )
 
 func init() {
-	plugins.Register[PIIInterceptorConfig](func(cfg PIIInterceptorConfig) (plugins.Interceptor, error) {
+	plugins.Register(func(cfg PIIInterceptorConfig) (plugins.Interceptor, error) {
 		return New(cfg)
 	})
 }

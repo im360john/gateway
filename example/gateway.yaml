@@ -3,6 +3,16 @@ api:
     version: "1.0"
 
 plugins:
+    plugins:
+      api_keys:
+        name: 'X-GW-Auth-Token'
+        location: 'header'
+        tokens:
+          - token: 'all_methods'
+          - token: 'only_orders'
+            allowed_methods:
+              - search_customer_orders
+              - get_customer_order_payment
     lua_rls:
         script: |
           function check_visibility(row, headers)

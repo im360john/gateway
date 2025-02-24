@@ -10,6 +10,7 @@ import (
 	_ "github.com/centralmind/gateway/connectors/mysql"
 	_ "github.com/centralmind/gateway/connectors/postgres"
 	_ "github.com/centralmind/gateway/connectors/snowflake"
+	_ "github.com/centralmind/gateway/plugins/api_keys"
 	_ "github.com/centralmind/gateway/plugins/lua_rls"
 	_ "github.com/centralmind/gateway/plugins/otel"
 	_ "github.com/centralmind/gateway/plugins/pii_remover"
