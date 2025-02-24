@@ -23,11 +23,72 @@ Our first users are companies deploying AI agents for customer support and analy
 
 ![img.png](assets/diagram.png)
 
+## How to generate
+
+Gateway is LLM-model first, i.e. it's designed to be generated via LLM-models.
+To generate your gateway config simply run discover command with your connection info:
+
+1. Connection info
+   ```yaml
+   hosts:
+   - localhost
+   user: postgres
+   password: password
+   database: mydb
+   port: 5432
+   ```
+2. Discovery command
+   ```shell
+   gateway start  \
+      --config PATH_TO_CONFIG \
+      discover \
+      --db-type postgres \
+      --tables table_name_1 --tables table_name_2 \ 
+      --open-ai-key $TOKEN \
+      --prompt "Generate for me awesome readonly api"
+   ```
+3. Wait for completion
+   ```shell
+   INFO[0000] Step 1: Read configs                         
+   INFO[0000] Step 2: Discover data                        
+   INFO[0000] Step 2: Found: 8 tables                      
+   INFO[0000] Step 3: Prepare prompt to AI                 
+   INFO[0000] Step 3 done. Prompt: prompt.txt              
+   INFO[0000] Step 4: Do AI Magic                          
+   INFO[0074] Step 4: open-ai usage: {1813 8665 10478 0x140000ce910 0x140000ce920}
+   INFO[0074] ✅ API schema saved в gateway.yaml            
+   INFO[0074] Done: in 1m14.140552125s
+   ```
+4. Explore results, the result would be saved in output file:
+   ```yaml
+   api:
+       name: Awesome Readonly API
+       description: ""
+       version: "1.0"
+   database:
+       type: YOUR_DB_TYPE
+       connection: YOUR_CONNECTION_INFO
+       tables:
+           - name: table_name_1
+             columns:
+               ... // Columns for this table
+             endpoints:
+               - http_method: GET
+                 http_path: /some_path
+                 mcp_method: some_method
+                 summary: Some readable summary.
+                 description: 'Some description'
+                 query: SQL Query with params
+                 params:
+                   ... // List of params for query
+   ```
+
+
 ## How to run
 
 ```shell
 go build .
-./gateway start --config ./example/gateway.yaml
+./gateway start --config ./example/gatиeway.yaml
 ```
 
 ### Docker compose
@@ -62,3 +123,4 @@ Gateway implement MCP protocol, for easy access to your data right from claude, 
    ```
 3. Ask something regards your data:
    ![claude_integration.png](./assets/claude_integration.png)
+
