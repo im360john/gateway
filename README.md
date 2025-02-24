@@ -88,7 +88,7 @@ To generate your gateway config simply run discover command with your connection
 
 ```shell
 go build .
-./gateway start --config ./example/gatиeway.yaml
+./gateway start --config ./example/gateway.yaml
 ```
 
 ### Docker compose
