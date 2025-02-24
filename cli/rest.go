@@ -3,6 +3,7 @@ package cli
 import (
 	gw_model "github.com/centralmind/gateway/model"
 	"github.com/centralmind/gateway/restgenerator"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"golang.org/x/xerrors"
 	"net/http"
@@ -29,6 +30,7 @@ func REST(configPath *string, addr *string) *cobra.Command {
 				return xerrors.Errorf("unable to init api: %w", err)
 			}
 			a.RegisterRoutes(mux)
+			logrus.Infof("docs here: http://localhost%s/swagger/", *addr)
 			return http.ListenAndServe(*addr, mux)
 		},
 	}
