@@ -3,7 +3,6 @@ package clickhouse
 import (
 	"context"
 	_ "embed"
-	_ "github.com/ClickHouse/clickhouse-go/v2"
 	"github.com/centralmind/gateway/connectors"
 	"github.com/centralmind/gateway/model"
 	"github.com/docker/go-connections/nat"
