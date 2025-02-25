@@ -4,10 +4,11 @@ import (
 	"context"
 	_ "embed"
 	"fmt"
-	"golang.org/x/xerrors"
 	"os"
 	"strings"
 	"time"
+
+	"golang.org/x/xerrors"
 
 	openai "github.com/sashabaranov/go-openai"
 	"github.com/sirupsen/logrus"
@@ -48,6 +49,16 @@ type TableData struct {
 	Sample  []map[string]any
 }
 
+func init() {
+	// Configure logrus for nicer output
+	logrus.SetFormatter(&logrus.TextFormatter{
+		ForceColors:      true,
+		FullTimestamp:    false,
+		TimestampFormat:  "",
+		DisableTimestamp: true,
+	})
+}
+
 func Discover(configPath *string) *cobra.Command {
 	var databaseType string
 	var tables []string
@@ -60,7 +71,12 @@ func Discover(configPath *string) *cobra.Command {
 		Args:  cobra.MatchAll(cobra.ExactArgs(0)),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			startTime := time.Now()
-			logrus.Infof("Step 1: Read configs")
+
+			// Configure header
+			logrus.Info("\r\n")
+			logrus.Info("🚀 API Discovery Process")
+
+			logrus.Info("Step 1: Read configs")
 			configRaw, err := os.ReadFile(*configPath)
 			if err != nil {
 				return err
@@ -72,12 +88,15 @@ func Discover(configPath *string) *cobra.Command {
 			if err := connector.Ping(context.Background()); err != nil {
 				return err
 			}
-			logrus.Infof("Step 2: Discover data")
+			logrus.Info("✅ Step 1 completed. Done.")
+			logrus.Info("\r\n")
+
+			logrus.Info("Step 2: Discover data")
 			allTables, err := connector.Discovery(context.Background())
 			if err != nil {
 				return err
 			}
-			logrus.Infof("Step 2: Found: %v tables", len(allTables))
+
 			tableSet := map[string]bool{}
 			for _, table := range tables {
 				tableSet[table] = true
@@ -87,6 +106,19 @@ func Discover(configPath *string) *cobra.Command {
 					tableSet[table.Name] = true
 				}
 			}
+
+			// Show discovered tables
+			logrus.Info("Discovered Tables:")
+			for _, table := range allTables {
+				if tableSet[table.Name] {
+					logrus.Infof("  - %s: %d columns", table.Name, len(table.Columns))
+				}
+			}
+
+			logrus.Info("✅ Step 2 completed. Done.")
+			logrus.Info("\r\n")
+			// Sample data
+			logrus.Info("Step 3: Sample data from tables")
 			var tablesToGenerate []TableData
 			for _, table := range allTables {
 				if !tableSet[table.Name] {
@@ -102,38 +134,76 @@ func Discover(configPath *string) *cobra.Command {
 					Sample:  sample,
 				})
 			}
-			logrus.Info("Step 3: Prepare prompt to AI")
+
+			// Show sampled data
+			logrus.Info("Data Sampling Results:")
+			for _, table := range tablesToGenerate {
+				logrus.Infof("  - %s: %d rows sampled", table.Name, len(table.Sample))
+			}
+
+			logrus.Info("✅ Step 3 completed. Done.")
+			logrus.Info("\r\n")
+			// Prepare prompt
+			logrus.Info("Step 4: Prepare prompt to AI")
 			fullPrompt := generatePrompt(databaseType, extraPrompt, tablesToGenerate)
-			promptFilename := "prompt.txt"
+			promptFilename := "prompt_default.txt"
 			if err := saveToFile(promptFilename, fullPrompt); err != nil {
 				logrus.Error("failed to save prompt:", err)
 			}
+			logrus.Infof("Prompt saved locally to %s", promptFilename)
 
-			logrus.Infof("Step 3 done. Prompt: %s", promptFilename)
-
-			logrus.Info("Step 4: Do AI Magic")
-			config, err := callOpenAI(openAPIKey, fullPrompt)
+			logrus.Info("✅ Step 4 completed. Done.")
+			logrus.Info("\r\n")
+			// Call API
+			logrus.Info("Step 5: Using AI to design API")
+			config, resp, err := callOpenAI(openAPIKey, fullPrompt)
 			if err != nil {
 				logrus.Error("failed to call OpenAI:", err)
-				return
+				return err
+			}
+
+			// Show generated API endpoints
+			var apiEndpoints int
+			logrus.Info("API Functions Created:")
+			for _, table := range config.Database.Tables {
+				for _, endpoint := range table.Endpoints {
+					logrus.Infof("  - %s %s - %s", endpoint.HTTPMethod, endpoint.HTTPPath, endpoint.Summary)
+					apiEndpoints++
+				}
 			}
 
 			config.Database.Type = databaseType
 			config.Database.Connection = string(configRaw)
 
+			// Save configuration
 			configData, err := yaml.Marshal(config)
 			if err != nil {
 				logrus.Error("yaml failed:", err)
-				return
+				return err
 			}
 
 			if err := saveToFile(output, string(configData)); err != nil {
 				logrus.Error("failed:", err)
+				return err
 			}
 
-			logrus.Infof("✅ API schema saved в %s", output)
+			logrus.Infof("API schema saved to: %s", output)
+			logrus.Info("\r\n")
+			logrus.Info("✅ Step 5: API Specification Generation Completed!")
+			logrus.Info("\r\n")
+			// Show statistics
+			duration := time.Since(startTime)
+			tokensUsed := resp.Usage.TotalTokens
 
-			logrus.Infof("Done: in %v", time.Since(startTime))
+			logrus.Info("✅ All steps completed. Done.")
+			logrus.Info("\r\n")
+			logrus.Info("--- Execution Statistics ---")
+			logrus.Infof("Total time taken: %v", duration.Round(time.Second))
+			logrus.Infof("Tokens used: %d (Estimated cost: $%.4f)",
+				tokensUsed, (float64(resp.Usage.PromptTokens)/1000000)*1.1+(float64(resp.Usage.CompletionTokens)/1000000)*4.4) //pricing for o3.mini
+			logrus.Infof("Tables processed: %d", len(tablesToGenerate))
+			logrus.Infof("API methods created: %d", apiEndpoints)
+
 			return nil
 		},
 	}
@@ -175,7 +245,7 @@ func saveToFile(filename, data string) error {
 	return os.WriteFile(filename, []byte(data), 0644)
 }
 
-func callOpenAI(apiKey string, prompt string) (*gw_model.Config, error) {
+func callOpenAI(apiKey string, prompt string) (*gw_model.Config, openai.ChatCompletionResponse, error) {
 	client := openai.NewClient(apiKey)
 
 	resp, err := client.CreateChatCompletion(
@@ -187,18 +257,23 @@ func callOpenAI(apiKey string, prompt string) (*gw_model.Config, error) {
 		},
 	)
 	if err != nil {
-		return nil, xerrors.Errorf("fail to call open-ai: %w", err)
+		return nil, openai.ChatCompletionResponse{}, xerrors.Errorf("fail to call open-ai: %w", err)
 	}
-	logrus.Infof("Step 4: open-ai usage: %v", resp.Usage)
+
+	logrus.WithFields(logrus.Fields{
+		"Total tokens":  resp.Usage.TotalTokens,
+		"Input tokens":  resp.Usage.PromptTokens,
+		"Output tokens": resp.Usage.CompletionTokens,
+	}).Info("OpenAI usage:")
 
 	answerText := strings.TrimSpace(resp.Choices[0].Message.Content)
 	if err := saveToFile("open-ai-raw.log", answerText); err != nil {
-		return nil, xerrors.Errorf("unable to save raw response: %w", err)
+		return nil, openai.ChatCompletionResponse{}, xerrors.Errorf("unable to save raw response: %w", err)
 	}
 
 	var res gw_model.Config
 	if err := yaml.Unmarshal([]byte(answerText), &res); err != nil {
-		return nil, xerrors.Errorf("unable to unmarshal response: %w", err)
+		return nil, openai.ChatCompletionResponse{}, xerrors.Errorf("unable to unmarshal response: %w", err)
 	}
-	return &res, nil
+	return &res, resp, nil
 }
