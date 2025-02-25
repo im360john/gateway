@@ -3,6 +3,7 @@ package clickhouse
 import (
 	"context"
 	"fmt"
+
 	_ "github.com/ClickHouse/clickhouse-go/v2"
 	"github.com/centralmind/gateway/connectors"
 	"github.com/centralmind/gateway/model"
@@ -25,7 +26,8 @@ func init() {
 }
 
 type Config struct {
-	Host     string
+	Host     string   // Single host
+	Hosts    []string // Multiple hosts
 	Database string
 	User     string
 	Password string
@@ -38,7 +40,15 @@ func (c Config) MakeDSN() string {
 	if c.Secure {
 		protocol = "https"
 	}
-	return fmt.Sprintf("%s://%s:%d?database=%s&username=%s&password=%s", protocol, c.Host, c.Port, c.Database, c.User, c.Password)
+
+	host := c.Host
+	// If no single host is specified but we have hosts array, use the first one
+	if host == "" && len(c.Hosts) > 0 {
+		host = c.Hosts[0]
+	}
+
+	// Format as protocol://user:password@host:port/database
+	return fmt.Sprintf("%s://%s:%s@%s:%d/%s", protocol, c.User, c.Password, host, c.Port, c.Database)
 }
 
 func (c Config) Type() string {
