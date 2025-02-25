@@ -3,6 +3,9 @@ package restgenerator
 import (
 	"context"
 	"encoding/json"
+	"net/http"
+	"regexp"
+
 	"github.com/centralmind/gateway/connectors"
 	gw_errors "github.com/centralmind/gateway/errors"
 	gw_model "github.com/centralmind/gateway/model"
@@ -13,8 +16,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"golang.org/x/xerrors"
-	"net/http"
-	"regexp"
 )
 
 // Rest handles OpenAPI schema generation and sample data serving.
@@ -59,8 +60,21 @@ func New(
 }
 
 // RegisterRoutes registers Rest endpoints.
-func (r *Rest) RegisterRoutes(mux *http.ServeMux, address string) {
-	swagger := swaggerator.Schema(r.Schema, address)
+func (r *Rest) RegisterRoutes(mux *http.ServeMux, addresses ...string) {
+	// If no addresses provided, use a default
+	if len(addresses) == 0 {
+		addresses = []string{"http://localhost:9090"}
+	}
+
+	// Handle case when first argument might be a slice itself
+	// This happens when we call with serverAddresses...
+	allAddresses := make([]string, 0, len(addresses))
+	for _, addr := range addresses {
+		allAddresses = append(allAddresses, addr)
+	}
+
+	// Pass all addresses to swaggerator.Schema
+	swagger := swaggerator.Schema(r.Schema, allAddresses...)
 	raw, _ := json.Marshal(swagger)
 	mux.Handle("/swagger/", http.StripPrefix("/swagger", swaggerui.Handler(raw)))
 	d := gin.Default()

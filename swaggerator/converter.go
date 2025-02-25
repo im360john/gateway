@@ -1,13 +1,15 @@
 package swaggerator
 
 import (
+	"strings"
+
 	"github.com/centralmind/gateway/model"
 	"github.com/centralmind/gateway/plugins"
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
 // Schema dynamically generates an OpenAPI schema based on the given table schema.
-func Schema(schema model.Config, address string) *openapi3.T {
+func Schema(schema model.Config, addresses ...string) *openapi3.T {
 	swagger := &openapi3.T{
 		OpenAPI: "3.0.0",
 		Info: &openapi3.Info{
@@ -18,15 +20,37 @@ func Schema(schema model.Config, address string) *openapi3.T {
 		Components: &openapi3.Components{
 			Schemas: openapi3.Schemas{},
 		},
-		Servers: openapi3.Servers{
-			&openapi3.Server{
-				Extensions:  nil,
-				Origin:      nil,
-				URL:         address,
-				Description: "Local host address",
-				Variables:   nil,
-			},
-		},
+		Servers: openapi3.Servers{},
+	}
+
+	// Add all server addresses
+	for i, address := range addresses {
+		var description string
+		switch {
+		case i == 0 && strings.HasPrefix(address, "http://localhost"):
+			description = "Local development server"
+		case strings.Contains(address, "dev"):
+			description = "Development server"
+		case strings.Contains(address, "stage"):
+			description = "Staging server"
+		case strings.Contains(address, "prod"):
+			description = "Production server"
+		default:
+			description = "Server " + address
+		}
+
+		swagger.Servers = append(swagger.Servers, &openapi3.Server{
+			URL:         address,
+			Description: description,
+		})
+	}
+
+	// If no servers were provided, add a default one
+	if len(swagger.Servers) == 0 {
+		swagger.Servers = append(swagger.Servers, &openapi3.Server{
+			URL:         "http://localhost:9090",
+			Description: "Default local host address",
+		})
 	}
 
 	var paths []openapi3.NewPathsOption
