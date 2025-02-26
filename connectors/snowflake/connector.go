@@ -3,6 +3,7 @@ package snowflake
 import (
 	"context"
 	"fmt"
+	"github.com/centralmind/gateway/castx"
 	"github.com/centralmind/gateway/connectors"
 	"github.com/centralmind/gateway/model"
 	"github.com/jmoiron/sqlx"
@@ -95,7 +96,12 @@ func (c Connector) Ping(ctx context.Context) error {
 }
 
 func (c Connector) Query(ctx context.Context, endpoint model.Endpoint, params map[string]any) ([]map[string]any, error) {
-	rows, err := c.db.NamedQueryContext(ctx, endpoint.Query, params)
+	processed, err := castx.ParamsE(endpoint, params)
+	if err != nil {
+		return nil, xerrors.Errorf("unable to process params: %w", err)
+	}
+
+	rows, err := c.db.NamedQueryContext(ctx, endpoint.Query, processed)
 	if err != nil {
 		return nil, xerrors.Errorf("unable to query db: %w", err)
 	}

@@ -3,9 +3,8 @@ package clickhouse
 import (
 	"context"
 	"fmt"
-	"strconv"
-
 	_ "github.com/ClickHouse/clickhouse-go/v2"
+	"github.com/centralmind/gateway/castx"
 	"github.com/centralmind/gateway/connectors"
 	"github.com/centralmind/gateway/model"
 	"github.com/jmoiron/sqlx"
@@ -106,38 +105,11 @@ func (c Connector) Ping(ctx context.Context) error {
 }
 
 func (c Connector) Query(ctx context.Context, endpoint model.Endpoint, params map[string]any) ([]map[string]any, error) {
-	// Convert string parameters to appropriate types
-	processedParams := make(map[string]any)
-	for key, value := range params {
-		if strValue, ok := value.(string); ok {
-			// Try to convert string to appropriate type
-
-			// First try to convert to integer
-			if intValue, err := strconv.Atoi(strValue); err == nil {
-				processedParams[key] = intValue
-				continue
-			}
-
-			// Then try to convert to float
-			if floatValue, err := strconv.ParseFloat(strValue, 64); err == nil {
-				processedParams[key] = floatValue
-				continue
-			}
-
-			// Then try to convert to boolean
-			if strValue == "true" {
-				processedParams[key] = true
-				continue
-			} else if strValue == "false" {
-				processedParams[key] = false
-				continue
-			}
-		}
-		// Use original value if no conversion was applied
-		processedParams[key] = value
+	processed, err := castx.ParamsE(endpoint, params)
+	if err != nil {
+		return nil, xerrors.Errorf("unable to process params: %w", err)
 	}
-
-	rows, err := c.db.NamedQueryContext(ctx, endpoint.Query, processedParams)
+	rows, err := c.db.NamedQueryContext(ctx, endpoint.Query, processed)
 	if err != nil {
 		return nil, xerrors.Errorf("unable to query db: %w", err)
 	}
