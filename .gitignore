@@ -1,3 +1,8 @@
 gateway
 .idea
+.trunk
 gateway.exe
+gateway.yaml
+open-ai-raw.log
+prompt.txt
+prompt_default.txt
