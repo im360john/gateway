@@ -2,17 +2,37 @@ package otel
 
 import "time"
 
+// Config represents OpenTelemetry configuration
 type Config struct {
-	ExporterType       string            `yaml:"exporter_type"`         // Type of exporter, either: oltp or stdout
-	Endpoint           string            `yaml:"endpoint"`              // OTLP endpoint (e.g., "localhost:4317")
-	ServiceName        string            `yaml:"service_name"`          // Service name
-	ServiceVersion     string            `yaml:"service_version"`       // Application version
-	Environment        string            `yaml:"environment"`           // Deployment environment (e.g., "dev", "staging", "prod")
-	Insecure           bool              `yaml:"insecure"`              // TLS Insecure
-	BatchTimeout       time.Duration     `yaml:"batch_timeout"`         // Batch timeout for exporting spans
-	SpanMaxQueueSize   int               `yaml:"span_max_queue_size"`   // Max queue size for spans
-	SpanMaxExportBatch int               `yaml:"span_max_export_batch"` // Max batch size for exporting spans
-	ResourceAttributes map[string]string `yaml:"resource_attributes"`   // Additional resource attributes
+	// ExporterType defines the type of exporter to use ("oltp" or "stdout")
+	ExporterType string `yaml:"exporter_type"`
+
+	// ServiceName is the name of your service for tracing
+	ServiceName string `yaml:"service_name"`
+
+	// ServiceVersion is the version of your service
+	ServiceVersion string `yaml:"service_version"`
+
+	// Environment specifies deployment environment (e.g., "prod", "staging")
+	Environment string `yaml:"environment"`
+
+	// Endpoint is the OTLP endpoint URL (for oltp exporter)
+	Endpoint string `yaml:"endpoint"`
+
+	// Insecure determines if TLS should be disabled
+	Insecure bool `yaml:"tls_mode"`
+
+	// SpanMaxQueueSize is the maximum queue size for spans
+	SpanMaxQueueSize int `yaml:"span_max_queue_size"`
+
+	// SpanMaxExportBatch is the maximum batch size for span export
+	SpanMaxExportBatch int `yaml:"span_max_export_batch"`
+
+	// BatchTimeout is the timeout for batching spans
+	BatchTimeout time.Duration `yaml:"batch_timeout"`
+
+	// ResourceAttributes are additional attributes to add to traces
+	ResourceAttributes map[string]string `yaml:"resource_attributes"`
 }
 
 func (c Config) Tag() string {

@@ -72,4 +72,39 @@ func TestConnector(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotEmpty(t, rows)
 	})
+
+	t.Run("Query Endpoint", func(t *testing.T) {
+		endpoint := model.Endpoint{
+			Query: `SELECT name, strength_level, special_move 
+					FROM gachi_personas 
+					WHERE strength_level >= :min_strength 
+					ORDER BY strength_level DESC`,
+			Params: []model.EndpointParams{
+				{
+					Name:     "min_strength",
+					Type:     "int",
+					Required: true,
+				},
+			},
+		}
+		params := map[string]any{
+			"min_strength": 95,
+		}
+		rows, err := connector.Query(ctx, endpoint, params)
+		assert.NoError(t, err)
+		assert.NotEmpty(t, rows)
+
+		// Verify results
+		expected := []map[string]any{
+			{"name": "Billy Herrington", "strength_level": int32(100), "special_move": "Anvil Drop"},
+			{"name": "Van Darkholme", "strength_level": int32(95), "special_move": "Whip of Submission"},
+		}
+
+		assert.Equal(t, len(expected), len(rows))
+		for i, exp := range expected {
+			assert.Equal(t, exp["name"], rows[i]["name"])
+			assert.Equal(t, exp["strength_level"], rows[i]["strength_level"])
+			assert.Equal(t, exp["special_move"], rows[i]["special_move"])
+		}
+	})
 }

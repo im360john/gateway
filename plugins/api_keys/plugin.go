@@ -70,5 +70,18 @@ func (p Plugin) Wrap(connector connectors.Connector) (connectors.Connector, erro
 func (p Plugin) Doc() string {
 	return `
 Add auth-check for api-keys, api key is located in headers
+
+
+# Example YAML configuration:
+
+api_keys:
+  name: "X-API-Key"
+  location: "header"  # or "query"
+  keys:
+    - key: "secret-key-1"
+      allowed_methods: ["get_some", "post_some"]
+    - key: "admin-key"
+      allowed_methods: []  # all methods allowed
+  keys_file: "/path/to/keys.yaml"  # optional, if presented will load api-keys from separate file
 `
 }

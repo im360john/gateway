@@ -34,13 +34,21 @@ func (p Plugin) Doc() string {
 	return `
 Allow to configure otel exporter, example config:
 
-    exporter_type: oltp
-    service_name: gachi_bass
-    endpoint: localhost:4317
-    tls_mode: insecure
-    span_max_queue_size: 5
-    span_max_export_batch: 10
-    batch_timeout: 1s
+# Example YAML configuration:
+
+otel:
+  exporter_type: "oltp"
+  service_name: "my-gateway"
+  service_version: "1.0.0"
+  environment: "production"
+  endpoint: "localhost:4317"
+  tls_mode: "insecure"
+  span_max_queue_size: 5000
+  span_max_export_batch: 512
+  batch_timeout: "1s"
+  resource_attributes:
+    team: "backend"
+    region: "us-east-1"
 `
 }
 

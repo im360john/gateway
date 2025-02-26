@@ -2,6 +2,10 @@ package postgres
 
 import (
 	"context"
+	"path/filepath"
+	"testing"
+	"time"
+
 	"github.com/centralmind/gateway/connectors"
 	"github.com/centralmind/gateway/model"
 	"github.com/docker/go-connections/nat"
@@ -11,9 +15,6 @@ import (
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
-	"path/filepath"
-	"testing"
-	"time"
 )
 
 func TestConnector(t *testing.T) {
@@ -77,5 +78,43 @@ func TestConnector(t *testing.T) {
 		rows, err := connector.Query(ctx, endpoint, params)
 		assert.NoError(t, err)
 		assert.NotEmpty(t, rows)
+	})
+
+	t.Run("Query Endpoint", func(t *testing.T) {
+		endpoint := model.Endpoint{
+			Query: `SELECT name, strength_level, special_move, team_id 
+					FROM gachi_personas 
+					WHERE team_id = :team_id 
+					ORDER BY strength_level DESC`,
+			Params: []model.EndpointParams{
+				{
+					Name:     "team_id",
+					Type:     "int",
+					Required: true,
+				},
+			},
+		}
+		params := map[string]any{
+			"team_id": 2,
+		}
+		rows, err := connector.Query(ctx, endpoint, params)
+		assert.NoError(t, err)
+		assert.NotEmpty(t, rows)
+
+		// Verify results
+		expected := []map[string]any{
+			{"name": "Billy Herrington", "strength_level": int64(100), "special_move": "Anvil Drop", "team_id": int64(2)},
+			{"name": "Hard Rod", "strength_level": int64(88), "special_move": "Steel Pipe Crush", "team_id": int64(2)},
+			{"name": "Mark Wolff", "strength_level": int64(85), "special_move": "Wolf Howl Slam", "team_id": int64(2)},
+			{"name": "Muscle Daddy", "strength_level": int64(79), "special_move": "Bear Hug Crush", "team_id": int64(2)},
+		}
+
+		assert.Equal(t, len(expected), len(rows))
+		for i, exp := range expected {
+			assert.Equal(t, exp["name"], rows[i]["name"])
+			assert.Equal(t, exp["strength_level"], rows[i]["strength_level"])
+			assert.Equal(t, exp["special_move"], rows[i]["special_move"])
+			assert.Equal(t, exp["team_id"], rows[i]["team_id"])
+		}
 	})
 }
