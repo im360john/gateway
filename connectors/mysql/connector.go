@@ -3,6 +3,7 @@ package mysql
 import (
 	"context"
 	"fmt"
+
 	"github.com/centralmind/gateway/castx"
 	"github.com/centralmind/gateway/connectors"
 	"github.com/centralmind/gateway/model"
@@ -12,7 +13,7 @@ import (
 )
 
 func init() {
-	connectors.Register[Config](func(cfg Config) (connectors.Connector, error) {
+	connectors.Register(func(cfg Config) (connectors.Connector, error) {
 		dsn, err := cfg.MakeDSN()
 		if err != nil {
 			return nil, xerrors.Errorf("unable to prepare mysql config: %w", err)

@@ -33,6 +33,7 @@ jobs:
         suite: [
           { group: "connectors", name: "clickhouse", path: "clickhouse" },
           { group: "connectors", name: "postgres", path: "postgres" },
+          { group: "connectors", name: "mysql", path: "mysql" },
         ]
     steps:
       - name: Checkout
