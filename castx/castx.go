@@ -32,3 +32,12 @@ func ParamsE(endpoint model.Endpoint, params map[string]any) (map[string]any, er
 	}
 	return processedParams, nil
 }
+
+func Process(row map[string]any) map[string]any {
+	for k := range row {
+		if bb, ok := row[k].([]byte); ok {
+			row[k] = string(bb)
+		}
+	}
+	return row
+}

@@ -123,7 +123,7 @@ func (c Connector) Query(ctx context.Context, endpoint model.Endpoint, params ma
 		if err := rows.MapScan(row); err != nil {
 			return nil, xerrors.Errorf("unable to scan row: %w", err)
 		}
-		res = append(res, row)
+		res = append(res, castx.Process(row))
 	}
 	return res, nil
 }
