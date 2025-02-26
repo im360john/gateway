@@ -1,0 +1,6 @@
+account: XXXXX-YYYY  
+user: TEST_READONLY
+password: password
+database: MY_COPY_DB
+schema: PUBLIC
+warehouse: COMPUTE_WH

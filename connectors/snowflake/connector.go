@@ -3,6 +3,7 @@ package snowflake
 import (
 	"context"
 	"fmt"
+
 	"github.com/centralmind/gateway/castx"
 	"github.com/centralmind/gateway/connectors"
 	"github.com/centralmind/gateway/model"
@@ -34,11 +35,14 @@ type Config struct {
 	User      string
 	Password  string
 	Warehouse string
+	Schema    string
 	Role      string
 }
 
 func (c Config) MakeDSN() (string, error) {
-	dsn := fmt.Sprintf("%s:%s@%s/%s?warehouse=%s&role=%s", c.User, c.Password, c.Account, c.Database, c.Warehouse, c.Role)
+
+	dsn := fmt.Sprintf("%s:%s@%s/%s/%s?warehouse=%s&role=%s", c.User, c.Password, c.Account, c.Database, c.Schema, c.Warehouse, c.Role)
+
 	return dsn, nil
 }
 
@@ -70,7 +74,8 @@ func (c Connector) Sample(ctx context.Context, table model.Table) ([]map[string]
 }
 
 func (c Connector) Discovery(ctx context.Context) ([]model.Table, error) {
-	rows, err := c.db.Query("SELECT table_name FROM information_schema.tables WHERE table_schema = CURRENT_DATABASE()")
+	rows, err := c.db.Query("SELECT table_name FROM information_schema.tables WHERE table_schema = CURRENT_SCHEMA()")
+
 	if err != nil {
 		return nil, err
 	}
@@ -79,6 +84,10 @@ func (c Connector) Discovery(ctx context.Context) ([]model.Table, error) {
 	var tables []model.Table
 	for rows.Next() {
 		var tableName string
+
+		fmt.Println("TableName")
+		fmt.Println(tableName)
+
 		if err := rows.Scan(&tableName); err != nil {
 			return nil, err
 		}
