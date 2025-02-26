@@ -34,6 +34,7 @@ jobs:
           { group: "connectors", name: "clickhouse", path: "clickhouse" },
           { group: "connectors", name: "postgres", path: "postgres" },
           { group: "connectors", name: "mysql", path: "mysql" },
+          { group: "plugins", name: "plugins", path: "plugins" },
         ]
     steps:
       - name: Checkout
