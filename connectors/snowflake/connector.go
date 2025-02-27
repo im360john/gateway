@@ -2,6 +2,7 @@ package snowflake
 
 import (
 	"context"
+	_ "embed"
 	"fmt"
 
 	"github.com/centralmind/gateway/castx"
@@ -11,6 +12,9 @@ import (
 	_ "github.com/snowflakedb/gosnowflake"
 	"golang.org/x/xerrors"
 )
+
+//go:embed readme.md
+var docString string
 
 func init() {
 	connectors.Register(func(cfg Config) (connectors.Connector, error) {
@@ -51,16 +55,7 @@ func (c Config) Type() string {
 }
 
 func (c Config) Doc() string {
-	return `Snowflake connector allows querying Snowflake data warehouse.
-
-Config example:
-    account: myaccount    # Your Snowflake account identifier
-    database: MYDB
-    user: myuser
-    password: secret
-    warehouse: COMPUTE_WH # Warehouse to use for queries
-    schema: PUBLIC        # Schema name
-    role: ACCOUNTADMIN    # Role to assume`
+	return docString
 }
 
 type Connector struct {

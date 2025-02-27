@@ -2,6 +2,7 @@ package mysql
 
 import (
 	"context"
+	_ "embed"
 	"fmt"
 
 	"github.com/centralmind/gateway/castx"
@@ -11,6 +12,9 @@ import (
 	"github.com/jmoiron/sqlx"
 	"golang.org/x/xerrors"
 )
+
+//go:embed readme.md
+var docString string
 
 func init() {
 	connectors.Register(func(cfg Config) (connectors.Connector, error) {
@@ -57,15 +61,7 @@ func (c Config) Type() string {
 }
 
 func (c Config) Doc() string {
-	return `MySQL connector allows querying MySQL/MariaDB databases.
-
-Config example:
-    host: localhost
-    database: mydb
-    user: root
-    password: secret
-    port: 3306
-    tlsConfig: ""       # Optional TLS configuration name from MySQL server`
+	return docString
 }
 
 type Connector struct {

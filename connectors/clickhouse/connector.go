@@ -2,6 +2,7 @@ package clickhouse
 
 import (
 	"context"
+	_ "embed"
 	"fmt"
 
 	_ "github.com/ClickHouse/clickhouse-go/v2"
@@ -11,6 +12,9 @@ import (
 	"github.com/jmoiron/sqlx"
 	"golang.org/x/xerrors"
 )
+
+//go:embed readme.md
+var docString string
 
 func init() {
 	connectors.Register(func(cfg Config) (connectors.Connector, error) {
@@ -57,18 +61,7 @@ func (c Config) Type() string {
 }
 
 func (c Config) Doc() string {
-	return `ClickHouse connector allows querying ClickHouse databases.
-
-Config example:
-    host: localhost      # Single host address
-    hosts:              # Or multiple hosts for cluster setup
-      - host1.example.com
-      - host2.example.com
-    database: mydb
-    user: default
-    password: secret
-    port: 8123
-    secure: false       # Use HTTPS instead of HTTP`
+	return docString
 }
 
 type Connector struct {

@@ -3,10 +3,14 @@ package postgres
 import (
 	"crypto/tls"
 	"crypto/x509"
+	_ "embed"
 
 	"github.com/jackc/pgx/v4"
 	"github.com/pkg/errors"
 )
+
+//go:embed readme.md
+var docString string
 
 type Config struct {
 	Hosts     []string
@@ -58,15 +62,5 @@ func (c Config) Type() string {
 }
 
 func (c Config) Doc() string {
-	return `PostgreSQL connector allows querying PostgreSQL databases.
-
-Config example:
-    hosts: 
-      - localhost
-    database: mydb
-    user: postgres
-    password: secret
-    port: 5432
-    tlsFile: ""        # Optional PEM-encoded certificate
-    enableTLS: false   # Enable TLS/SSL connection`
+	return docString
 }

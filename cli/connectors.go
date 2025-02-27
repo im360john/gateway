@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/centralmind/gateway/connectors"
+	"github.com/charmbracelet/glamour"
 	"github.com/spf13/cobra"
 )
 
@@ -31,7 +32,8 @@ func Connectors() *cobra.Command {
 				}
 				fmt.Printf("Connector: %s\n", c.Type())
 				fmt.Printf("--------------\n")
-				fmt.Println(c.Doc())
+				rawConfig, _ := glamour.RenderWithEnvironmentConfig(c.Doc())
+				fmt.Println(rawConfig)
 			}
 			return nil
 		},
