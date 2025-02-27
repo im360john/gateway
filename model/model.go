@@ -2,6 +2,7 @@ package model
 
 import (
 	"encoding/json"
+
 	"golang.org/x/xerrors"
 	"gopkg.in/yaml.v3"
 )
@@ -55,6 +56,7 @@ type ColumnSchema struct {
 	Name       string `yaml:"name" json:"name,omitempty"`
 	Type       string `yaml:"type" json:"type,omitempty"`
 	PrimaryKey bool   `yaml:"primary_key" json:"primary_key,omitempty"`
+	PII        bool   `yaml:"pii" json:"pii,omitempty"`
 }
 
 type Endpoint struct {

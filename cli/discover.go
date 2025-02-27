@@ -32,8 +32,8 @@ var (
 	- SQL queries should be optimized for {database_type} and use appropirate indexes.
 	- Endpoints that return lists must include pagination parameters (offset and limit).
 	- Consistent Endpoint Definitions: Each table defined in the DDL should have corresponding endpoints as specified by the JSON schema, including method, path, description, SQL query, and parameters.
-	- Sensitive Data Handling: If any columns contain sensitive data, they must be flagged appropriately (e.g., using a "pii" flag).
-	- Each Parameter in API endpoints may have default value taken from corresponded example rows, only if it's generic enough
+	- Sensitive Data Handling: If any columns contain sensitive or PII data like phone number, SSN, address, credit card etc, they must be flagged appropriately (e.g., using a "pii" flag).
+	- Each Parameter in API endpoints may have default value taken from corresponded example rows, only if it's not PII or sensitive data
 	- If some entity require pagination, there should be separate API that calculate total_count, so pagination can be queried
 `
 )
@@ -47,6 +47,22 @@ type TableData struct {
 	Columns []gw_model.ColumnSchema
 	Name    string
 	Sample  []map[string]any
+}
+
+// PromptColumnSchema is used specifically for generating prompts,
+// omitting sensitive fields like PII flag
+type PromptColumnSchema struct {
+	Name       string `yaml:"name"`
+	Type       string `yaml:"type"`
+	PrimaryKey bool   `yaml:"primary_key,omitempty"`
+}
+
+func columnToPromptSchema(col gw_model.ColumnSchema) PromptColumnSchema {
+	return PromptColumnSchema{
+		Name:       col.Name,
+		Type:       col.Type,
+		PrimaryKey: col.PrimaryKey,
+	}
 }
 
 func init() {
@@ -237,6 +253,14 @@ data_sample:
 }
 
 func yamlify(sample any) string {
+	// Convert ColumnSchema to PromptColumnSchema if needed
+	if columns, ok := sample.([]gw_model.ColumnSchema); ok {
+		promptColumns := make([]PromptColumnSchema, len(columns))
+		for i, col := range columns {
+			promptColumns[i] = columnToPromptSchema(col)
+		}
+		sample = promptColumns
+	}
 	raw, _ := yaml.Marshal(sample)
 	return string(raw)
 }
