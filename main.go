@@ -13,6 +13,7 @@ import (
 	_ "github.com/centralmind/gateway/plugins/api_keys"
 	_ "github.com/centralmind/gateway/plugins/lru_cache"
 	_ "github.com/centralmind/gateway/plugins/lua_rls"
+	_ "github.com/centralmind/gateway/plugins/oauth"
 	_ "github.com/centralmind/gateway/plugins/otel"
 	_ "github.com/centralmind/gateway/plugins/pii_remover"
 )

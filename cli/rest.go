@@ -46,7 +46,9 @@ func REST(configPath *string, addr *string, servers *string) *cobra.Command {
 			}
 
 			// Register routes with all server addresses
-			a.RegisterRoutes(mux, serverAddresses...)
+			if err := a.RegisterRoutes(mux, serverAddresses...); err != nil {
+				return err
+			}
 
 			logrus.Infof("docs here: http://localhost%s/swagger/", *addr)
 			return http.ListenAndServe(*addr, mux)

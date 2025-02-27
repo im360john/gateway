@@ -1,6 +1,8 @@
 package plugins
 
 import (
+	"net/http"
+
 	"github.com/centralmind/gateway/connectors"
 	"github.com/centralmind/gateway/remapper"
 	"github.com/getkin/kin-openapi/openapi3"
@@ -28,6 +30,11 @@ type Interceptor interface {
 	// context: additional context information as key-value pairs
 	// Returns: processed data and a boolean indicating if further processing should be skipped
 	Process(data map[string]any, context map[string][]string) (procesed map[string]any, skipped bool)
+}
+
+type HTTPServer interface {
+	Plugin
+	RegisterRoutes(mux *http.ServeMux)
 }
 
 // Wrapper represents a plugin that can wrap and enhance a connector's functionality
@@ -71,7 +78,8 @@ func New(tag string, config any) (Plugin, error) {
 	return f(config)
 }
 
-func Enrich(pluginsCfg map[string]any, schema *openapi3.T) (*openapi3.T, error) {
+func Plugins[TPlugin Plugin](pluginsCfg map[string]any) ([]TPlugin, error) {
+	var res []TPlugin
 	for k, v := range pluginsCfg {
 		if _, ok := plugins[k]; !ok {
 			continue
@@ -80,31 +88,47 @@ func Enrich(pluginsCfg map[string]any, schema *openapi3.T) (*openapi3.T, error) 
 		if err != nil {
 			return nil, xerrors.Errorf("unable to construct: %s: %w", k, err)
 		}
-		wrapper, ok := plugin.(Swaggerer)
+		p, ok := plugin.(TPlugin)
 		if !ok {
 			continue
 		}
+		res = append(res, p)
+	}
+	return res, nil
+}
+
+func Routes(pluginsCfg map[string]any, mux *http.ServeMux) error {
+	plugs, err := Plugins[HTTPServer](pluginsCfg)
+	if err != nil {
+		return err
+	}
+
+	for _, plug := range plugs {
+		plug.RegisterRoutes(mux)
+	}
+	return nil
+}
+
+func Enrich(pluginsCfg map[string]any, schema *openapi3.T) (*openapi3.T, error) {
+	plugs, err := Plugins[Swaggerer](pluginsCfg)
+	if err != nil {
+		return nil, err
+	}
+	for _, wrapper := range plugs {
 		schema = wrapper.Enrich(schema)
 	}
 	return schema, nil
 }
 
 func Wrap(pluginsCfg map[string]any, connector connectors.Connector) (connectors.Connector, error) {
-	for k, v := range pluginsCfg {
-		if _, ok := plugins[k]; !ok {
-			continue
-		}
-		plugin, err := plugins[k](v)
-		if err != nil {
-			return nil, xerrors.Errorf("unable to construct: %s: %w", k, err)
-		}
-		wrapper, ok := plugin.(Wrapper)
-		if !ok {
-			continue
-		}
+	plugs, err := Plugins[Wrapper](pluginsCfg)
+	if err != nil {
+		return nil, err
+	}
+	for _, wrapper := range plugs {
 		connector, err = wrapper.Wrap(connector)
 		if err != nil {
-			return nil, xerrors.Errorf("unable to wrap: %s: %w", k, err)
+			return nil, xerrors.Errorf("unable to wrap: %T: %w", wrapper, err)
 		}
 	}
 	return connector, nil
