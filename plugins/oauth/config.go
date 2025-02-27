@@ -53,9 +53,6 @@ type Config struct {
 	// Scopes defines required access scopes
 	Scopes []string `yaml:"scopes"`
 
-	// MethodScopes defines required scopes for specific methods
-	MethodScopes map[string][]string `yaml:"method_scopes"`
-
 	// TokenHeader defines the header name for the token (default: "Authorization")
 	TokenHeader string `yaml:"token_header"`
 

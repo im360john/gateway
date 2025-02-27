@@ -42,9 +42,6 @@ oauth:
   scopes:                     # Required access scopes
     - "profile"
     - "email"
-  method_scopes:             # Required scopes for specific methods (optional)
-    get_users: ["read:user"]
-    create_user: ["write:user"]
   token_header: "Authorization" # Header name for the token (default: "Authorization")
   user_info_url: ""          # User info endpoint URL (required for Auth0)
   introspection_url: ""      # Token introspection endpoint (required for Keycloak/Okta)
