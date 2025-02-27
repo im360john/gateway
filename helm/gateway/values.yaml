@@ -1,0 +1,34 @@
+image:
+  repository: ghcr.io/centralmind/gateway
+  tag: "latest"
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: true
+  className: "traefik"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+  hosts:
+    - host: demo-gw.centralmind.io
+      paths:
+        - path: /
+          pathType: Prefix
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+gateway:
+  api:
+    name: Awesome API
+    version: "1.0"
+  database:
+    type: postgres
+    connection: 'YOUR CONNECTION CONFIG'
