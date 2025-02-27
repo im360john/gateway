@@ -80,6 +80,7 @@ func Schema(schema model.Config, addresses ...string) *huma.OpenAPI {
 			operation := &huma.Operation{
 				Summary:     endpoint.Summary,
 				Description: endpoint.Description,
+				OperationID: endpoint.MCPMethod,
 				Tags:        []string{info.Name},
 				Parameters:  params,
 				Responses: map[string]*huma.Response{
@@ -109,11 +110,7 @@ func Schema(schema model.Config, addresses ...string) *huma.OpenAPI {
 					},
 				},
 			}
-			api.Paths[endpoint.HTTPPath] = &huma.PathItem{
-				Summary:     endpoint.Summary,
-				Description: endpoint.Description,
-				Parameters:  params,
-			}
+			api.Paths[endpoint.HTTPPath] = &huma.PathItem{}
 			switch endpoint.HTTPMethod {
 			case "GET":
 				api.Paths[endpoint.HTTPPath].Get = operation
