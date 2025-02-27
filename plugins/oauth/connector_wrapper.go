@@ -42,7 +42,9 @@ func (c *Connector) Query(ctx context.Context, endpoint model.Endpoint, params m
 	}
 
 	ctx = xcontext.WithClaims(ctx, userInfo)
-
+	if err := c.checkAuthorization(endpoint.MCPMethod, userInfo, params); err != nil {
+		return nil, xerrors.Errorf("unable to authorize: %w", err)
+	}
 	return c.Connector.Query(ctx, endpoint, params)
 }
 
