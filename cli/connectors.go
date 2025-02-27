@@ -29,8 +29,8 @@ func Connectors() *cobra.Command {
 					fmt.Printf("Connector: %s is not known\n", connector)
 					return nil
 				}
-				fmt.Printf("\nConnector: %s\n", c.Type())
-				fmt.Printf("--------------%s\n", string(make([]byte, len(c.Type()))))
+				fmt.Printf("Connector: %s\n", c.Type())
+				fmt.Printf("--------------\n")
 				fmt.Println(c.Doc())
 			}
 			return nil
