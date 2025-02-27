@@ -3,6 +3,7 @@ package otel
 import (
 	"context"
 	"fmt"
+	"github.com/centralmind/gateway/xcontext"
 	"time"
 
 	"github.com/centralmind/gateway/connectors"
@@ -38,6 +39,11 @@ func (c Connector) Query(ctx context.Context, endpoint model.Endpoint, params ma
 	// Capture query parameters in the span
 	for key, value := range params {
 		span.SetAttributes(attribute.String("db.param."+key, fmt.Sprintf("%v", value)))
+	}
+
+	claims := xcontext.Claims(ctx)
+	for key, value := range claims {
+		span.SetAttributes(attribute.String("auth.claim."+key, fmt.Sprintf("%v", value)))
 	}
 
 	startTime := time.Now()
