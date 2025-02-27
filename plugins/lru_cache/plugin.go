@@ -1,10 +1,15 @@
 package lrucache
 
 import (
+	_ "embed"
+
 	"github.com/centralmind/gateway/connectors"
 	"github.com/centralmind/gateway/plugins"
 	"github.com/hashicorp/golang-lru/v2/expirable"
 )
+
+//go:embed README.md
+var docString string
 
 func init() {
 	plugins.Register(New)
@@ -25,17 +30,7 @@ type Plugin struct {
 }
 
 func (p Plugin) Doc() string {
-	return `
-LRU-based Cache
-
-Suitable for scenarios where the cache holds a fixed number of entries and evicts the least recently used items when full.
-
-## Example YAML configuration:
-
-lru_cache:
-  max_size: 1000
-  ttl: "5m"  # 5 minutes
-`
+	return docString
 }
 
 func (p Plugin) Wrap(connector connectors.Connector) (connectors.Connector, error) {

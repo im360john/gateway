@@ -17,3 +17,7 @@ type Config struct {
 func (c Config) Tag() string {
 	return "pii_remover"
 }
+
+func (c Config) Doc() string {
+	return docString
+}

@@ -11,6 +11,7 @@ import (
 type Config interface {
 	// Tag returns the unique identifier for the plugin
 	Tag() string
+	Doc() string
 }
 
 // Plugin is the base interface that all plugins must implement
@@ -47,6 +48,7 @@ type Swaggerer interface {
 
 var (
 	plugins = map[string]func(any) (Plugin, error){}
+	configs = map[string]Config{}
 )
 
 func Register[TConfig Config, TPlugin Plugin](f func(cfg TConfig) (TPlugin, error)) {
@@ -58,6 +60,7 @@ func Register[TConfig Config, TPlugin Plugin](f func(cfg TConfig) (TPlugin, erro
 		}
 		return f(cfg)
 	}
+	configs[t.Tag()] = t
 }
 
 func New(tag string, config any) (Plugin, error) {
@@ -105,4 +108,22 @@ func Wrap(pluginsCfg map[string]any, connector connectors.Connector) (connectors
 		}
 	}
 	return connector, nil
+}
+
+// KnownPlugins returns a list of all registered plugin configurations
+func KnownPlugins() []Config {
+	result := make([]Config, 0, len(plugins))
+	for tag := range plugins {
+		result = append(result, configs[tag])
+	}
+	return result
+}
+
+// KnownPlugin returns configuration for a specific plugin by tag
+func KnownPlugin(tag string) (Config, bool) {
+	cfg, ok := configs[tag]
+	if !ok {
+		return nil, false
+	}
+	return cfg, true
 }

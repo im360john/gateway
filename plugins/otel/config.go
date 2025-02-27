@@ -39,6 +39,10 @@ func (c Config) Tag() string {
 	return "otel"
 }
 
+func (c Config) Doc() string {
+	return docString
+}
+
 func (c Config) WithDefaults() {
 	if c.SpanMaxQueueSize == 0 {
 		c.SpanMaxQueueSize = 1

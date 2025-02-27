@@ -18,3 +18,7 @@ type Config struct {
 func (c Config) Tag() string {
 	return "lua_rls"
 }
+
+func (c Config) Doc() string {
+	return docString
+}

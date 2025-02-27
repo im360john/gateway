@@ -20,6 +20,10 @@ func (c Config) Tag() string {
 	return "api_keys"
 }
 
+func (c Config) Doc() string {
+	return docString
+}
+
 // Key represents a single API key configuration with its permissions
 type Key struct {
 	// Key is the API key value

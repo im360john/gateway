@@ -15,3 +15,7 @@ type Config struct {
 func (c Config) Tag() string {
 	return "lru_cache"
 }
+
+func (c Config) Doc() string {
+	return docString
+}

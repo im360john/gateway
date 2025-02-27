@@ -1,12 +1,16 @@
 package piiremover
 
 import (
+	_ "embed"
 	"fmt"
 	"path"
 	"regexp"
 
 	"github.com/centralmind/gateway/plugins"
 )
+
+//go:embed README.md
+var docString string
 
 func init() {
 	plugins.Register(func(cfg Config) (plugins.Interceptor, error) {
@@ -21,21 +25,7 @@ type Plugin struct {
 }
 
 func (p *Plugin) Doc() string {
-	return `
-Remove certain column from result
-
-# Example YAML configuration:
-
-pii_remover:
-  fields:
-    - "*.email"
-    - "users.phone"
-    - "*.credit_card"
-  replacement: "*[REDACTED]*"
-  detection_rules:
-    credit_card: "\\d{4}-\\d{4}-\\d{4}-\\d{4}"
-    phone: "\\+?\\d{10,12}"
-`
+	return docString
 }
 
 func (p *Plugin) Process(data map[string]any, context map[string][]string) (processed map[string]any, skipped bool) {

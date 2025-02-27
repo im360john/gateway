@@ -1,10 +1,15 @@
 package luarls
 
 import (
+	_ "embed"
 	"fmt"
+
 	"github.com/centralmind/gateway/plugins"
 	lua "github.com/yuin/gopher-lua"
 )
+
+//go:embed README.md
+var docString string
 
 func init() {
 	plugins.Register(func(cfg Config) (plugins.Interceptor, error) {
@@ -16,30 +21,13 @@ type Plugin struct {
 	script string
 }
 
-func (l Plugin) Doc() string {
-	return `
-Allow to execute lua script for every row in result set
-
-# Example YAML configuration:
-
-lua_rls:
-  script: |
-    function filter_rows(row, context)
-      if context.user_role == "admin" then
-        return true
-      end
-      return row.tenant_id == context.tenant_id
-    end
-  variables:
-    max_rows: 1000
-    debug: true
-  cache_size: 100
-`
+func (p Plugin) Doc() string {
+	return docString
 }
 
-func (l Plugin) Process(row map[string]any, headers map[string][]string) (processed map[string]any, skipped bool) {
+func (p Plugin) Process(row map[string]any, headers map[string][]string) (processed map[string]any, skipped bool) {
 	st := lua.NewState()
-	if err := st.DoString(l.script); err != nil {
+	if err := st.DoString(p.script); err != nil {
 		return nil, false
 	}
 	fn := st.GetGlobal("check_visibility")

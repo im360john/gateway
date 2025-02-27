@@ -2,6 +2,8 @@ package otel
 
 import (
 	"context"
+	_ "embed"
+
 	"github.com/centralmind/gateway/connectors"
 	"github.com/centralmind/gateway/plugins"
 	"go.opentelemetry.io/otel"
@@ -12,6 +14,9 @@ import (
 	trace_provider "go.opentelemetry.io/otel/sdk/trace"
 	"google.golang.org/grpc"
 )
+
+//go:embed README.md
+var docString string
 
 func init() {
 	plugins.Register(New)
@@ -31,25 +36,7 @@ func (p Plugin) Wrap(connector connectors.Connector) (connectors.Connector, erro
 }
 
 func (p Plugin) Doc() string {
-	return `
-Allow to configure otel exporter, example config:
-
-# Example YAML configuration:
-
-otel:
-  exporter_type: "oltp"
-  service_name: "my-gateway"
-  service_version: "1.0.0"
-  environment: "production"
-  endpoint: "localhost:4317"
-  tls_mode: "insecure"
-  span_max_queue_size: 5000
-  span_max_export_batch: 512
-  batch_timeout: "1s"
-  resource_attributes:
-    team: "backend"
-    region: "us-east-1"
-`
+	return docString
 }
 
 func New(cfg Config) (plugins.Wrapper, error) {

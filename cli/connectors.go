@@ -30,8 +30,6 @@ func Connectors() *cobra.Command {
 					fmt.Printf("Connector: %s is not known\n", connector)
 					return nil
 				}
-				fmt.Printf("Connector: %s\n", c.Type())
-				fmt.Printf("--------------\n")
 				rawConfig, _ := glamour.RenderWithEnvironmentConfig(c.Doc())
 				fmt.Println(rawConfig)
 			}
