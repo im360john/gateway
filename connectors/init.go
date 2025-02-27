@@ -2,6 +2,7 @@ package connectors
 
 import (
 	"context"
+
 	"github.com/centralmind/gateway/model"
 	"github.com/centralmind/gateway/remapper"
 	"golang.org/x/xerrors"
@@ -10,6 +11,7 @@ import (
 
 type Config interface {
 	Type() string
+	Doc() string
 }
 
 type Connector interface {
@@ -20,16 +22,32 @@ type Connector interface {
 }
 
 var interceptors = map[string]func(any) (Connector, error){}
+var configs = map[string]Config{}
 
 func Register[TConfig Config](f func(cfg TConfig) (Connector, error)) {
 	var t TConfig
 	interceptors[t.Type()] = func(a any) (Connector, error) {
 		cfg, err := remapper.Remap[TConfig](a)
 		if err != nil {
-			return nil, xerrors.Errorf("unable to rempa: %w", err)
+			return nil, xerrors.Errorf("unable to remap: %w", err)
 		}
 		return f(cfg)
 	}
+	configs[t.Type()] = t
+}
+
+// KnownConnectors returns a list of all registered connector configurations
+func KnownConnectors() []Config {
+	result := make([]Config, 0, len(configs))
+	for _, cfg := range configs {
+		result = append(result, cfg)
+	}
+	return result
+}
+
+func KnownConnector(key string) (Config, bool) {
+	cfg, ok := configs[key]
+	return cfg, ok
 }
 
 func New(tag string, config any) (Connector, error) {

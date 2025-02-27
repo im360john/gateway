@@ -3,6 +3,7 @@ package clickhouse
 import (
 	"context"
 	"fmt"
+
 	_ "github.com/ClickHouse/clickhouse-go/v2"
 	"github.com/centralmind/gateway/castx"
 	"github.com/centralmind/gateway/connectors"
@@ -12,7 +13,7 @@ import (
 )
 
 func init() {
-	connectors.Register[Config](func(cfg Config) (connectors.Connector, error) {
+	connectors.Register(func(cfg Config) (connectors.Connector, error) {
 		dsn := cfg.MakeDSN()
 		db, err := sqlx.Open("clickhouse", dsn)
 		if err != nil {
@@ -53,6 +54,21 @@ func (c Config) MakeDSN() string {
 
 func (c Config) Type() string {
 	return "clickhouse"
+}
+
+func (c Config) Doc() string {
+	return `ClickHouse connector allows querying ClickHouse databases.
+
+Config example:
+    host: localhost      # Single host address
+    hosts:              # Or multiple hosts for cluster setup
+      - host1.example.com
+      - host2.example.com
+    database: mydb
+    user: default
+    password: secret
+    port: 8123
+    secure: false       # Use HTTPS instead of HTTP`
 }
 
 type Connector struct {

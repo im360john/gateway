@@ -12,19 +12,28 @@ func Connectors() *cobra.Command {
 		Use:   "connectors",
 		Short: "List all available database connectors",
 		Long:  "Display a list of all registered database connectors with their configuration documentation",
+		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			knownConnectors := connectors.KnownConnectors()
-			
-			fmt.Println("Available Database Connectors:")
-			fmt.Println("=============================")
-			
-			for _, c := range knownConnectors {
+
+			if len(args) == 0 {
+				fmt.Println("Available Database Connectors:")
+
+				for _, c := range knownConnectors {
+					fmt.Printf("%s\n", c.Type())
+				}
+			}
+			for _, connector := range args {
+				c, ok := connectors.KnownConnector(connector)
+				if !ok {
+					fmt.Printf("Connector: %s is not known\n", connector)
+					return nil
+				}
 				fmt.Printf("\nConnector: %s\n", c.Type())
 				fmt.Printf("--------------%s\n", string(make([]byte, len(c.Type()))))
 				fmt.Println(c.Doc())
 			}
-			
 			return nil
 		},
 	}
-} 
+}

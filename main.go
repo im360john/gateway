@@ -25,6 +25,7 @@ func main() {
 		SilenceUsage: true,
 	}
 	cli.RegisterCommand(rootCommand, cli.StartCommand())
+	cli.RegisterCommand(rootCommand, cli.Connectors())
 	err := rootCommand.Execute()
 	if err != nil {
 		os.Exit(1)
