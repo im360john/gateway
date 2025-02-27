@@ -7,6 +7,12 @@ type Config struct {
 	// Provider specifies the OAuth provider ("google", "github", etc.)
 	Provider string `yaml:"provider"`
 
+	// ProviderAuthURL specifies oauth2.Endpoint AuthURL if Provider is unknown
+	ProviderAuthURL string `yaml:"provider_auth_url"`
+
+	// ProviderTokenURL specifies oauth2.Endpoint TokenURL if Provider is unknown
+	ProviderTokenURL string `yaml:"provider_token_url"`
+
 	// ClientID is the OAuth Client ID
 	ClientID string `yaml:"client_id"`
 
@@ -54,6 +60,11 @@ func (c Config) GetOAuthConfig() *oauth2.Config {
 		endpoint = oauth2.Endpoint{
 			AuthURL:  "https://github.com/login/oauth/authorize",
 			TokenURL: "https://github.com/login/oauth/access_token",
+		}
+	default:
+		endpoint = oauth2.Endpoint{
+			AuthURL:  c.ProviderAuthURL,
+			TokenURL: c.ProviderTokenURL,
 		}
 		// Add other providers as needed
 	}
