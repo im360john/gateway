@@ -71,6 +71,11 @@ func (p *Plugin) Enrich(swag *huma.OpenAPI) *huma.OpenAPI {
 		swag.Components.SecuritySchemes = map[string]*huma.SecurityScheme{}
 	}
 
+	scopes := map[string]string{}
+	for _, scope := range p.oauthConfig.Scopes {
+		scopes[scope] = ""
+	}
+
 	swag.Components.SecuritySchemes["OAuth2"] = &huma.SecurityScheme{
 		Type:        "oauth2",
 		Description: "OAuth2 authentication",
@@ -78,7 +83,7 @@ func (p *Plugin) Enrich(swag *huma.OpenAPI) *huma.OpenAPI {
 			AuthorizationCode: &huma.OAuthFlow{
 				AuthorizationURL: p.oauthConfig.Endpoint.AuthURL,
 				TokenURL:         p.oauthConfig.Endpoint.TokenURL,
-				Scopes:           make(map[string]string),
+				Scopes:           scopes,
 			},
 		},
 	}
