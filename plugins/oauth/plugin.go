@@ -2,11 +2,11 @@ package oauth
 
 import (
 	_ "embed"
+	"github.com/danielgtaylor/huma/v2"
 	"net/http"
 
 	"github.com/centralmind/gateway/connectors"
 	"github.com/centralmind/gateway/plugins"
-	"github.com/getkin/kin-openapi/openapi3"
 	"golang.org/x/oauth2"
 	"golang.org/x/xerrors"
 )
@@ -65,29 +65,27 @@ func (p *Plugin) Wrap(connector connectors.Connector) (connectors.Connector, err
 	}, nil
 }
 
-func (p *Plugin) Enrich(swag *openapi3.T) *openapi3.T {
+func (p *Plugin) Enrich(swag *huma.OpenAPI) *huma.OpenAPI {
 	// Add OAuth2 security definition
 	if swag.Components.SecuritySchemes == nil {
-		swag.Components.SecuritySchemes = make(map[string]*openapi3.SecuritySchemeRef)
+		swag.Components.SecuritySchemes = map[string]*huma.SecurityScheme{}
 	}
 
-	swag.Components.SecuritySchemes["OAuth2"] = &openapi3.SecuritySchemeRef{
-		Value: &openapi3.SecurityScheme{
-			Type:        "oauth2",
-			Description: "OAuth2 authentication",
-			Flows: &openapi3.OAuthFlows{
-				AuthorizationCode: &openapi3.OAuthFlow{
-					AuthorizationURL: p.oauthConfig.Endpoint.AuthURL,
-					TokenURL:         p.oauthConfig.Endpoint.TokenURL,
-					Scopes:           make(map[string]string),
-				},
+	swag.Components.SecuritySchemes["OAuth2"] = &huma.SecurityScheme{
+		Type:        "oauth2",
+		Description: "OAuth2 authentication",
+		Flows: &huma.OAuthFlows{
+			AuthorizationCode: &huma.OAuthFlow{
+				AuthorizationURL: p.oauthConfig.Endpoint.AuthURL,
+				TokenURL:         p.oauthConfig.Endpoint.TokenURL,
+				Scopes:           make(map[string]string),
 			},
 		},
 	}
 
 	// Add security requirements to all paths
-	for _, pathItem := range swag.Paths.Map() {
-		for _, op := range []*openapi3.Operation{
+	for _, pathItem := range swag.Paths {
+		for _, op := range []*huma.Operation{
 			pathItem.Get,
 			pathItem.Post,
 			pathItem.Put,
@@ -95,7 +93,7 @@ func (p *Plugin) Enrich(swag *openapi3.T) *openapi3.T {
 			pathItem.Patch,
 		} {
 			if op != nil {
-				op.Security = &openapi3.SecurityRequirements{
+				op.Security = []map[string][]string{
 					{
 						"OAuth2": []string{},
 					},

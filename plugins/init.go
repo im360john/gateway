@@ -1,11 +1,11 @@
 package plugins
 
 import (
+	"github.com/danielgtaylor/huma/v2"
 	"net/http"
 
 	"github.com/centralmind/gateway/connectors"
 	"github.com/centralmind/gateway/remapper"
-	"github.com/getkin/kin-openapi/openapi3"
 	"golang.org/x/xerrors"
 )
 
@@ -50,7 +50,7 @@ type Swaggerer interface {
 	Plugin
 	// Enrich enhances the OpenAPI documentation with additional specifications
 	// Returns: modified OpenAPI documentation
-	Enrich(swag *openapi3.T) *openapi3.T
+	Enrich(swag *huma.OpenAPI) *huma.OpenAPI
 }
 
 var (
@@ -109,7 +109,7 @@ func Routes(pluginsCfg map[string]any, mux *http.ServeMux) error {
 	return nil
 }
 
-func Enrich(pluginsCfg map[string]any, schema *openapi3.T) (*openapi3.T, error) {
+func Enrich(pluginsCfg map[string]any, schema *huma.OpenAPI) (*huma.OpenAPI, error) {
 	plugs, err := Plugins[Swaggerer](pluginsCfg)
 	if err != nil {
 		return nil, err

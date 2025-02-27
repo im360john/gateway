@@ -2,10 +2,10 @@ package api_keys
 
 import (
 	_ "embed"
+	"github.com/danielgtaylor/huma/v2"
 
 	"github.com/centralmind/gateway/connectors"
 	"github.com/centralmind/gateway/plugins"
-	"github.com/getkin/kin-openapi/openapi3"
 )
 
 //go:embed README.md
@@ -30,37 +30,34 @@ type Plugin struct {
 	config Config
 }
 
-func MaybeSetSecurity(op *openapi3.Operation, name string) *openapi3.Operation {
+func MaybeSetSecurity(op *huma.Operation, name string) *huma.Operation {
 	if op == nil {
 		return op
 	}
-	op.Security = &openapi3.SecurityRequirements{
-		openapi3.SecurityRequirement{
-			name: []string{}, // Reference the security scheme
+	op.Security = []map[string][]string{
+		{
+			name: []string{},
 		},
 	}
 	return op
 }
 
-func (p Plugin) Enrich(swag *openapi3.T) *openapi3.T {
+func (p Plugin) Enrich(swag *huma.OpenAPI) *huma.OpenAPI {
 	securityName := "BearerAuth"
 	if swag.Components.SecuritySchemes == nil {
-		swag.Components.SecuritySchemes = map[string]*openapi3.SecuritySchemeRef{}
+		swag.Components.SecuritySchemes = map[string]*huma.SecurityScheme{}
 	}
-	swag.Components.SecuritySchemes[securityName] = &openapi3.SecuritySchemeRef{
-		Value: &openapi3.SecurityScheme{
-			Type: "apiKey",
-			In:   p.config.Location,
-			Name: p.config.Name,
-		},
+	swag.Components.SecuritySchemes[securityName] = &huma.SecurityScheme{
+		Type: "apiKey",
+		In:   p.config.Location,
+		Name: p.config.Name,
 	}
-	for key, v := range swag.Paths.Map() {
+	for _, v := range swag.Paths {
 		v.Get = MaybeSetSecurity(v.Get, securityName)
 		v.Delete = MaybeSetSecurity(v.Delete, securityName)
 		v.Post = MaybeSetSecurity(v.Post, securityName)
 		v.Put = MaybeSetSecurity(v.Put, securityName)
 		v.Patch = MaybeSetSecurity(v.Patch, securityName)
-		swag.Paths.Set(key, v)
 	}
 	return swag
 }

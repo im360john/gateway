@@ -12,7 +12,6 @@ import (
 	"github.com/centralmind/gateway/plugins"
 	"github.com/centralmind/gateway/swaggerator"
 	"github.com/centralmind/gateway/xcontext"
-	"github.com/flowchartsman/swaggerui"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"golang.org/x/xerrors"
@@ -83,7 +82,7 @@ func (r *Rest) RegisterRoutes(mux *http.ServeMux, addresses ...string) error {
 	if err != nil {
 		return xerrors.Errorf("unable to build swagger: %w", err)
 	}
-	mux.Handle("/swagger/", http.StripPrefix("/swagger", swaggerui.Handler(raw)))
+	mux.Handle("/swagger/", http.StripPrefix("/swagger", swaggerator.Handler(raw)))
 	d := gin.Default()
 	for _, table := range r.Schema.Database.Tables {
 		for _, endpoint := range table.Endpoints {
