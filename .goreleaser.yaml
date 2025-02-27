@@ -41,6 +41,7 @@ release:
 dockers:
   - image_templates:
       - "ghcr.io/centralmind/gateway:{{.Version}}-amd64"
+      - "ghcr.io/centralmind/gateway:latest-amd64"
     goos: linux
     goarch: amd64
     use: buildx
@@ -49,6 +50,7 @@ dockers:
       - "--platform=linux/amd64"
   - image_templates:
       - "ghcr.io/centralmind/gateway:{{.Version}}-arm64"
+      - "ghcr.io/centralmind/gateway:latest-arm64"
     goos: linux
     goarch: arm64
     use: buildx
@@ -60,3 +62,7 @@ docker_manifests:
     image_templates:
       - "ghcr.io/centralmind/gateway:{{.Version}}-amd64"
       - "ghcr.io/centralmind/gateway:{{.Version}}-arm64"
+  - name_template: "ghcr.io/centralmind/gateway:latest"
+    image_templates:
+      - "ghcr.io/centralmind/gateway:latest-amd64"
+      - "ghcr.io/centralmind/gateway:latest-arm64"
