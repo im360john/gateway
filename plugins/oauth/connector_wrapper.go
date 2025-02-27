@@ -48,7 +48,7 @@ func (c *Connector) Query(ctx context.Context, endpoint model.Endpoint, params m
 	return c.Connector.Query(ctx, endpoint, params)
 }
 
-// validateToken делает запрос к IDP для проверки токена
+// validateToken makes a request to IDP to validate the token
 func (c *Connector) validateToken(ctx context.Context, token string) (map[string]any, error) {
 	provider := strings.ToLower(c.config.Provider)
 	endpoint := ""

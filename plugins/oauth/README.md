@@ -235,27 +235,27 @@ oauth:
 
 ### Supported Operations
 
-- `eq` - Точное совпадение значения
-- `ne` - Значение не равно
-- `contains` - Массив содержит значение
-- `regex` - Значение соответствует регулярному выражению
-- `exists` - Проверка существования claim
+- `eq` - Exact value match
+- `ne` - Value is not equal
+- `contains` - Array contains value
+- `regex` - Value matches regular expression
+- `exists` - Check if claim exists
 
 ### Claim Path Syntax
 
-Поддерживается доступ к вложенным полям через точку и индексам массивов:
+Supports access to nested fields using dot notation and array indices:
 
-- `email` - простое поле
-- `org.name` - вложенное поле
-- `groups[0]` - элемент массива
-- `org.departments[0].name` - комбинация вложенности
+- `email` - simple field
+- `org.name` - nested field
+- `groups[0]` - array element
+- `org.departments[0].name` - combination of nesting
 
 ### Dynamic Values
 
-В значениях правил поддерживаются параметры запроса через синтаксис Go templates:
-- `{{.ParamName}}` - значение из параметров запроса
-- `{{.Method}}` - имя метода
-- `{{.Path}}` - путь запроса
+Request parameters are supported in rule values using Go template syntax:
+- `{{.ParamName}}` - value from request parameters
+- `{{.Method}}` - method name
+- `{{.Path}}` - request path
 
 ### Examples
 
