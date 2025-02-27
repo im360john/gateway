@@ -88,7 +88,7 @@ func Schema(schema model.Config, addresses ...string) *huma.OpenAPI {
 						Description: "Success",
 						Content: map[string]*huma.MediaType{
 							"application/json": {
-								Schema: &huma.Schema{Type: "object"},
+								Schema: &huma.Schema{},
 							},
 						},
 					},
@@ -96,7 +96,7 @@ func Schema(schema model.Config, addresses ...string) *huma.OpenAPI {
 						Description: "Not Found",
 						Content: map[string]*huma.MediaType{
 							"application/json": {
-								Schema: &huma.Schema{Type: "object"},
+								Schema: &huma.Schema{},
 							},
 						},
 					},
@@ -104,7 +104,7 @@ func Schema(schema model.Config, addresses ...string) *huma.OpenAPI {
 						Description: "Error",
 						Content: map[string]*huma.MediaType{
 							"application/json": {
-								Schema: &huma.Schema{Type: "object"},
+								Schema: &huma.Schema{},
 							},
 						},
 					},
