@@ -49,15 +49,50 @@ To generate your gateway config simply run discover command with your connection
    ```
 3. Wait for completion
    ```shell
-   INFO[0000] Step 1: Read configs                         
-   INFO[0000] Step 2: Discover data                        
-   INFO[0000] Step 2: Found: 8 tables                      
-   INFO[0000] Step 3: Prepare prompt to AI                 
-   INFO[0000] Step 3 done. Prompt: prompt.txt              
-   INFO[0000] Step 4: Do AI Magic                          
-   INFO[0074] Step 4: open-ai usage: {1813 8665 10478 0x140000ce910 0x140000ce920}
-   INFO[0074] ✅ API schema saved в gateway.yaml            
-   INFO[0074] Done: in 1m14.140552125s
+      INFO 🚀 API Discovery Process
+      INFO Step 1: Read configs
+      INFO ✅ Step 1 completed. Done.
+
+      INFO Step 2: Discover data
+      INFO Discovered Tables:
+      INFO   - payment_dim: 3 columns
+      INFO   - fact_table: 9 columns
+      ...
+      INFO ✅ Step 2 completed. Done.
+
+      INFO Step 3: Sample data from tables
+      INFO Data Sampling Results:
+      INFO   - payment_dim: 5 rows sampled
+      INFO   - fact_table: 5 rows sampled
+      ...
+      INFO ✅ Step 3 completed. Done.
+
+      INFO Step 4: Prepare prompt to AI
+      INFO Prompt saved locally to prompt_default.txt
+      INFO ✅ Step 4 completed. Done.
+
+      INFO Step 5: Using AI to design API
+      Waiting for OpenAI response... Done!     
+      INFO OpenAI usage:                                 Input tokens=3187 Output tokens=14872 Total tokens=18059
+      INFO API Functions Created:
+      INFO   - GET /payment_dim/{payment_key} - Retrieve a payment detail by its payment key
+      INFO   - GET /payment_dim - List payment records with pagination
+      INFO   - GET /payment_dim/count - Retrieve total count of payment records
+      INFO   - GET /fact_table/{payment_key} - Retrieve a transaction detail by its payment key
+      INFO   - GET /fact_table - List transaction records with pagination
+      .....
+      INFO API schema saved to: gateway.yaml
+
+      INFO ✅ Step 5: API Specification Generation Completed!
+
+      INFO ✅ All steps completed. Done.
+
+      INFO --- Execution Statistics ---
+      INFO Total time taken: 2m12s
+      INFO Tokens used: 18059 (Estimated cost: $0.0689)
+      INFO Tables processed: 6
+      INFO API methods created: 18
+      INFO Total number of columns with PII data: 2
    ```
 4. Explore results, the result would be saved in output file:
    ```yaml
