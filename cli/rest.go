@@ -35,7 +35,7 @@ func REST(configPath *string, addr *string, servers *string) *cobra.Command {
 			}
 
 			// Create the list of server addresses for RegisterRoutes
-			serverAddresses := []string{fmt.Sprintf("http://localhost%s", *addr)}
+			serverAddresses := []string{}
 
 			// Add additional servers from the --servers flag if provided
 			if *servers != "" {
@@ -43,6 +43,10 @@ func REST(configPath *string, addr *string, servers *string) *cobra.Command {
 				for _, server := range additionalServers {
 					serverAddresses = append(serverAddresses, strings.TrimSpace(server))
 				}
+			}
+
+			if len(serverAddresses) == 0 { 
+				serverAddresses = append(serverAddresses, fmt.Sprintf("http://localhost%s", *addr))
 			}
 
 			// Register routes with all server addresses
