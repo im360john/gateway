@@ -32,7 +32,6 @@ Our first users are companies deploying AI agents for customer support and analy
 
 ## How it Works
 
-</div>
 <div align="center">
 ![img.png](assets/diagram.png)
 </div>
@@ -172,3 +171,10 @@ Gateway implement MCP protocol, for easy access to your data right from claude, 
 3. Ask something regards your data:
    ![claude_integration.png](./assets/claude_integration.png)
 
+## Roadmap
+- 🗄️ **Expand Database Support** – Add support for Redshift, S3, Oracle, MS SQL, Elasticsearch.
+- 🔐 **MCP with Authentication** – Secure Model Context Protocol with API keys and OAuth.
+- 🤖 **More LLM Providers** – Integrate Anthropic Claude, Google Gemini, DeepSeek.
+- 🏠 **Local & On-Prem Deployment** – Allow usage with self-hosted LLMs.
+- 📦 **Schema Evolution & Versioning** – Track changes and auto-migrate APIs.
+- 🚦 **Traffic Control & Rate Limiting** – Intelligent throttling for high-scale environments.
