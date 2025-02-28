@@ -18,6 +18,7 @@ helm install gateway ./gateway -f values.yaml
 |-----------|-------------------------|---------------|
 | `image.repository` | Docker image name       | `ghcr.io/centralmind/gateway` |
 | `image.tag` | Docker image tag        | `latest` |
+| `imagePullSecrets` | List of image pull secrets | `[]` |
 | `service.type` | Kubernetes service type | `ClusterIP` |
 | `service.port` | Service port            | `8080` |
 | `ingress.enabled` | Enable Ingress          | `true` |
@@ -47,6 +48,10 @@ gateway:
 image:
   repository: ghcr.io/centralmind/gateway
   tag: "0.0.0-rc0"
+
+# Optional: configure image pull secrets if using private registry
+imagePullSecrets:
+  - name: registry-secret
 
 ingress:
   hosts:

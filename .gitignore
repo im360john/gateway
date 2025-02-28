@@ -7,3 +7,4 @@ prompt.txt
 prompt_default.txt
 example/connection-snowflake.yaml
 example/connection.yaml
+deploy/*
