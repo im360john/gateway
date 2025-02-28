@@ -1,3 +1,7 @@
+---
+title: 'PostgreSQL'
+---
+
 PostgreSQL connector allows querying PostgreSQL databases.
 
 ## Config Schema

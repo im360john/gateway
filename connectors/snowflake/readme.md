@@ -1,3 +1,7 @@
+---
+title: 'Snowflake'
+---
+
 Snowflake connector allows querying Snowflake data warehouse.
 
 ## Config Schema

@@ -21,12 +21,16 @@ export default defineConfig({
           items: [{ label: 'Introduction', slug: '' }],
         },
         {
-          label: 'Terms of Service',
-          items: [
-            { label: 'Terms of Service', slug: 'content/terms' },
-            { label: 'Privacy Policy', slug: 'content/privacy' },
-            { label: 'Cookie Policy', slug: 'content/cookie' },
-          ],
+          label: 'Database Connectors',
+          autogenerate: {
+            directory: 'connectors'
+          }
+        },
+        {
+          label: 'Plugins',
+          autogenerate: {
+            directory: 'plugins'
+          }
         },
       ],
     }),

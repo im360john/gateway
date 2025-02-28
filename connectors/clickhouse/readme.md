@@ -1,3 +1,7 @@
+---
+title: 'Clickhouse'
+---
+
 ClickHouse connector allows querying ClickHouse databases.
 
 ## Config Schema

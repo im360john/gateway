@@ -1,3 +1,7 @@
+---
+title: 'MySQL'
+---
+
 MySQL connector allows querying MySQL/MariaDB databases.
 
 ## Config Schema
