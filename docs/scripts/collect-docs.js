@@ -24,18 +24,18 @@ const ignorePatterns = [
 ];
 
 function generateTitle(filePath) {
-  // Получаем имя директории, в которой находится README
+  // Get the name of the directory containing README
   const dir = dirname(filePath);
   if (dir === '.') return 'Root Documentation';
   
-  // Разбиваем путь на части и берем последнюю директорию
+  // Split the path into parts and take the last directory
   const parts = dir.split('/');
   const lastDir = parts[parts.length - 1];
   
-  // Преобразуем kebab-case или snake_case в Title Case
+  // Transform kebab-case or snake_case to Title Case
   return lastDir
     .replace(/[-_]/g, ' ')
-    .replace(/([a-z])([A-Z])/g, '$1 $2') // Разделяем camelCase
+    .replace(/([a-z])([A-Z])/g, '$1 $2') // Split camelCase
     .split(' ')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(' ');
@@ -103,7 +103,17 @@ async function processAndCopyImage(sourcePath, targetPath) {
       return;
     }
 
-    // Process image
+    // For GIF files, convert to WebP while preserving animation
+    if (ext === '.gif') {
+      const targetWebP = targetPath.replace(/\.gif$/i, '.webp');
+      await sharp(sourcePath, { animated: true })
+        .webp({ quality: 80, effort: 6 })
+        .toFile(targetWebP);
+      console.log(`Converted GIF to WebP: ${sourcePath} -> ${targetWebP}`);
+      return;
+    }
+
+    // Process other image types
     await sharp(sourcePath)
       .resize(1200, 1200, { // Maximum dimensions
         fit: 'inside', // Preserve aspect ratio
@@ -305,16 +315,17 @@ function shouldProcessFile(filepath) {
 }
 
 async function watchFiles() {
-  // Сначала собираем все файлы
+  // First collect all files
   const initialFiles = await collectDocs();
   
-  console.log('Watching for file changes...');
+  console.log('Watching for file changes...', initialFiles);
   
-  // Начинаем отслеживать изменения
+  // Start watching for changes
   watch(rootDir, { recursive: true }, async (eventType, filename) => {
     if (!filename) return;
     
-    const relativePath = filename.replace(/\\/g, '/'); // Нормализуем путь для Windows
+    // Normalize path for Windows
+    const relativePath = filename.replace(/\\/g, '/');
     
     if (shouldProcessFile(relativePath)) {
       console.log(`Change detected in ${relativePath}`);
@@ -323,7 +334,7 @@ async function watchFiles() {
   });
 }
 
-// Проверяем аргументы командной строки
+// Check command line arguments
 const args = process.argv.slice(2);
 if (args.includes('--watch')) {
   watchFiles();
