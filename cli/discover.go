@@ -60,7 +60,7 @@ type PromptColumnSchema struct {
 func columnToPromptSchema(col gw_model.ColumnSchema) PromptColumnSchema {
 	return PromptColumnSchema{
 		Name:       col.Name,
-		Type:       col.Type,
+		Type:       string(col.Type),
 		PrimaryKey: col.PrimaryKey,
 	}
 }

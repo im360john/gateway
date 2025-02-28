@@ -110,3 +110,60 @@ func TestConnector(t *testing.T) {
 		}
 	})
 }
+
+func TestMySQLTypeMapping(t *testing.T) {
+	c := &Connector{}
+
+	tests := []struct {
+		name     string
+		sqlType  string
+		expected model.ColumnType
+	}{
+		// String types
+		{"varchar", "VARCHAR", model.TypeString},
+		{"text", "TEXT", model.TypeString},
+		{"char", "CHAR", model.TypeString},
+		{"tinytext", "TINYTEXT", model.TypeString},
+		{"mediumtext", "MEDIUMTEXT", model.TypeString},
+		{"longtext", "LONGTEXT", model.TypeString},
+		{"enum", "ENUM", model.TypeString},
+
+		// Numeric types
+		{"decimal", "DECIMAL", model.TypeNumber},
+		{"numeric", "NUMERIC", model.TypeNumber},
+		{"float", "FLOAT", model.TypeNumber},
+		{"double", "DOUBLE", model.TypeNumber},
+
+		// Integer types
+		{"int", "INT", model.TypeInteger},
+		{"tinyint", "TINYINT", model.TypeInteger},
+		{"smallint", "SMALLINT", model.TypeInteger},
+		{"mediumint", "MEDIUMINT", model.TypeInteger},
+		{"bigint", "BIGINT", model.TypeInteger},
+
+		// Boolean type (MySQL uses TINYINT(1) for boolean)
+		{"boolean", "BOOLEAN", model.TypeBoolean},
+		{"bool", "BOOL", model.TypeBoolean},
+		{"tinyint(1)", "TINYINT(1)", model.TypeBoolean},
+
+		// JSON type
+		{"json", "JSON", model.TypeObject},
+
+		// Set type (mapped to array)
+		{"set", "SET", model.TypeArray},
+
+		// Date/Time types
+		{"date", "DATE", model.TypeDatetime},
+		{"time", "TIME", model.TypeDatetime},
+		{"datetime", "DATETIME", model.TypeDatetime},
+		{"timestamp", "TIMESTAMP", model.TypeDatetime},
+		{"year", "YEAR", model.TypeDatetime},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := c.GuessColumnType(tt.sqlType)
+			assert.Equal(t, tt.expected, result, "Type mapping mismatch for %s", tt.sqlType)
+		})
+	}
+}

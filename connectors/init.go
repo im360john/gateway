@@ -19,6 +19,7 @@ type Connector interface {
 	Query(ctx context.Context, endpoint model.Endpoint, params map[string]any) ([]map[string]any, error)
 	Discovery(ctx context.Context) ([]model.Table, error)
 	Sample(ctx context.Context, table model.Table) ([]map[string]any, error)
+	InferQuery(ctx context.Context, query string) ([]model.ColumnSchema, error)
 }
 
 var interceptors = map[string]func(any) (Connector, error){}

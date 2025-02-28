@@ -1,7 +1,10 @@
 package swaggerator
 
 import (
+	"context"
 	"embed"
+	"github.com/centralmind/gateway/connectors"
+	"golang.org/x/xerrors"
 	"io/fs"
 	"net/http"
 	"strings"
@@ -15,12 +18,17 @@ import (
 var swagfs embed.FS
 
 // Schema dynamically generates an OpenAPI 3.1 schema based on the given table schema.
-func Schema(schema model.Config, addresses ...string) *huma.OpenAPI {
+func Schema(schema model.Config, addresses ...string) (*huma.OpenAPI, error) {
 	api := huma.DefaultConfig(schema.API.Name, "3.1.0").OpenAPI
 	api.Info.Title = schema.API.Name
 	api.Info.Description = "Config that dynamically generates accessor for data"
 	api.Info.Version = schema.API.Version
 	api.Paths = make(map[string]*huma.PathItem)
+
+	connector, err := connectors.New(schema.Database.Type, schema.Database.Connection)
+	if err != nil {
+		return nil, xerrors.Errorf("unable to init connector: %w", err)
+	}
 
 	// Add all server addresses
 	for i, address := range addresses {
@@ -53,14 +61,24 @@ func Schema(schema model.Config, addresses ...string) *huma.OpenAPI {
 
 	// Iterate through tables and generate OpenAPI schemas
 	for _, info := range schema.Database.Tables {
-		schemaProps := map[string]huma.Schema{}
-		for _, col := range info.Columns {
-			schemaProps[col.Name] = huma.Schema{
-				Type: col.Type,
-			}
-		}
-
 		for _, endpoint := range info.Endpoints {
+			cols, err := connector.InferQuery(context.Background(), endpoint.Query)
+			if err != nil {
+				return nil, xerrors.Errorf("unable to infer query %s: %w", endpoint.Query, err)
+			}
+			schemaProps := map[string]*huma.Schema{}
+			for _, col := range cols {
+				schemaProps[col.Name] = &huma.Schema{
+					Type: string(col.Type),
+				}
+				if col.Type == model.TypeDatetime {
+					schemaProps[col.Name] = &huma.Schema{
+						Type:   "string",
+						Format: "date-time",
+					}
+				}
+			}
+
 			var params []*huma.Param
 			for _, param := range endpoint.Params {
 				if param.Location == "" {
@@ -77,6 +95,16 @@ func Schema(schema model.Config, addresses ...string) *huma.OpenAPI {
 					},
 				})
 			}
+			resSchema := &huma.Schema{
+				Type:       "object",
+				Properties: schemaProps,
+			}
+			if endpoint.IsArrayResult {
+				resSchema = &huma.Schema{
+					Type:  "array",
+					Items: resSchema,
+				}
+			}
 			operation := &huma.Operation{
 				Summary:     endpoint.Summary,
 				Description: endpoint.Description,
@@ -88,7 +116,7 @@ func Schema(schema model.Config, addresses ...string) *huma.OpenAPI {
 						Description: "Success",
 						Content: map[string]*huma.MediaType{
 							"application/json": {
-								Schema: &huma.Schema{},
+								Schema: resSchema,
 							},
 						},
 					},
@@ -126,8 +154,11 @@ func Schema(schema model.Config, addresses ...string) *huma.OpenAPI {
 		}
 	}
 
-	api, _ = plugins.Enrich(schema.Plugins, api)
-	return api
+	api, err = plugins.Enrich(schema.Plugins, api)
+	if err != nil {
+		return nil, xerrors.Errorf("unable to enrich swagger schema: %w", err)
+	}
+	return api, nil
 }
 
 func byteHandler(b []byte) http.HandlerFunc {

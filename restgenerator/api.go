@@ -65,7 +65,10 @@ func (r *Rest) RegisterRoutes(mux *http.ServeMux, addresses ...string) error {
 	}
 
 	// Pass all addresses to swaggerator.Schema
-	swagger := swaggerator.Schema(r.Schema, addresses...)
+	swagger, err := swaggerator.Schema(r.Schema, addresses...)
+	if err != nil {
+		return xerrors.Errorf("unable to build swagger doc: %w", err)
+	}
 	raw, err := json.Marshal(swagger)
 	if err != nil {
 		return xerrors.Errorf("unable to build swagger: %w", err)

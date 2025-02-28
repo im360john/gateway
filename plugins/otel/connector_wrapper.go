@@ -20,6 +20,10 @@ type Connector struct {
 	tp     *trace_provider.TracerProvider
 }
 
+func (c Connector) InferQuery(ctx context.Context, query string) ([]model.ColumnSchema, error) {
+	return c.inner.InferQuery(ctx, query)
+}
+
 func (c Connector) Ping(ctx context.Context) error {
 	return c.inner.Ping(ctx)
 }
