@@ -134,6 +134,16 @@ func (r *Rest) Handler(endpoint gw_model.Endpoint) gin.HandlerFunc {
 			}
 			res = append(res, row)
 		}
+		if !endpoint.IsArrayResult {
+			if len(res) == 0 {
+				c.JSON(http.StatusNotFound, gin.H{})
+				return
+			}
+			if len(res) >= 1 {
+				c.JSON(http.StatusOK, res[0])
+				return
+			}
+		}
 		c.JSON(http.StatusOK, res)
 	}
 }
