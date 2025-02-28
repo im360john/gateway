@@ -71,14 +71,6 @@ func (r *Rest) RegisterRoutes(mux *http.ServeMux, addresses ...string) error {
 		return xerrors.Errorf("unable to build swagger: %w", err)
 	}
 
-	// Add redirect from root to swagger UI
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "" || r.URL.Path == "/" {
-			http.Redirect(w, r, "/swagger/", http.StatusFound)
-			return
-		}
-	})
-
 	mux.Handle("/swagger/", http.StripPrefix("/swagger", swaggerator.Handler(raw)))
 	d := gin.Default()
 	for _, table := range r.Schema.Database.Tables {
@@ -86,7 +78,16 @@ func (r *Rest) RegisterRoutes(mux *http.ServeMux, addresses ...string) error {
 			d.Handle(endpoint.HTTPMethod, convertSwaggerToGin(endpoint.HTTPPath), r.Handler(endpoint))
 		}
 	}
-	mux.Handle("/", d.Handler())
+
+	// Add redirect from root to swagger UI
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "" || r.URL.Path == "/" {
+			http.Redirect(w, r, "/swagger/", http.StatusFound)
+			return
+		}
+		d.Handler().ServeHTTP(w, r)
+	})
+
 	return nil
 }
 

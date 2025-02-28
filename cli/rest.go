@@ -45,7 +45,7 @@ func REST(configPath *string, addr *string, servers *string) *cobra.Command {
 				}
 			}
 
-			if len(serverAddresses) == 0 { 
+			if len(serverAddresses) == 0 {
 				serverAddresses = append(serverAddresses, fmt.Sprintf("http://localhost%s", *addr))
 			}
 
@@ -54,7 +54,7 @@ func REST(configPath *string, addr *string, servers *string) *cobra.Command {
 				return err
 			}
 
-			logrus.Infof("docs here: %s/swagger/", serverAddresses[0])
+			logrus.Infof("docs here: %s/", serverAddresses[0])
 			return http.ListenAndServe(*addr, mux)
 		},
 	}
