@@ -38,6 +38,16 @@ Our first users are companies deploying AI agents for customer support and analy
 
 </div>
 
+### Connect & Discover  
+Gateway connects to your structured databases like PostgreSQL. Automatically analyzes the schema and samples data to generate an optimized API structure based on your prompt. Ensures security by detecting PII
+
+### Deploy  
+Runs as a standalone binary, Docker container, or Helm chart for Kubernetes. Configuration is managed via YAML and a plugin system, allowing customization without modifying the core code. Supports row-level security (RLS) with Lua scripts, caching strategies like LRU and time-based expiration, and observability through OpenTelemetry. Cleaning PII data using regex rules.   
+
+### Use & Integrate  
+Exposes APIs through REST, and MCP with built-in authentication via API keys and OAuth. Designed for seamless integration with AI models, including OpenAI, Anthropic Claude, Google Gemini, and DeepSeek. Automatically provides OpenAPI 3.1.0 documentation for easy adoption and supports flexible query execution with structured access control.  
+
+
 ## How to generate
 
 Gateway is LLM-model first, i.e. it's designed to be generated via LLM-models.
