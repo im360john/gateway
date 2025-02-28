@@ -60,13 +60,14 @@ type ColumnSchema struct {
 }
 
 type Endpoint struct {
-	HTTPMethod  string           `yaml:"http_method" json:"http_method,omitempty"`
-	HTTPPath    string           `yaml:"http_path" json:"path,omitempty"`
-	MCPMethod   string           `yaml:"mcp_method" json:"mcp_method,omitempty"`
-	Summary     string           `yaml:"summary" json:"summary,omitempty"`
-	Description string           `yaml:"description" json:"description,omitempty"`
-	Query       string           `yaml:"query" json:"query,omitempty"`
-	Params      []EndpointParams `yaml:"params" json:"params,omitempty"`
+	HTTPMethod    string           `yaml:"http_method" json:"http_method,omitempty"`
+	HTTPPath      string           `yaml:"http_path" json:"path,omitempty"`
+	MCPMethod     string           `yaml:"mcp_method" json:"mcp_method,omitempty"`
+	Summary       string           `yaml:"summary" json:"summary,omitempty"`
+	Description   string           `yaml:"description" json:"description,omitempty"`
+	Query         string           `yaml:"query" json:"query,omitempty"`
+	IsArrayResult bool             `yaml:"is_array_result" json:"is_array_result,omitempty"`
+	Params        []EndpointParams `yaml:"params" json:"params,omitempty"`
 }
 
 type EndpointParams struct {

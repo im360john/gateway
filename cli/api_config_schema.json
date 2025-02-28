@@ -40,7 +40,19 @@
                   "type": "object",
                   "properties": {
                     "name": { "type": "string" },
-                    "type": { "type": "string" },
+                    "type": { 
+                      "type": "string",
+                      "description": "Column data type. Can be either a JSON Schema primitive type (string, number, integer, boolean, null) or a complex object structure defined using JSON Schema syntax.",
+                      "enum": [
+                        "string",
+                        "number",
+                        "integer",
+                        "boolean",
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    },
                     "pii": {
                       "type": "boolean",
                       "description": "Indicates if the column contains sensitive data."
@@ -62,6 +74,11 @@
                     "mcp_method": {
                       "type": "string",
                       "description": "Machine readable name for MCP-tool name (e.g. get_order_for_customer)."
+                    },
+                    "is_array_result": {
+                      "type": "boolean",
+                      "description": "Indicates if the endpoint returns an array of items (true) or a single item (false).",
+                      "default": true
                     },
                     "http_path": {
                       "type": "string",

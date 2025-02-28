@@ -35,7 +35,7 @@ func REST(configPath *string, addr *string, servers *string) *cobra.Command {
 			}
 
 			// Create the list of server addresses for RegisterRoutes
-			serverAddresses := []string{fmt.Sprintf("http://localhost%s", *addr)}
+			serverAddresses := []string{}
 
 			// Add additional servers from the --servers flag if provided
 			if *servers != "" {
@@ -45,12 +45,16 @@ func REST(configPath *string, addr *string, servers *string) *cobra.Command {
 				}
 			}
 
+			if len(serverAddresses) == 0 {
+				serverAddresses = append(serverAddresses, fmt.Sprintf("http://localhost%s", *addr))
+			}
+
 			// Register routes with all server addresses
 			if err := a.RegisterRoutes(mux, serverAddresses...); err != nil {
 				return err
 			}
 
-			logrus.Infof("docs here: http://localhost%s/swagger/", *addr)
+			logrus.Infof("docs here: %s/", serverAddresses[0])
 			return http.ListenAndServe(*addr, mux)
 		},
 	}
