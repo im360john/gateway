@@ -1,4 +1,4 @@
-FROM ubuntu:jammy
+FROM alpine:3.19
 
 ENV TZ=Etc/UTC, ROTATION_TZ=Etc/UTC
 
@@ -10,7 +10,8 @@ RUN echo $TZ > /etc/timezone && \
 # Create a non-root user and group
 RUN addgroup --system cligroup && adduser --system --ingroup cligroup cliuser
 
-COPY gateway /usr/local/bin/gw
+ARG BINARY=gateway
+COPY ${BINARY} /usr/local/bin/gw
 
 RUN chmod +x /usr/local/bin/gw
 
