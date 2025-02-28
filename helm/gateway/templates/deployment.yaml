@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "gateway.name" . }}
+  namespace: {{ .Release.Namespace }}
 spec:
   replicas: 1
   selector:
@@ -39,4 +40,4 @@ spec:
       volumes:
         - name: config
           configMap:
-            name: {{ include "gateway.name" . }}-config 
+            name: {{ include "gateway.name" . }}-config

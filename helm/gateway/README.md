@@ -22,7 +22,8 @@ helm install gateway ./gateway -f values.yaml
 | `service.type` | Kubernetes service type | `ClusterIP` |
 | `service.port` | Service port            | `8080` |
 | `ingress.enabled` | Enable Ingress          | `true` |
-| `ingress.className` | Ingress controller class | `traefik` |
+| `ingress.kind` | Ingress type (IngressRoute) | `IngressRoute` |
+| `ingress.entryPoints` | Traefik entry points | `["web"]` |
 | `ingress.hosts[0].host` | Ingress hostname        | `demo-gw.centralmind.io` |
 | `ingress.hosts[0].paths[0].path` | Ingress path            | `/` |
 | `resources.limits.cpu` | CPU limit               | `500m` |
@@ -54,6 +55,10 @@ imagePullSecrets:
   - name: registry-secret
 
 ingress:
+  enabled: true
+  kind: IngressRoute
+  entryPoints:
+    - web
   hosts:
     - host: my-gateway.example.com
       paths:
