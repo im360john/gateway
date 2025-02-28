@@ -302,7 +302,7 @@ func callOpenAI(apiKey string, prompt string) (*gw_model.Config, openai.ChatComp
 
 	// Create a channel to control the spinner
 	done := make(chan bool)
-	go startSpinner("Waiting for OpenAI response", done)
+	go startSpinner("Thinking. The process can take a few minutes to finish", done)
 
 	resp, err := client.CreateChatCompletion(
 		context.TODO(),

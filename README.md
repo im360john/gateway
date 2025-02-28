@@ -14,7 +14,7 @@ AI agents and LLM-powered applications need fast, secure access to data, but tra
 
 Our first users are companies deploying AI agents for customer support and analytics, where they need models to access the right data without security risks or compliance headaches.
 
-
+![demo](/assets/demo.gif)
 
 
 ## Features
