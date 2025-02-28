@@ -1,4 +1,6 @@
-# PII Remover Plugin
+---
+title: PII Remover Plugin
+---
 
 Removes or masks Personally Identifiable Information (PII) from query results.
 

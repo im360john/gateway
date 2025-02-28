@@ -1,4 +1,6 @@
-# Lua RLS Plugin
+---
+title: Lua RLS Plugin
+---
 
 Row-Level Security implementation using Lua scripts.
 

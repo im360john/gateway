@@ -1,4 +1,6 @@
-# OAuth Plugin
+---
+title: OAuth Plugin
+---
 
 Provides OAuth 2.0 authentication and claim-based authorization for endpoints.
 

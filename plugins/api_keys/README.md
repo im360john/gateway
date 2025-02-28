@@ -1,4 +1,6 @@
-# API Keys Plugin
+---
+title: API Keys Plugin
+---
 
 Provides API key authentication for endpoints.
 

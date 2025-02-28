@@ -1,4 +1,6 @@
-# Gateway Demo Deployment Guide
+---
+title: Gateway Deployment Guide
+---
 
 This guide will help you deploy the Gateway demo application with PostgreSQL in Kubernetes.
 

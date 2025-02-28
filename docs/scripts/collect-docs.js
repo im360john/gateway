@@ -50,6 +50,11 @@ function generateDescription(filePath) {
 }
 
 function addFrontMatter(content, filePath) {
+  // If content already has frontmatter, parse it
+  if (content.startsWith('---')) {
+    return content
+  }
+
   const title = generateTitle(filePath);
   const description = generateDescription(filePath);
   
@@ -60,12 +65,6 @@ description: ${description}
 
 `;
 
-  // Check if frontmatter already exists
-  if (content.startsWith('---')) {
-    // If exists, leave as is
-    return content;
-  }
-  
   return frontMatter + content;
 }
 
@@ -152,35 +151,37 @@ async function copyAssets() {
 
 async function collectPluginsDocs() {
   try {
-    // First get the list of all plugins
-    const { stdout: pluginsList } = await execAsync('go run main.go plugins', { cwd: rootDir });
-    const plugins = pluginsList
-      .split('\n')
-      .filter(line => line.trim() && !line.includes('Available Plugins:'))
-      .map(line => line.trim());
+    const pluginsPath = join(rootDir, 'plugins');
+    const pluginDirs = await glob('*/', {
+      cwd: pluginsPath,
+      nocase: true,
+    });
 
-    console.log('Found plugins:', plugins);
+    console.log('Found plugin directories:', pluginDirs);
 
     // Create directory for plugins
-    const pluginsDir = join(docsDir, 'plugins');
-    await mkdir(pluginsDir, { recursive: true });
+    const pluginsDocsDir = join(docsDir, 'plugins');
+    await mkdir(pluginsDocsDir, { recursive: true });
 
-    // Collect documentation for each plugin
-    for (const plugin of plugins) {
-      const { stdout: pluginDoc } = await execAsync(`go run main.go plugins ${plugin}`, { cwd: rootDir });
+    // Process each plugin
+    for (const pluginDir of pluginDirs) {
+      const pluginName = pluginDir.replace(/\/$/, ''); // Remove trailing slash
+      const readmePath = join(pluginsPath, pluginDir, 'README.md');
       
-      // Create documentation file for the plugin
-      const pluginPath = join(pluginsDir, `${plugin}.md`);
-      
-      const content = `---
-title: ${plugin} Plugin
-description: Documentation for the ${plugin} plugin
----
-
-${pluginDoc}`;
-
-      await writeFile(pluginPath, content);
-      console.log(`Generated documentation for plugin ${plugin}`);
+      try {
+        const content = await readFile(readmePath, 'utf8');
+        const pluginDocPath = join(pluginsDocsDir, `${pluginName}.md`);
+        
+        // Add frontmatter and write content
+        await writeFile(pluginDocPath, addFrontMatter(content, `plugins/${pluginName}/README.md`));
+        console.log(`Generated documentation for plugin ${pluginName}`);
+      } catch (error) {
+        if (error.code === 'ENOENT') {
+          console.log(`No README.md found for plugin ${pluginName}`);
+        } else {
+          console.error(`Error processing plugin ${pluginName}:`, error);
+        }
+      }
     }
 
     // Create index file for plugins
@@ -191,10 +192,13 @@ description: List of all available plugins and their documentation
 
 # Available Plugins
 
-${plugins.map(plugin => `- [${plugin}](${plugin})`).join('\n')}
+${pluginDirs.map(dir => {
+  const name = dir.replace(/\/$/, '');
+  return `- [${name}](${name})`;
+}).join('\n')}
 `;
 
-    await writeFile(join(pluginsDir, 'index.md'), indexContent);
+    await writeFile(join(pluginsDocsDir, 'index.md'), indexContent);
     console.log('Generated plugins index');
 
   } catch (error) {
@@ -205,27 +209,55 @@ ${plugins.map(plugin => `- [${plugin}](${plugin})`).join('\n')}
 async function collectConnectorsDocs() {
   try {
     const connectorsPath = join(rootDir, 'connectors');
-    const files = await glob('**/README.md', {
+    const connectorDirs = await glob('*/', {
       cwd: connectorsPath,
       nocase: true,
     });
 
-    for (const file of files) {
-      const sourcePath = join(connectorsPath, file);
-      const content = await readFile(sourcePath, 'utf8');
+    console.log('Found connector directories:', connectorDirs);
+
+    // Create directory for connectors
+    const connectorsDocsDir = join(docsDir, 'connectors');
+    await mkdir(connectorsDocsDir, { recursive: true });
+
+    // Process each connector
+    for (const connectorDir of connectorDirs) {
+      const connectorName = connectorDir.replace(/\/$/, ''); // Remove trailing slash
+      const readmePath = join(connectorsPath, connectorDir, 'README.md');
       
-      // Convert path: connectors/foo/README.md -> connectors/foo.md
-      const targetPath = join(docsDir, 'connectors', 
-        file.toLowerCase() === 'readme.md' 
-          ? 'index.md'
-          : `${dirname(file)}.md`
-      );
-      
-      await mkdir(dirname(targetPath), { recursive: true });
-      await writeFile(targetPath, addFrontMatter(content, file));
-      
-      console.log(`Processed connector documentation: ${file} -> ${targetPath}`);
+      try {
+        const content = await readFile(readmePath, 'utf8');
+        const connectorDocPath = join(connectorsDocsDir, `${connectorName}.md`);
+        
+        // Add frontmatter and write content
+        await writeFile(connectorDocPath, addFrontMatter(content, `connectors/${connectorName}/README.md`));
+        console.log(`Generated documentation for connector ${connectorName}`);
+      } catch (error) {
+        if (error.code === 'ENOENT') {
+          console.log(`No README.md found for connector ${connectorName}`);
+        } else {
+          console.error(`Error processing connector ${connectorName}:`, error);
+        }
+      }
     }
+
+    // Create index file for connectors
+    const indexContent = `---
+title: Connectors
+description: List of all available connectors and their documentation
+---
+
+# Available Connectors
+
+${connectorDirs.map(dir => {
+  const name = dir.replace(/\/$/, '');
+  return `- [${name}](${name})`;
+}).join('\n')}
+`;
+
+    await writeFile(join(connectorsDocsDir, 'index.md'), indexContent);
+    console.log('Generated connectors index');
+
   } catch (error) {
     console.error('Error collecting connectors documentation:', error);
   }

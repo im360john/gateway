@@ -1,4 +1,6 @@
-# OpenTelemetry Plugin
+---
+title: OpenTelemetry Plugin
+---
 
 Integrates OpenTelemetry tracing.
 

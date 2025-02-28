@@ -1,4 +1,6 @@
-# Gateway Plugins
+---
+title: Plugins
+---
 
 Gateway supports a plugin system that allows extending functionality through various types of plugins:
 

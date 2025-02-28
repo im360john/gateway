@@ -1,4 +1,6 @@
-# LRU Cache Plugin
+---
+title: LRU Cache Plugin
+---
 
 Implements LRU (Least Recently Used) caching for query responses.
 

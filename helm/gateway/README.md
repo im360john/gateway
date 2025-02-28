@@ -1,4 +1,6 @@
-# Gateway Helm Chart
+---
+title: Gateway Helm Chart
+---
 
 A simple Helm chart for deploying Gateway in Kubernetes.
 
