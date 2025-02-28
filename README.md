@@ -33,8 +33,11 @@ Our first users are companies deploying AI agents for customer support and analy
 ## How it Works
 
 <div align="center">
+
 ![img.png](assets/diagram.png)
+
 </div>
+
 ## How to generate
 
 Gateway is LLM-model first, i.e. it's designed to be generated via LLM-models.
@@ -85,7 +88,7 @@ To generate your gateway config simply run discover command with your connection
 
       INFO Step 5: Using AI to design API
       Waiting for OpenAI response... Done!     
-      INFO OpenAI usage:                                 Input tokens=3187 Output tokens=14872 Total tokens=18059
+      INFO OpenAI usage:  Input tokens=3187 Output tokens=14872 Total tokens=18059
       INFO API Functions Created:
       INFO   - GET /payment_dim/{payment_key} - Retrieve a payment detail by its payment key
       INFO   - GET /payment_dim - List payment records with pagination
