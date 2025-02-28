@@ -60,28 +60,25 @@ func New(
 
 // RegisterRoutes registers Rest endpoints.
 func (r *Rest) RegisterRoutes(mux *http.ServeMux, addresses ...string) error {
-	// If no addresses provided, use a default
-	if len(addresses) == 0 {
-		addresses = []string{"http://localhost:9090"}
-	}
-
-	// Handle case when first argument might be a slice itself
-	// This happens when we call with serverAddresses...
-	allAddresses := make([]string, 0, len(addresses))
-	for _, addr := range addresses {
-		allAddresses = append(allAddresses, addr)
-	}
-
 	if err := plugins.Routes(r.Schema.Plugins, mux); err != nil {
 		return xerrors.Errorf("unable to register plugin routes: %w", err)
 	}
 
 	// Pass all addresses to swaggerator.Schema
-	swagger := swaggerator.Schema(r.Schema, allAddresses...)
+	swagger := swaggerator.Schema(r.Schema, addresses...)
 	raw, err := json.Marshal(swagger)
 	if err != nil {
 		return xerrors.Errorf("unable to build swagger: %w", err)
 	}
+
+	// Add redirect from root to swagger UI
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "" || r.URL.Path == "/" {
+			http.Redirect(w, r, "/swagger/", http.StatusFound)
+			return
+		}
+	})
+
 	mux.Handle("/swagger/", http.StripPrefix("/swagger", swaggerator.Handler(raw)))
 	d := gin.Default()
 	for _, table := range r.Schema.Database.Tables {
