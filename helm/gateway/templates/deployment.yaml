@@ -26,6 +26,10 @@ spec:
             - /etc/gateway/config.yaml
             - --addr
             - ":{{ .Values.service.port }}"
+            {{- if .Values.gateway.servers }}
+            - --servers
+            - {{ join "," .Values.gateway.servers }}
+            {{- end }}
             - rest
           ports:
             - name: http
