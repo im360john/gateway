@@ -7,6 +7,71 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// ColumnType represents the allowed data types for columns
+type ColumnType string
+
+const (
+	TypeString   ColumnType = "string"
+	TypeDatetime ColumnType = "date-time"
+	TypeNumber   ColumnType = "number"
+	TypeInteger  ColumnType = "integer"
+	TypeBoolean  ColumnType = "boolean"
+	TypeNull     ColumnType = "null"
+	TypeObject   ColumnType = "object"
+	TypeArray    ColumnType = "array"
+)
+
+// IsValid checks if the column type is one of the allowed types
+func (ct ColumnType) IsValid() bool {
+	switch ct {
+	case TypeString, TypeNumber, TypeInteger, TypeBoolean, TypeNull, TypeObject, TypeArray, TypeDatetime:
+		return true
+	default:
+		return false
+	}
+}
+
+// String implements fmt.Stringer interface
+func (ct ColumnType) String() string {
+	return string(ct)
+}
+
+// MarshalYAML implements yaml.Marshaler interface
+func (ct ColumnType) MarshalYAML() (interface{}, error) {
+	return ct.String(), nil
+}
+
+// UnmarshalYAML implements yaml.Unmarshaler interface
+func (ct *ColumnType) UnmarshalYAML(value *yaml.Node) error {
+	var str string
+	if err := value.Decode(&str); err != nil {
+		return err
+	}
+	*ct = ColumnType(str)
+	if !ct.IsValid() {
+		return xerrors.Errorf("invalid column type: %s", str)
+	}
+	return nil
+}
+
+// MarshalJSON implements json.Marshaler interface
+func (ct ColumnType) MarshalJSON() ([]byte, error) {
+	return json.Marshal(ct.String())
+}
+
+// UnmarshalJSON implements json.Unmarshaler interface
+func (ct *ColumnType) UnmarshalJSON(data []byte) error {
+	var str string
+	if err := json.Unmarshal(data, &str); err != nil {
+		return err
+	}
+	*ct = ColumnType(str)
+	if !ct.IsValid() {
+		return xerrors.Errorf("invalid column type: %s", str)
+	}
+	return nil
+}
+
 type Config struct {
 	API      APIParams      `yaml:"api" json:"api"`
 	Database Database       `yaml:"database" json:"database"`
@@ -53,10 +118,10 @@ type Table struct {
 }
 
 type ColumnSchema struct {
-	Name       string `yaml:"name" json:"name,omitempty"`
-	Type       string `yaml:"type" json:"type,omitempty"`
-	PrimaryKey bool   `yaml:"primary_key" json:"primary_key,omitempty"`
-	PII        bool   `yaml:"pii" json:"pii,omitempty"`
+	Name       string     `yaml:"name" json:"name,omitempty"`
+	Type       ColumnType `yaml:"type" json:"type,omitempty"`
+	PrimaryKey bool       `yaml:"primary_key" json:"primary_key,omitempty"`
+	PII        bool       `yaml:"pii" json:"pii,omitempty"`
 }
 
 type Endpoint struct {

@@ -118,3 +118,64 @@ func TestConnector(t *testing.T) {
 		}
 	})
 }
+
+func TestPostgreSQLTypeMapping(t *testing.T) {
+	c := &Connector{}
+
+	tests := []struct {
+		name     string
+		sqlType  string
+		expected model.ColumnType
+	}{
+		// String types
+		{"varchar", "VARCHAR", model.TypeString},
+		{"text", "TEXT", model.TypeString},
+		{"char", "CHAR", model.TypeString},
+		{"name", "NAME", model.TypeString},
+		{"uuid", "UUID", model.TypeString},
+		{"xml", "XML", model.TypeString},
+		{"citext", "CITEXT", model.TypeString},
+
+		// Numeric types
+		{"numeric", "NUMERIC", model.TypeNumber},
+		{"decimal", "DECIMAL", model.TypeNumber},
+		{"real", "REAL", model.TypeNumber},
+		{"double precision", "DOUBLE PRECISION", model.TypeNumber},
+		{"money", "MONEY", model.TypeNumber},
+
+		// Integer types
+		{"integer", "INTEGER", model.TypeInteger},
+		{"bigint", "BIGINT", model.TypeInteger},
+		{"smallint", "SMALLINT", model.TypeInteger},
+		{"serial", "SERIAL", model.TypeInteger},
+		{"bigserial", "BIGSERIAL", model.TypeInteger},
+
+		// Boolean type
+		{"boolean", "BOOLEAN", model.TypeBoolean},
+		{"bool", "BOOL", model.TypeBoolean},
+
+		// JSON types
+		{"json", "JSON", model.TypeObject},
+		{"jsonb", "JSONB", model.TypeObject},
+
+		// Array types
+		{"text[]", "TEXT[]", model.TypeArray},
+		{"integer[]", "INTEGER[]", model.TypeArray},
+		{"varchar[]", "VARCHAR[]", model.TypeArray},
+
+		// Date/Time types
+		{"timestamp", "TIMESTAMP", model.TypeDatetime},
+		{"date", "DATE", model.TypeDatetime},
+		{"time", "TIME", model.TypeDatetime},
+		{"interval", "INTERVAL", model.TypeDatetime},
+		{"timestamptz", "TIMESTAMPTZ", model.TypeDatetime},
+		{"timetz", "TIMETZ", model.TypeDatetime},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := c.GuessColumnType(tt.sqlType)
+			assert.Equal(t, tt.expected, result, "Type mapping mismatch for %s", tt.sqlType)
+		})
+	}
+}

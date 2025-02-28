@@ -4,6 +4,7 @@ import (
 	"context"
 	_ "embed"
 	"fmt"
+	"strings"
 
 	_ "github.com/ClickHouse/clickhouse-go/v2"
 	"github.com/centralmind/gateway/castx"
@@ -26,6 +27,7 @@ func init() {
 		return &Connector{
 			config: cfg,
 			db:     db,
+			base:   &connectors.BaseConnector{DB: db},
 		}, nil
 	})
 }
@@ -67,6 +69,7 @@ func (c Config) Doc() string {
 type Connector struct {
 	config Config
 	db     *sqlx.DB
+	base   *connectors.BaseConnector
 }
 
 func (c Connector) Sample(ctx context.Context, table model.Table) ([]map[string]any, error) {
@@ -153,8 +156,70 @@ func (c Connector) LoadsColumns(ctx context.Context, tableName string) ([]model.
 		}
 		columns = append(columns, model.ColumnSchema{
 			Name: name,
-			Type: dataType,
+			Type: c.GuessColumnType(dataType),
 		})
 	}
 	return columns, nil
+}
+
+// GuessColumnType implements TypeGuesser interface for ClickHouse
+func (c *Connector) GuessColumnType(sqlType string) model.ColumnType {
+	// ClickHouse types are case-sensitive
+	// Array types (check first as they contain other type names)
+	if strings.Contains(sqlType, "Array") || strings.Contains(sqlType, "Nested") || strings.Contains(sqlType, "Tuple") {
+		return model.TypeArray
+	}
+
+	// Object types
+	switch sqlType {
+	case "JSON", "Object('json')":
+		return model.TypeObject
+	}
+
+	// String types
+	switch sqlType {
+	case "String", "UUID", "IPv4", "IPv6", "Enum8", "Enum16":
+		return model.TypeString
+	}
+	if strings.HasPrefix(sqlType, "FixedString") {
+		return model.TypeString
+	}
+
+	// Numeric types
+	switch {
+	case strings.HasPrefix(sqlType, "Float32"), strings.HasPrefix(sqlType, "Float64"),
+		strings.HasPrefix(sqlType, "Decimal"), strings.HasPrefix(sqlType, "Decimal32"),
+		strings.HasPrefix(sqlType, "Decimal64"), strings.HasPrefix(sqlType, "Decimal128"):
+		return model.TypeNumber
+	}
+
+	// Integer types
+	switch sqlType {
+	case "Int8", "Int16", "Int32", "Int64", "UInt8", "UInt16", "UInt32", "UInt64":
+		return model.TypeInteger
+	}
+
+	// Boolean type
+	if sqlType == "Bool" {
+		return model.TypeBoolean
+	}
+
+	// Date/Time types
+	switch {
+	case sqlType == "Date", strings.HasPrefix(sqlType, "DateTime"):
+		return model.TypeDatetime
+	}
+
+	// Default to string for unknown types
+	return model.TypeString
+}
+
+// InferResultColumns returns column information for the given query
+func (c *Connector) InferResultColumns(ctx context.Context, query string) ([]model.ColumnSchema, error) {
+	return c.base.InferResultColumns(ctx, query, c)
+}
+
+// InferQuery implements the Connector interface
+func (c *Connector) InferQuery(ctx context.Context, query string) ([]model.ColumnSchema, error) {
+	return c.base.InferResultColumns(ctx, query, c)
 }

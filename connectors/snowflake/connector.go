@@ -4,6 +4,7 @@ import (
 	"context"
 	_ "embed"
 	"fmt"
+	"strings"
 
 	"github.com/centralmind/gateway/castx"
 	"github.com/centralmind/gateway/connectors"
@@ -29,6 +30,7 @@ func init() {
 		return &Connector{
 			config: cfg,
 			db:     db,
+			base:   &connectors.BaseConnector{DB: db},
 		}, nil
 	})
 }
@@ -61,6 +63,7 @@ func (c Config) Doc() string {
 type Connector struct {
 	config Config
 	db     *sqlx.DB
+	base   *connectors.BaseConnector
 }
 
 func (c Connector) Sample(ctx context.Context, table model.Table) ([]map[string]any, error) {
@@ -154,8 +157,66 @@ func (c Connector) LoadsColumns(ctx context.Context, tableName string) ([]model.
 		}
 		columns = append(columns, model.ColumnSchema{
 			Name: name,
-			Type: dataType,
+			Type: c.GuessColumnType(dataType),
 		})
 	}
 	return columns, nil
+}
+
+// GuessColumnType implements TypeGuesser interface for Snowflake
+func (c *Connector) GuessColumnType(sqlType string) model.ColumnType {
+	upperType := strings.ToUpper(sqlType)
+
+	// Array type
+	if strings.Contains(upperType, "ARRAY") {
+		return model.TypeArray
+	}
+
+	// Object types
+	switch upperType {
+	case "OBJECT", "VARIANT":
+		return model.TypeObject
+	}
+
+	// String types
+	switch upperType {
+	case "STRING", "TEXT", "VARCHAR", "CHAR", "BINARY", "VARBINARY":
+		return model.TypeString
+	}
+
+	// Numeric types
+	switch upperType {
+	case "NUMBER", "DECIMAL", "NUMERIC", "FLOAT", "DOUBLE":
+		return model.TypeNumber
+	}
+
+	// Integer types
+	switch upperType {
+	case "INT", "INTEGER", "BIGINT", "SMALLINT", "TINYINT":
+		return model.TypeInteger
+	}
+
+	// Boolean type
+	if upperType == "BOOLEAN" {
+		return model.TypeBoolean
+	}
+
+	// Date/Time types
+	switch upperType {
+	case "DATE", "TIME", "TIMESTAMP", "TIMESTAMP_LTZ", "TIMESTAMP_NTZ", "TIMESTAMP_TZ":
+		return model.TypeDatetime
+	}
+
+	// Default to string for unknown types
+	return model.TypeString
+}
+
+// InferResultColumns returns column information for the given query
+func (c *Connector) InferResultColumns(ctx context.Context, query string) ([]model.ColumnSchema, error) {
+	return c.base.InferResultColumns(ctx, query, c)
+}
+
+// InferQuery implements the Connector interface
+func (c *Connector) InferQuery(ctx context.Context, query string) ([]model.ColumnSchema, error) {
+	return c.base.InferResultColumns(ctx, query, c)
 }

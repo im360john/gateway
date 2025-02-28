@@ -3,6 +3,9 @@ package clickhouse
 import (
 	"context"
 	_ "embed"
+	"path/filepath"
+	"testing"
+
 	"github.com/centralmind/gateway/connectors"
 	"github.com/centralmind/gateway/model"
 	"github.com/docker/go-connections/nat"
@@ -11,8 +14,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/clickhouse"
-	"path/filepath"
-	"testing"
 )
 
 func TestConnector(t *testing.T) {
@@ -107,4 +108,65 @@ func TestConnector(t *testing.T) {
 			assert.Equal(t, exp["special_move"], rows[i]["special_move"])
 		}
 	})
+}
+
+func TestClickHouseTypeMapping(t *testing.T) {
+	c := &Connector{}
+
+	tests := []struct {
+		name     string
+		sqlType  string
+		expected model.ColumnType
+	}{
+		// String types
+		{"String", "String", model.TypeString},
+		{"FixedString", "FixedString(16)", model.TypeString},
+		{"UUID", "UUID", model.TypeString},
+		{"IPv4", "IPv4", model.TypeString},
+		{"IPv6", "IPv6", model.TypeString},
+		{"Enum8", "Enum8", model.TypeString},
+		{"Enum16", "Enum16", model.TypeString},
+
+		// Numeric types
+		{"Float32", "Float32", model.TypeNumber},
+		{"Float64", "Float64", model.TypeNumber},
+		{"Decimal", "Decimal(10,2)", model.TypeNumber},
+		{"Decimal32", "Decimal32(4)", model.TypeNumber},
+		{"Decimal64", "Decimal64(4)", model.TypeNumber},
+		{"Decimal128", "Decimal128(4)", model.TypeNumber},
+
+		// Integer types
+		{"Int8", "Int8", model.TypeInteger},
+		{"Int16", "Int16", model.TypeInteger},
+		{"Int32", "Int32", model.TypeInteger},
+		{"Int64", "Int64", model.TypeInteger},
+		{"UInt8", "UInt8", model.TypeInteger},
+		{"UInt16", "UInt16", model.TypeInteger},
+		{"UInt32", "UInt32", model.TypeInteger},
+		{"UInt64", "UInt64", model.TypeInteger},
+
+		// Boolean type
+		{"Bool", "Bool", model.TypeBoolean},
+
+		// Object types
+		{"JSON", "JSON", model.TypeObject},
+		{"Object", "Object('json')", model.TypeObject},
+
+		// Array types
+		{"Array", "Array(String)", model.TypeArray},
+		{"Nested", "Nested(x String, y Int32)", model.TypeArray},
+		{"Tuple", "Tuple(String, Int32)", model.TypeArray},
+
+		// Date/Time types
+		{"Date", "Date", model.TypeDatetime},
+		{"DateTime", "DateTime", model.TypeDatetime},
+		{"DateTime64", "DateTime64(3)", model.TypeDatetime},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := c.GuessColumnType(tt.sqlType)
+			assert.Equal(t, tt.expected, result, "Type mapping mismatch for %s", tt.sqlType)
+		})
+	}
 }
