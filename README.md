@@ -15,14 +15,27 @@ AI agents and LLM-powered applications need fast, secure access to data, but tra
 Our first users are companies deploying AI agents for customer support and analytics, where they need models to access the right data without security risks or compliance headaches.
 
 
-<div align="center">
 
-## Design
+
+## Features
+- ⚡ **Automatic API Generation** – Creates APIs using LLM based on table schema and sampled data.
+- 🗄️ **Structured Database Support** – Works with PostgreSQL, MySQL, ClickHouse, and Snowflake.
+- 🌍 **Run APIs as Rest or MCP Server** – Easily expose APIs in multiple protocols.
+- 📜 **Swagger & OpenAPI 3.1.0 Documentation** – Automatically generated API documentation and OpenAPI spec.
+- 🔒 **Automatic PII Cleanup** – Uses regex rules, (Microsoft Presidio coming soon).
+- ⚡ **Configurable via YAML & Plugin System** – Extend API functionality effortlessly.
+- 🐳 **Run as Binary or Docker** – Comes with a ready-to-use Helm chart.
+- 🔑 **Row-Level Security (RLS)** – Restrict data access using Lua scripts.
+- 🔐 **Authentication** – Supports API keys and OAuth.
+- 👀 **Observability & Audit Trail** – Uses OpenTelemetry (OTel) for tracking requests.
+- 🏎️ **Caching** – Supports time-based and LRU caching for efficiency.
+
+## How it Works
 
 </div>
-
+<div align="center">
 ![img.png](assets/diagram.png)
-
+</div>
 ## How to generate
 
 Gateway is LLM-model first, i.e. it's designed to be generated via LLM-models.
