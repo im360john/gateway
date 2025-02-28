@@ -16,10 +16,9 @@ export default defineConfig({
 
       customCss: ['./src/styles/custom.css'],
       sidebar: [
-        {
-          label: 'General',
-          items: [{ label: 'Introduction', slug: '' }],
-        },
+        { label: 'Introduction', slug: '' },
+        { label: 'Helm Installation', link: '/helm/gateway' },
+        { label: 'Kubernetes Example', link: '/example/k8s' },
         {
           label: 'Database Connectors',
           autogenerate: {
