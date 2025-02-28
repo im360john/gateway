@@ -54,7 +54,7 @@ func REST(configPath *string, addr *string, servers *string) *cobra.Command {
 				return err
 			}
 
-			logrus.Infof("docs here: http://localhost%s/swagger/", *addr)
+			logrus.Infof("docs here: %s/swagger/", serverAddresses[0])
 			return http.ListenAndServe(*addr, mux)
 		},
 	}
