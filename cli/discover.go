@@ -269,8 +269,29 @@ func saveToFile(filename, data string) error {
 	return os.WriteFile(filename, []byte(data), 0644)
 }
 
+// startSpinner starts a loading animation in the console
+func startSpinner(message string, done chan bool) {
+	spinChars := []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
+	i := 0
+	for {
+		select {
+		case <-done:
+			fmt.Printf("\r%s... Done!     \n", message)
+			return
+		default:
+			fmt.Printf("\r%s %s", spinChars[i], message)
+			time.Sleep(100 * time.Millisecond)
+			i = (i + 1) % len(spinChars)
+		}
+	}
+}
+
 func callOpenAI(apiKey string, prompt string) (*gw_model.Config, openai.ChatCompletionResponse, error) {
 	client := openai.NewClient(apiKey)
+
+	// Create a channel to control the spinner
+	done := make(chan bool)
+	go startSpinner("Waiting for OpenAI response", done)
 
 	resp, err := client.CreateChatCompletion(
 		context.TODO(),
@@ -280,6 +301,10 @@ func callOpenAI(apiKey string, prompt string) (*gw_model.Config, openai.ChatComp
 			ReasoningEffort: "high",
 		},
 	)
+
+	// Stop the spinner
+	done <- true
+
 	if err != nil {
 		return nil, openai.ChatCompletionResponse{}, xerrors.Errorf("fail to call open-ai: %w", err)
 	}
