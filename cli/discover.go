@@ -216,9 +216,20 @@ func Discover(configPath *string) *cobra.Command {
 			logrus.Info("--- Execution Statistics ---")
 			logrus.Infof("Total time taken: %v", duration.Round(time.Second))
 			logrus.Infof("Tokens used: %d (Estimated cost: $%.4f)",
-				tokensUsed, (float64(resp.Usage.PromptTokens)/1000000)*1.1+(float64(resp.Usage.CompletionTokens)/1000000)*4.4) //pricing for o3.mini
+				tokensUsed, (float64(resp.Usage.PromptTokens)/1000000)*1.1+(float64(resp.Usage.CompletionTokens)/1000000)*4.4)
 			logrus.Infof("Tables processed: %d", len(tablesToGenerate))
 			logrus.Infof("API methods created: %d", apiEndpoints)
+
+			// Count PII columns from the generated config
+			var piiColumnsCount int
+			for _, table := range config.Database.Tables {
+				for _, column := range table.Columns {
+					if column.PII {
+						piiColumnsCount++
+					}
+				}
+			}
+			logrus.Infof("Total number of columns with PII data: %d", piiColumnsCount)
 
 			return nil
 		},
