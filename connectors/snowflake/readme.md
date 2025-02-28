@@ -27,38 +27,3 @@ warehouse: COMPUTE_WH # Warehouse to use for queries
 schema: PUBLIC        # Schema name
 role: ACCOUNTADMIN    # Role to assume 
 ```
-
-## Config Schema:
-
-```yaml
-type: object
-properties:
-  account:
-    type: string
-    required: true
-    description: Snowflake account identifier
-  database:
-    type: string
-    required: true
-    description: Database name
-  user:
-    type: string
-    required: true
-    description: Username
-  password:
-    type: string
-    required: true
-    description: Password
-  warehouse:
-    type: string
-    required: true
-    description: Warehouse to use for queries
-  schema:
-    type: string
-    required: true
-    description: Schema name
-  role:
-    type: string
-    required: true
-    description: Role to assume
-```
