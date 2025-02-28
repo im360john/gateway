@@ -38,4 +38,4 @@ gateway:
     type: postgres
     connection: 'YOUR CONNECTION CONFIG'
   servers:
-    - https://demo-gw.centralmind.ai
+    - https://example.api
