@@ -13,9 +13,9 @@ service:
 
 ingress:
   enabled: true
-  className: "traefik"
-  annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: web
+  kind: IngressRoute
+  entryPoints:
+    - web
   hosts:
     - host: demo-gw.centralmind.io
       paths:
@@ -37,3 +37,5 @@ gateway:
   database:
     type: postgres
     connection: 'YOUR CONNECTION CONFIG'
+  servers:
+    - https://demo-gw.centralmind.ai
