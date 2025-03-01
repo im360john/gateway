@@ -1,4 +1,4 @@
-import { readFile, writeFile, mkdir, copyFile as fsCopyFile } from 'fs/promises';
+import { readFile, writeFile, mkdir, copyFile as fsCopyFile, rm } from 'fs/promises';
 import { dirname, join, basename, extname } from 'path';
 import { fileURLToPath } from 'url';
 import { glob } from 'glob';
@@ -20,7 +20,9 @@ const ignorePatterns = [
   '**/dist/**',
   '**/vendor/**',
   '**/build/**',
-  '**/tmp/**'
+  '**/tmp/**',
+  '**/connectors/**',  // Ignore connectors directory for general copying
+  '**/plugins/**'      // Ignore plugins directory for general copying
 ];
 
 function generateTitle(filePath) {
@@ -68,10 +70,39 @@ description: ${description}
   return frontMatter + content;
 }
 
+function simplifyPath(filePath) {
+  if (basename(filePath) === 'index.md') {
+    return join(dirname(filePath), '..') + '.md';
+  }
+  return filePath;
+}
+
 async function copyFile(file) {
   const sourcePath = join(rootDir, file);
-  const targetDir = join(docsDir, dirname(file));
-  const targetPath = join(targetDir, 'index.md');
+  let targetDir = join(docsDir, dirname(file));
+  let targetPath = join(targetDir, 'index.md');
+  const parentDir = dirname(file);
+  const parts = targetPath.split('/');
+
+  if (targetPath && (parts.includes('connectors') || parts.includes('plugins'))) {
+    const parentDir = parts[parts.length - 2];
+
+    if (parentDir !== 'connectors' && parentDir !== 'plugins') {
+      targetPath = join(dirname(targetPath), '.') + '.md';
+    }
+  }
+
+  // Special handling for connectors and plugins
+  if ((file.includes('/connectors/') || file.includes('/plugins/')) && file.toLowerCase().endsWith('readme.md')) {
+    const parts = file.split('/');
+    const typeIndex = parts.findIndex(part => part === 'connectors' || part === 'plugins');
+    if (typeIndex !== -1 && typeIndex + 1 < parts.length) {
+      const type = parts[typeIndex];
+      const name = parts[typeIndex + 1];
+      targetDir = join(docsDir, type);
+      targetPath = join(targetDir, `${name}.md`);
+    }
+  }
 
   try {
     // Create target directory
@@ -159,63 +190,6 @@ async function copyAssets() {
   }
 }
 
-async function collectPluginsDocs() {
-  try {
-    const pluginsPath = join(rootDir, 'plugins');
-    const pluginDirs = await glob('*/', {
-      cwd: pluginsPath,
-      nocase: true,
-    });
-
-    console.log('Found plugin directories:', pluginDirs);
-
-    // Create directory for plugins
-    const pluginsDocsDir = join(docsDir, 'plugins');
-    await mkdir(pluginsDocsDir, { recursive: true });
-
-    // Process each plugin
-    for (const pluginDir of pluginDirs) {
-      const pluginName = pluginDir.replace(/\/$/, ''); // Remove trailing slash
-      const readmePath = join(pluginsPath, pluginDir, 'README.md');
-      
-      try {
-        const content = await readFile(readmePath, 'utf8');
-        const pluginDocPath = join(pluginsDocsDir, `${pluginName}.md`);
-        
-        // Add frontmatter and write content
-        await writeFile(pluginDocPath, addFrontMatter(content, `plugins/${pluginName}/README.md`));
-        console.log(`Generated documentation for plugin ${pluginName}`);
-      } catch (error) {
-        if (error.code === 'ENOENT') {
-          console.log(`No README.md found for plugin ${pluginName}`);
-        } else {
-          console.error(`Error processing plugin ${pluginName}:`, error);
-        }
-      }
-    }
-
-    // Create index file for plugins
-    const indexContent = `---
-title: Plugins
-description: List of all available plugins and their documentation
----
-
-# Available Plugins
-
-${pluginDirs.map(dir => {
-  const name = dir.replace(/\/$/, '');
-  return `- [${name}](${name})`;
-}).join('\n')}
-`;
-
-    await writeFile(join(pluginsDocsDir, 'index.md'), indexContent);
-    console.log('Generated plugins index');
-
-  } catch (error) {
-    console.error('Error collecting plugins documentation:', error);
-  }
-}
-
 async function collectConnectorsDocs() {
   try {
     const connectorsPath = join(rootDir, 'connectors');
@@ -273,6 +247,63 @@ ${connectorDirs.map(dir => {
   }
 }
 
+async function collectPluginsDocs() {
+  try {
+    const pluginsPath = join(rootDir, 'plugins');
+    const pluginDirs = await glob('*/', {
+      cwd: pluginsPath,
+      nocase: true,
+    });
+
+    console.log('Found plugin directories:', pluginDirs);
+
+    // Create directory for plugins
+    const pluginsDocsDir = join(docsDir, 'plugins');
+    await mkdir(pluginsDocsDir, { recursive: true });
+
+    // Process each plugin
+    for (const pluginDir of pluginDirs) {
+      const pluginName = pluginDir.replace(/\/$/, ''); // Remove trailing slash
+      const readmePath = join(pluginsPath, pluginDir, 'README.md');
+      
+      try {
+        const content = await readFile(readmePath, 'utf8');
+        const pluginDocPath = join(pluginsDocsDir, `${pluginName}.md`);
+        
+        // Add frontmatter and write content
+        await writeFile(pluginDocPath, addFrontMatter(content, `plugins/${pluginName}/README.md`));
+        console.log(`Generated documentation for plugin ${pluginName}`);
+      } catch (error) {
+        if (error.code === 'ENOENT') {
+          console.log(`No README.md found for plugin ${pluginName}`);
+        } else {
+          console.error(`Error processing plugin ${pluginName}:`, error);
+        }
+      }
+    }
+
+    // Create index file for plugins
+    const indexContent = `---
+title: Plugins
+description: List of all available plugins and their documentation
+---
+
+# Available Plugins
+
+${pluginDirs.map(dir => {
+  const name = dir.replace(/\/$/, '');
+  return `- [${name}](${name})`;
+}).join('\n')}
+`;
+
+    await writeFile(join(pluginsDocsDir, 'index.md'), indexContent);
+    console.log('Generated plugins index');
+
+  } catch (error) {
+    console.error('Error collecting plugins documentation:', error);
+  }
+}
+
 async function collectDocs() {
   try {
     // Find all README.md files in the project
@@ -314,7 +345,21 @@ function shouldProcessFile(filepath) {
   return isReadme && !isIgnored;
 }
 
+async function cleanTargetDirs() {
+  console.log('Cleaning target directories...');
+  try {
+    await rm(docsDir, { recursive: true, force: true });
+    await rm(assetsDir, { recursive: true, force: true });
+    console.log('Target directories cleaned successfully');
+  } catch (error) {
+    console.error('Error cleaning target directories:', error);
+  }
+}
+
 async function watchFiles() {
+  // Clean target directories first
+  await cleanTargetDirs();
+  
   // First collect all files
   const initialFiles = await collectDocs();
   
@@ -339,5 +384,5 @@ const args = process.argv.slice(2);
 if (args.includes('--watch')) {
   watchFiles();
 } else {
-  collectDocs();
+  cleanTargetDirs().then(() => collectDocs());
 } 
