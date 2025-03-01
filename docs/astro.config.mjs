@@ -17,6 +17,7 @@ export default defineConfig({
       customCss: ['./src/styles/custom.css'],
       sidebar: [
         { label: 'Introduction', slug: '' },
+        { label: 'CLI (Command Line Interface)', link: '/cli' },
         { label: 'Helm Installation', link: '/helm/gateway' },
         { label: 'Kubernetes Example', link: '/example/k8s' },
         {
