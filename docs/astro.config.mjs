@@ -31,6 +31,14 @@ export default defineConfig({
             directory: 'plugins'
           }
         },
+        {
+          label: 'Terms of Service',
+          items: [
+            { label: 'Terms of Service', slug: 'content/terms' },
+            { label: 'Privacy Policy', slug: 'content/privacy' },
+            { label: 'Cookie Policy', slug: 'content/cookie' },
+          ],
+        },
       ],
     }),
     react(),
