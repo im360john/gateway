@@ -30,7 +30,7 @@ Our first users are companies deploying AI agents for customer support and analy
 - 🔒 **Automatic PII Cleanup** – Uses <a href="https://docs.centralmind.ai/plugins/pii_remover/">regex plugin</a> or <a href="https://docs.centralmind.ai/plugins/presidio_anonymizer/">Microsoft Presidio plugin</a> for reducting PII or sensetive data.
 - ⚡ **Configurable via YAML & Plugin System** – Extend API functionality effortlessly.
 - 🐳 **Run as Binary or Docker** – Comes with a ready-to-use <a href="https://docs.centralmind.ai/helm/gateway/">Helm chart</a> and docker container.
-- 📦 **Local & On-Prem Deployment** – Allow usage with self-hosted LLMs, just specify --ai-endpoint and --ai-model parameters.
+- 📦 **Local & On-Prem Usage** – Allow usage with self-hosted LLMs, just specify --ai-endpoint and --ai-model parameters.
 - 🔑 **Row-Level Security (RLS)** – Restrict data access using <a href="https://docs.centralmind.ai/plugins/lua_rls/">Lua scripts</a>.
 - 🔐 **Authentication** – Supports <a href="https://docs.centralmind.ai/plugins/api_keys/">API keys</a> and <a href="https://docs.centralmind.ai/plugins/oauth/">OAuth</a>.
 - 👀 **Observability & Audit Trail** – Uses <a href="https://docs.centralmind.ai/plugins/otel/">OpenTelemetry (OTel) plugin</a> for tracking requests including remote endpoints.
@@ -150,7 +150,7 @@ To generate your gateway config simply run discover command with your connection
    ```
 
 
-## How to run
+## How to start API
 
 ```shell
 go build .

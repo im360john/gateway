@@ -1,10 +1,15 @@
 ---
-title: Presidio Anonymizer Plugin
+title: Overview
 ---
 
 # Presidio Anonymizer Plugin
 
-This plugin integrates with Microsoft's Presidio Anonymizer API to anonymize sensitive data in your fields.
+This plugin integrates with <a href="https://microsoft.github.io/presidio/anonymizer/">Microsoft's Presidio</a> Anonymizer API to anonymize sensitive data in your fields. The Presidio anonymizer is module for anonymizing detected PII text entities with desired values.
+
+![Microsoft's Presidio demo](https://microsoft.github.io/presidio/assets/detection_flow.gif)
+
+- **Predefined or custom PII recognizers** leveraging Named Entity Recognition, regular expressions, rule-based logic, and checksum with relevant context in multiple languages.  
+
 
 ## Configuration
 
