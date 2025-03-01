@@ -22,12 +22,12 @@ import (
 var (
 	basePrompt = `
 !Important rules:
-	- The most important:The final output must contain *only valid JSON* with no additional commentary, explanations, or markdown formatting!
+	- The most important:The final output must contain *only valid single JSON* with no additional commentary, explanations, or markdown formatting!
 	- The JSON configuration must strictly adhere to the provided JSON schema, including all required fields.
 	- Description of API endpoints should have also an example, to help chatbot to use it.
 	- All descriptions and summary must not have any sensetive information/data from security point of view including database types, password and etc.
 	- All SQL queries must be Pure SQL that will be used in golang SQLx on top of database - {database_type} and be fully parameterized (using named parameters) to prevent SQL injection.
-	- All API endpoints must have output schemas.
+	- Do not generate output schema for endpoints..
 	- All SQL queries must be verified that they will not return array of data where expected one item.
 	- SQL queries should be optimized for {database_type} and use appropirate indexes.
 	- Endpoints that return lists must include pagination parameters (offset and limit).
