@@ -7,19 +7,50 @@ import (
 
 	"github.com/jackc/pgx/v4"
 	"github.com/pkg/errors"
+	"gopkg.in/yaml.v3"
 )
 
 //go:embed readme.md
 var docString string
 
 type Config struct {
-	Hosts     []string
-	Database  string
-	User      string
-	Password  string
-	Port      int
-	TLSFile   string
-	EnableTLS bool
+	Hosts      []string
+	Database   string
+	User       string
+	Password   string
+	Port       int
+	TLSFile    string
+	EnableTLS  bool
+	ConnString string // Connection string in format: postgresql://user:password@host:port/database
+}
+
+// UnmarshalYAML implements the yaml.Unmarshaler interface to allow for both
+// direct connection string or full configuration objects in YAML
+func (c *Config) UnmarshalYAML(value *yaml.Node) error {
+	// Try to unmarshal as a string (connection string)
+	var connString string
+	if err := value.Decode(&connString); err == nil {
+		// If successful, validate and set the connection string field
+		if len(connString) > 0 {
+			// Validate that it starts with postgresql://
+			if len(connString) < 13 || connString[:13] != "postgresql://" {
+				return errors.New("invalid PostgreSQL connection string, must start with postgresql://")
+			}
+			c.ConnString = connString
+			return nil
+		}
+	}
+
+	// If that didn't work, try to unmarshal as a full config object
+	type configAlias Config // Use alias to avoid infinite recursion
+	var alias configAlias
+	if err := value.Decode(&alias); err != nil {
+		return err
+	}
+
+	// Copy the fields from alias to c
+	*c = Config(alias)
+	return nil
 }
 
 func (c Config) TLSConfig() (*tls.Config, error) {
@@ -42,6 +73,28 @@ func (c Config) TLSConfig() (*tls.Config, error) {
 }
 
 func (c Config) MakeConfig() (*pgx.ConnConfig, error) {
+	// If connection string is provided, use it directly
+	if c.ConnString != "" {
+		// ParseConfig parses a connection string and returns a *pgx.ConnConfig
+		config, err := pgx.ParseConfig(c.ConnString)
+		if err != nil {
+			return nil, errors.Wrap(err, "unable to parse connection string")
+		}
+
+		// Apply TLS settings if EnableTLS is true
+		if c.EnableTLS {
+			tlsConfig, err := c.TLSConfig()
+			if err != nil {
+				return nil, err
+			}
+			config.TLSConfig = tlsConfig
+		}
+
+		config.PreferSimpleProtocol = true
+		return config, nil
+	}
+
+	// Otherwise, use the individual fields as before
 	tlsConfig, err := c.TLSConfig()
 	if err != nil {
 		return nil, err

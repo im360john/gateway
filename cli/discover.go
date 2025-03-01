@@ -22,7 +22,7 @@ import (
 var (
 	basePrompt = `
 !Important rules:
-	- The final output must contain only valid JSON with no additional commentary, explanations, or markdown formatting.
+	- The most important:The final output must contain *only valid JSON* with no additional commentary, explanations, or markdown formatting!
 	- The JSON configuration must strictly adhere to the provided JSON schema, including all required fields.
 	- Description of API endpoints should have also an example, to help chatbot to use it.
 	- All descriptions and summary must not have any sensetive information/data from security point of view including database types, password and etc.
@@ -79,6 +79,8 @@ func Discover(configPath *string) *cobra.Command {
 	var databaseType string
 	var tables []string
 	var aiAPIKey string
+	var aiEndpoint string
+	var aiModel string
 	var output string
 	var extraPrompt string
 	cmd := &cobra.Command{
@@ -172,7 +174,7 @@ func Discover(configPath *string) *cobra.Command {
 			logrus.Info("\r\n")
 			// Call API
 			logrus.Info("Step 5: Using AI to design API")
-			config, resp, err := callOpenAI(aiAPIKey, fullPrompt)
+			config, resp, err := callOpenAI(aiAPIKey, fullPrompt, aiEndpoint, aiModel)
 			if err != nil {
 				logrus.Error("failed to call OpenAI:", err)
 				return err
@@ -237,6 +239,8 @@ func Discover(configPath *string) *cobra.Command {
 	cmd.Flags().StringSliceVar(&tables, "tables", nil, "List of table to include")
 	cmd.Flags().StringVar(&databaseType, "db-type", "postgres", "Type of database")
 	cmd.Flags().StringVar(&aiAPIKey, "ai-api-key", "ai-api-key", "AI API token")
+	cmd.Flags().StringVar(&aiEndpoint, "ai-endpoint", "", "Custom OpenAI-compatible API endpoint URL")
+	cmd.Flags().StringVar(&aiModel, "ai-model", "o3-mini", "AI model to use")
 	cmd.Flags().StringVar(&output, "output", "gateway.yaml", "Resulted yaml path")
 	cmd.Flags().StringVar(&extraPrompt, "prompt", "generate reasonable set of API-s for this data", "Custom input to generate API-s")
 	return cmd
@@ -297,8 +301,17 @@ func startSpinner(message string, done chan bool) {
 	}
 }
 
-func callOpenAI(apiKey string, prompt string) (*gw_model.Config, openai.ChatCompletionResponse, error) {
-	client := openai.NewClient(apiKey)
+func callOpenAI(apiKey string, prompt string, endpoint string, model string) (*gw_model.Config, openai.ChatCompletionResponse, error) {
+	var client *openai.Client
+
+	// Create client with custom endpoint if provided
+	if endpoint != "" {
+		config := openai.DefaultConfig(apiKey)
+		config.BaseURL = endpoint
+		client = openai.NewClientWithConfig(config)
+	} else {
+		client = openai.NewClient(apiKey)
+	}
 
 	// Create a channel to control the spinner
 	done := make(chan bool)
@@ -307,7 +320,7 @@ func callOpenAI(apiKey string, prompt string) (*gw_model.Config, openai.ChatComp
 	resp, err := client.CreateChatCompletion(
 		context.TODO(),
 		openai.ChatCompletionRequest{
-			Model:           "o3-mini",
+			Model:           model,
 			Messages:        []openai.ChatCompletionMessage{{Role: "user", Content: prompt}},
 			ReasoningEffort: "high",
 		},

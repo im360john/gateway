@@ -1,6 +1,6 @@
 hosts:
   - localhost
 user: postgres
-password: password
-database: mydb
+password: mysecretpassword
+database: sampledb
 port: 5432
