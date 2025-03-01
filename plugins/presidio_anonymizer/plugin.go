@@ -51,34 +51,25 @@ func (p *Plugin) Process(data map[string]any, context map[string][]string) (proc
 		return data, false
 	}
 
-	// Collect all rules from all fields
+	// Convert rules to Presidio format
 	var allAnonymizers []PresidioAnonymizer
-	fieldsWithRules := make(map[string]bool)
-
-	for field, rules := range p.cfg.AnonymizerRules {
-		if _, exists := data[field]; !exists {
-			continue
+	for _, rule := range p.cfg.AnonymizerRules {
+		anonymizer := PresidioAnonymizer{
+			Type:     rule.Type,
+			NewValue: rule.NewValue,
 		}
-		fieldsWithRules[field] = true
 
-		for _, rule := range rules {
-			anonymizer := PresidioAnonymizer{
-				Type:     rule.Type,
-				NewValue: rule.NewValue,
+		if rule.Operator == "mask" {
+			anonymizer.Masking = &MaskingRule{
+				Char:        rule.MaskingChar,
+				CharsToMask: rule.CharsToMask,
 			}
-
-			if rule.Operator == "mask" {
-				anonymizer.Masking = &MaskingRule{
-					Char:        rule.MaskingChar,
-					CharsToMask: rule.CharsToMask,
-				}
-			}
-
-			allAnonymizers = append(allAnonymizers, anonymizer)
 		}
+
+		allAnonymizers = append(allAnonymizers, anonymizer)
 	}
 
-	// If no fields need anonymization, return original data
+	// If no rules defined, return original data
 	if len(allAnonymizers) == 0 {
 		return data, false
 	}
@@ -122,11 +113,9 @@ func (p *Plugin) Process(data map[string]any, context map[string][]string) (proc
 		return data, false
 	}
 
-	// Update only the fields that had rules
-	for field := range fieldsWithRules {
-		if val, ok := anonymizedData[field]; ok {
-			data[field] = val
-		}
+	// Update all fields with anonymized data
+	for field, val := range anonymizedData {
+		data[field] = val
 	}
 
 	return data, false

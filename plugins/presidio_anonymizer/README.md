@@ -12,26 +12,23 @@ This plugin integrates with Microsoft's Presidio Anonymizer API to anonymize sen
 presidio_anonymizer:
     presidio_url: http://localhost:8080/api/v1/projects/1/anonymize
     anonymizer_rules:
-      email:
-        - type: EMAIL_ADDRESS
-          operator: mask
-          masking_char: "*"
-          chars_to_mask: 4
-      name:
-        - type: PERSON
-          operator: replace
-          new_value: "[REDACTED NAME]"
-      phone:
-        - type: PHONE_NUMBER
-          operator: mask
-          masking_char: "#"
-          chars_to_mask: 6
+      - type: EMAIL_ADDRESS
+        operator: mask
+        masking_char: "*"
+        chars_to_mask: 4
+      - type: PERSON
+        operator: replace
+        new_value: "[REDACTED NAME]"
+      - type: PHONE_NUMBER
+        operator: mask
+        masking_char: "#"
+        chars_to_mask: 6
 ```
 
 ### Configuration Parameters
 
 - `presidio_url`: Required. The URL of your Presidio Anonymizer API endpoint.
-- `anonymizer_rules`: Map of field names to their anonymization rules.
+- `anonymizer_rules`: List of anonymization rules that will be applied to all fields.
 
 Each rule contains:
 - `type`: The type of PII to detect (e.g., "PERSON", "EMAIL_ADDRESS", "PHONE_NUMBER", etc.)
@@ -47,7 +44,8 @@ Input:
 {
   "email": "john.doe@example.com",
   "name": "John Doe",
-  "phone": "+1-555-123-4567"
+  "phone": "+1-555-123-4567",
+  "description": "Contact John Doe at john.doe@example.com or +1-555-123-4567"
 }
 ```
 
@@ -56,6 +54,7 @@ Output:
 {
   "email": "john****@example.com",
   "name": "[REDACTED NAME]",
-  "phone": "+1-555-######67"
+  "phone": "+1-555-######67",
+  "description": "Contact [REDACTED NAME] at john****@example.com or +1-555-######67"
 }
 ``` 

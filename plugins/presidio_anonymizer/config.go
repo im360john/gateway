@@ -4,8 +4,8 @@ package presidioanonymizer
 type Config struct {
 	// PresidioURL is the URL of the Presidio Anonymizer API
 	PresidioURL string `json:"presidio_url" yaml:"presidio_url"`
-	// AnonymizerRules defines the anonymization rules for specific fields
-	AnonymizerRules map[string][]AnonymizerRule `json:"anonymizer_rules" yaml:"anonymizer_rules"`
+	// AnonymizerRules defines the anonymization rules that apply to all fields
+	AnonymizerRules []AnonymizerRule `json:"anonymizer_rules" yaml:"anonymizer_rules"`
 }
 
 // AnonymizerRule defines how to anonymize a specific type of PII
