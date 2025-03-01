@@ -24,16 +24,17 @@ Our first users are companies deploying AI agents for customer support and analy
 
 ## Features
 - ⚡ **Automatic API Generation** – Creates APIs using LLM based on table schema and sampled data.
-- 🗄️ **Structured Database Support** – Works with PostgreSQL, MySQL, ClickHouse, and Snowflake.
+- 🗄️ **Structured Database Support** – Works with <a href="https://docs.centralmind.ai/connectors/postgres/">PostgreSQL</a>, <a href="https://docs.centralmind.ai/connectors/mysql/">MySQL</a>, <a href="https://docs.centralmind.ai/connectors/clickhouse/">ClickHouse</a>, and <a href="https://docs.centralmind.ai/connectors/snowflake/">Snowflake</a> connectors.
 - 🌍 **Run APIs as Rest or MCP Server** – Easily expose APIs in multiple protocols.
 - 📜 **Swagger & OpenAPI 3.1.0 Documentation** – Automatically generated API documentation and OpenAPI spec.
-- 🔒 **Automatic PII Cleanup** – Uses regex rules, (Microsoft Presidio coming soon).
+- 🔒 **Automatic PII Cleanup** – Uses <a href="https://docs.centralmind.ai/plugins/pii_remover/">regex plugin</a> or <a href="https://docs.centralmind.ai/plugins/presidio_anonymizer/">Microsoft Presidio plugin</a> for reducting PII or sensetive data.
 - ⚡ **Configurable via YAML & Plugin System** – Extend API functionality effortlessly.
-- 🐳 **Run as Binary or Docker** – Comes with a ready-to-use Helm chart.
-- 🔑 **Row-Level Security (RLS)** – Restrict data access using Lua scripts.
-- 🔐 **Authentication** – Supports API keys and OAuth.
-- 👀 **Observability & Audit Trail** – Uses OpenTelemetry (OTel) for tracking requests.
-- 🏎️ **Caching** – Supports time-based and LRU caching for efficiency.
+- 🐳 **Run as Binary or Docker** – Comes with a ready-to-use <a href="https://docs.centralmind.ai/helm/gateway/">Helm chart</a> and docker container.
+- 📦 **Local & On-Prem Deployment** – Allow usage with self-hosted LLMs, just specify --ai-endpoint and --ai-model parameters.
+- 🔑 **Row-Level Security (RLS)** – Restrict data access using <a href="https://docs.centralmind.ai/plugins/lua_rls/">Lua scripts</a>.
+- 🔐 **Authentication** – Supports <a href="https://docs.centralmind.ai/plugins/api_keys/">API keys</a> and <a href="https://docs.centralmind.ai/plugins/oauth/">OAuth</a>.
+- 👀 **Observability & Audit Trail** – Uses <a href="https://docs.centralmind.ai/plugins/otel/">OpenTelemetry (OTel) plugin</a> for tracking requests including remote endpoints.
+- 🏎️ **Caching** – Supports time-based and <a href="https://docs.centralmind.ai/plugins/lru_cache/">LRU caching</a> for efficiency.
 
 ## How it Works
 
@@ -44,7 +45,7 @@ Our first users are companies deploying AI agents for customer support and analy
 </div>
 
 ### Connect & Discover  
-Gateway connects to your structured databases like PostgreSQL. Automatically analyzes the schema and samples data to generate an optimized API structure based on your prompt. Ensures security by detecting PII
+Gateway connects to your structured databases like PostgreSQL. Automatically analyzes the schema and samples data to generate an optimized API structure based on your prompt. Ensures security by detecting PII. On this stage the tool is using AI service to generate API configuration. You can use OpenAI or any OpenAI compatible API providers.
 
 ### Deploy  
 Runs as a standalone binary, Docker container, or Helm chart for Kubernetes. Configuration is managed via YAML and a plugin system, allowing customization without modifying the core code. Supports row-level security (RLS) with Lua scripts, caching strategies like LRU and time-based expiration, and observability through OpenTelemetry. Cleaning PII data using regex rules.   
@@ -191,8 +192,8 @@ Gateway implement MCP protocol, for easy access to your data right from claude, 
 
 ## Roadmap
 - 🗄️ **Expand Database Support** – Add support for Redshift, S3, Oracle, MS SQL, Elasticsearch.
+- 🔍 **Complex filters and Aggregations** - Support API methods with advanced filtering and aggregation syntax.
 - 🔐 **MCP with Authentication** – Secure Model Context Protocol with API keys and OAuth.
-- 🤖 **More LLM Providers** – Integrate Anthropic Claude, Google Gemini, DeepSeek.
-- 🏠 **Local & On-Prem Deployment** – Allow usage with self-hosted LLMs.
+- 🤖 **More LLM Providers** – Integrate Anthropic Claude, Google Gemini, DeepSeek.- 🏠 
 - 📦 **Schema Evolution & Versioning** – Track changes and auto-migrate APIs.
 - 🚦 **Traffic Control & Rate Limiting** – Intelligent throttling for high-scale environments.
