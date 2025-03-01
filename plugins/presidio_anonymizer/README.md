@@ -9,22 +9,23 @@ This plugin integrates with Microsoft's Presidio Anonymizer API to anonymize sen
 ## Configuration
 
 ```yaml
-presidio_url: http://localhost:8080/api/v1/projects/1/anonymize
-anonymizer_rules:
-  email:
-    - type: EMAIL_ADDRESS
-      operator: mask
-      masking_char: "*"
-      chars_to_mask: 4
-  name:
-    - type: PERSON
-      operator: replace
-      new_value: "[REDACTED NAME]"
-  phone:
-    - type: PHONE_NUMBER
-      operator: mask
-      masking_char: "#"
-      chars_to_mask: 6
+presidio_anonymizer:
+    presidio_url: http://localhost:8080/api/v1/projects/1/anonymize
+    anonymizer_rules:
+      email:
+        - type: EMAIL_ADDRESS
+          operator: mask
+          masking_char: "*"
+          chars_to_mask: 4
+      name:
+        - type: PERSON
+          operator: replace
+          new_value: "[REDACTED NAME]"
+      phone:
+        - type: PHONE_NUMBER
+          operator: mask
+          masking_char: "#"
+          chars_to_mask: 6
 ```
 
 ### Configuration Parameters
