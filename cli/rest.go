@@ -13,12 +13,14 @@ import (
 	"golang.org/x/xerrors"
 )
 
-func REST(configPath *string, addr *string, servers *string, disableSwagger *bool) *cobra.Command {
+func REST(configPath *string, addr *string, servers *string) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "rest",
 		Short: "REST gateway",
 		Args:  cobra.MatchAll(cobra.ExactArgs(0)),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			disableSwagger, _ := cmd.Flags().GetBool("disable-swagger")
+
 			gwRaw, err := os.ReadFile(*configPath)
 			if err != nil {
 				return xerrors.Errorf("unable to read yaml config file: %w", err)
@@ -51,16 +53,18 @@ func REST(configPath *string, addr *string, servers *string, disableSwagger *boo
 
 			// Use the disable-swagger flag value passed from parent command
 			// Register routes with all server addresses and disable-swagger flag
-			if err := a.RegisterRoutes(mux, *disableSwagger, serverAddresses...); err != nil {
+			if err := a.RegisterRoutes(mux, disableSwagger, serverAddresses...); err != nil {
 				return err
 			}
 
-			if !*disableSwagger {
+			if !disableSwagger {
 				logrus.Infof("docs here: %s/", serverAddresses[0])
 			}
 			return http.ListenAndServe(*addr, mux)
 		},
 	}
+
+	cmd.Flags().Bool("disable-swagger", false, "disable Swagger UI")
 
 	return cmd
 }

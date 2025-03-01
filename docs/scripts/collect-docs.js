@@ -227,7 +227,11 @@ async function collectConnectorsDocs() {
     // Process each connector
     for (const connectorDir of connectorDirs) {
       const connectorName = connectorDir.replace(/\/$/, ''); // Remove trailing slash
-      const readmePath = join(connectorsPath, connectorDir, 'README.md');
+      const readmeFiles = await glob('readme.md', {
+        cwd: join(connectorsPath, connectorDir),
+        nocase: true,
+      });
+      const readmePath = readmeFiles.length > 0 ? join(connectorsPath, connectorDir, readmeFiles[0]) : join(connectorsPath, connectorDir, 'README.md');
 
       try {
         const content = await readFile(readmePath, 'utf8');
