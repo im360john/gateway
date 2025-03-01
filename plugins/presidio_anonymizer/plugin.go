@@ -28,84 +28,108 @@ func (p *Plugin) Doc() string {
 }
 
 type presidioRequest struct {
-	Text         string              `json:"text"`
-	Anonymizers  []presidioAnonymizer `json:"anonymizers"`
+	Text        string               `json:"text"`
+	Anonymizers []PresidioAnonymizer `json:"anonymizers"`
 }
 
-type presidioAnonymizer struct {
-	Type     string `json:"type"`
-	NewValue string `json:"new_value,omitempty"`
-	Masking  *struct {
-		Char         string `json:"char,omitempty"`
-		CharsToMask int    `json:"chars_to_mask,omitempty"`
-	} `json:"masking,omitempty"`
+type PresidioAnonymizer struct {
+	Type     string       `json:"type"`
+	NewValue string       `json:"new_value,omitempty"`
+	Masking  *MaskingRule `json:"masking,omitempty"`
+}
+
+type MaskingRule struct {
+	Char        string `json:"char,omitempty"`
+	CharsToMask int    `json:"chars_to_mask,omitempty"`
 }
 
 func (p *Plugin) Process(data map[string]any, context map[string][]string) (processed map[string]any, skipped bool) {
-	for field, value := range data {
-		if strVal, ok := value.(string); ok {
-			if rules, exists := p.cfg.AnonymizerRules[field]; exists {
-				anonymized, err := p.anonymizeText(strVal, rules)
-				if err != nil {
-					// Log error but continue processing
-					fmt.Printf("Error anonymizing field %s: %v\n", field, err)
-					continue
+	// Convert data to JSON string for batch processing
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		fmt.Printf("Error marshaling data: %v\n", err)
+		return data, false
+	}
+
+	// Collect all rules from all fields
+	var allAnonymizers []PresidioAnonymizer
+	fieldsWithRules := make(map[string]bool)
+
+	for field, rules := range p.cfg.AnonymizerRules {
+		if _, exists := data[field]; !exists {
+			continue
+		}
+		fieldsWithRules[field] = true
+
+		for _, rule := range rules {
+			anonymizer := PresidioAnonymizer{
+				Type:     rule.Type,
+				NewValue: rule.NewValue,
+			}
+
+			if rule.Operator == "mask" {
+				anonymizer.Masking = &MaskingRule{
+					Char:        rule.MaskingChar,
+					CharsToMask: rule.CharsToMask,
 				}
-				data[field] = anonymized
 			}
+
+			allAnonymizers = append(allAnonymizers, anonymizer)
 		}
 	}
-	return data, false
-}
 
-func (p *Plugin) anonymizeText(text string, rules []AnonymizerRule) (string, error) {
+	// If no fields need anonymization, return original data
+	if len(allAnonymizers) == 0 {
+		return data, false
+	}
+
+	// Make a single API call with all rules
 	reqBody := presidioRequest{
-		Text:        text,
-		Anonymizers: make([]presidioAnonymizer, len(rules)),
-	}
-
-	for i, rule := range rules {
-		anonymizer := presidioAnonymizer{
-			Type:     rule.Type,
-			NewValue: rule.NewValue,
-		}
-		
-		if rule.Operator == "mask" {
-			anonymizer.Masking = &struct {
-				Char         string `json:"char,omitempty"`
-				CharsToMask int    `json:"chars_to_mask,omitempty"`
-			}{
-				Char:         rule.MaskingChar,
-				CharsToMask: rule.CharsToMask,
-			}
-		}
-		
-		reqBody.Anonymizers[i] = anonymizer
+		Text:        string(jsonData),
+		Anonymizers: allAnonymizers,
 	}
 
 	jsonBody, err := json.Marshal(reqBody)
 	if err != nil {
-		return "", fmt.Errorf("failed to marshal request: %v", err)
+		fmt.Printf("Error marshaling request: %v\n", err)
+		return data, false
 	}
 
 	resp, err := http.Post(p.cfg.PresidioURL, "application/json", bytes.NewBuffer(jsonBody))
 	if err != nil {
-		return "", fmt.Errorf("failed to call Presidio API: %v", err)
+		fmt.Printf("Error calling Presidio API: %v\n", err)
+		return data, false
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("Presidio API returned status code: %d", resp.StatusCode)
+		fmt.Printf("Presidio API returned status code: %d\n", resp.StatusCode)
+		return data, false
 	}
 
 	var result struct {
 		Text string `json:"text"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return "", fmt.Errorf("failed to decode response: %v", err)
+		fmt.Printf("Error decoding response: %v\n", err)
+		return data, false
 	}
 
-	return result.Text, nil
+	// Parse the anonymized JSON back into the data map
+	var anonymizedData map[string]any
+	if err := json.Unmarshal([]byte(result.Text), &anonymizedData); err != nil {
+		fmt.Printf("Error unmarshaling anonymized data: %v\n", err)
+		return data, false
+	}
+
+	// Update only the fields that had rules
+	for field := range fieldsWithRules {
+		if val, ok := anonymizedData[field]; ok {
+			data[field] = val
+		}
+	}
+
+	return data, false
 }
 
 func New(config Config) (plugins.Interceptor, error) {
@@ -116,4 +140,4 @@ func New(config Config) (plugins.Interceptor, error) {
 	return &Plugin{
 		cfg: config,
 	}, nil
-} 
+}
