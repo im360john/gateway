@@ -9,6 +9,7 @@ func StartCommand() *cobra.Command {
 	var gatewayParams string
 	var addr string
 	var servers string
+	var disableSwagger bool
 	cmd := &cobra.Command{
 		Use:   "start",
 		Short: "Start gateway",
@@ -17,7 +18,8 @@ func StartCommand() *cobra.Command {
 	cmd.PersistentFlags().StringVar(&gatewayParams, "config", "./gateway.yaml", "path to yaml file with gateway configuration")
 	cmd.PersistentFlags().StringVar(&addr, "addr", ":9090", "addr for gateway")
 	cmd.PersistentFlags().StringVar(&servers, "servers", "", "comma-separated list of additional server URLs for Swagger UI (e.g., https://dev1.example.com,https://dev2.example.com)")
-	RegisterCommand(cmd, REST(&gatewayParams, &addr, &servers))
+	cmd.PersistentFlags().BoolVar(&disableSwagger, "disable-swagger", false, "disable Swagger UI")
+	RegisterCommand(cmd, REST(&gatewayParams, &addr, &servers, &disableSwagger))
 	RegisterCommand(cmd, MCP(&gatewayParams, &addr))
 	RegisterCommand(cmd, MCPStdio(&gatewayParams))
 	RegisterCommand(cmd, Discover(&gatewayParams))
