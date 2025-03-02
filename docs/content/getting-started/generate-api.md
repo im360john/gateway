@@ -42,24 +42,24 @@ port: 5432
 Use the following command to generate an API with AI assistance:
 
 ```bash
-./gateway start \
+gateway \
   --config connection.yaml \
   discover \
   --db-type postgres \
-  --ai-api-key %OpenAPI_KEY% \
+  --tables table_name_1 --tables table_name_2 \
+  --ai-api-key $OPENAI_KEY \
   --prompt "Develop an API that enables a chatbot to retrieve information about data. \
 Try to place yourself as analyst and think what kind of data you will require, \
 based on that come up with useful API methods for that"
-
 ```
 
 #### Parameter Descriptions:
 
-- `start`: Initiates the Gateway service
-- `--config connection.yaml`: Path to the database connection configuration file
 - `discover`: Activates the discovery mechanism to analyze your database using AI
+- `--config connection.yaml`: Path to the database connection configuration file
 - `--db-type postgres`: Specifies the database type (in this case, postgres)
-- `--ai-api-key $OPENAIKEY`: Your OpenAI API key for AI-assisted API generation
+- `--tables`: Specify which tables to include in API generation (can be used multiple times)
+- `--ai-api-key $OPENAI_KEY`: Your OpenAI API key for AI-assisted API generation
 - `--prompt "..."`: Customizes the AI's approach to generating the API based on your specific needs
 
 After running this command, Gateway will generate a `gateway.yaml` configuration file. This file contains the complete API definition, including:
@@ -79,7 +79,7 @@ After generating your API:
 2. Customize endpoints and parameters as needed
 3. Run Gateway with your configuration:
    ```bash
-   ./gateway start --config gateway.yaml rest
+   gateway start --config gateway.yaml rest
    ```
 
 For more detailed information on configuration options, refer to the [Configuration Guide](./configuration.md).

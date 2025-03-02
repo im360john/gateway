@@ -28,6 +28,7 @@ func main() {
 	cli.RegisterCommand(rootCommand, cli.StartCommand())
 	cli.RegisterCommand(rootCommand, cli.Connectors())
 	cli.RegisterCommand(rootCommand, cli.Plugins())
+	cli.RegisterCommand(rootCommand, cli.Discover())
 	err := rootCommand.Execute()
 	if err != nil {
 		os.Exit(1)

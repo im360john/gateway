@@ -79,7 +79,8 @@ func init() {
 	})
 }
 
-func Discover(configPath *string) *cobra.Command {
+func Discover() *cobra.Command {
+	var configPath string
 	var databaseType string
 	var tables []string
 	var aiAPIKey string
@@ -107,7 +108,7 @@ func Discover(configPath *string) *cobra.Command {
 			logrus.Info("🚀 API Discovery Process")
 
 			logrus.Info("Step 1: Read configs")
-			configRaw, err := os.ReadFile(*configPath)
+			configRaw, err := os.ReadFile(configPath)
 			if err != nil {
 				return err
 			}
@@ -258,6 +259,7 @@ func Discover(configPath *string) *cobra.Command {
 			return nil
 		},
 	}
+	cmd.Flags().StringVar(&configPath, "config", "connection.yaml", "Path to connection yaml file")
 	cmd.Flags().StringSliceVar(&tables, "tables", nil, "List of table to include")
 	cmd.Flags().StringVar(&databaseType, "db-type", "postgres", "Type of database")
 	cmd.Flags().StringVar(&aiAPIKey, "ai-api-key", "ai-api-key", "AI API token")

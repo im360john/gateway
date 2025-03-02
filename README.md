@@ -11,10 +11,10 @@ description: 'Build a data platform for LLMs in one day. Securely connect any da
 
 </div>
 
-AI agents and LLM-powered applications need fast, secure access to data, but traditional APIs and databases aren’t built for this. We’re building an API layer that automatically generates secure, LLM-optimized APIs on top of your structured data.
+AI agents and LLM-powered applications need fast, secure access to data, but traditional APIs and databases aren't built for this. We're building an API layer that automatically generates secure, LLM-optimized APIs on top of your structured data.
 
 - Filters out PII and sensitive data to ensure compliance with GDPR, CPRA, SOC 2, and other regulations.
-- Adds traceability and auditing, so AI applications aren’t black boxes and security teams can control.
+- Adds traceability and auditing, so AI applications aren't black boxes and security teams can control.
 - Optimizes for AI workloads, supports Model Context Protocol (MCP) with extra meta information to help AI agents understand APIs, caching and security.
 
 Our first users are companies deploying AI agents for customer support and analytics, where they need models to access the right data without security risks or compliance headaches.
@@ -162,7 +162,7 @@ To generate your gateway config simply run discover command with your connection
 
 ```shell
 go build .
-./gateway start --config ./example/gateway.yaml rest
+gateway start --config ./example/gateway.yaml rest
 ```
 
 ### Docker compose
