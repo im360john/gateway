@@ -15,7 +15,7 @@ This plugin integrates with <a href="https://microsoft.github.io/presidio/anonym
 
 ```yaml
 presidio_anonymizer:
-    presidio_url: http://localhost:8080/api/v1/projects/1/anonymize
+    presidio_url: http://localhost:8080/anonymize
     anonymizer_rules:
       - type: EMAIL_ADDRESS
         operator: mask
