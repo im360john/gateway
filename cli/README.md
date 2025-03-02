@@ -9,11 +9,13 @@ This document provides information about the available CLI commands and their pa
 Starts the Gateway with the specified configuration.
 
 **Usage:**
+
 ```
 gateway start [flags]
 ```
 
 **Flags:**
+
 - `--config` - Path to YAML file with gateway configuration (default: "./gateway.yaml")
 - `--addr` - Address for gateway server (default: ":9090")
 - `--servers` - Comma-separated list of additional server URLs for Swagger UI (e.g., "https://dev1.example.com,https://dev2.example.com")
@@ -23,11 +25,13 @@ gateway start [flags]
 Starts the REST Gateway service.
 
 **Usage:**
+
 ```
 gateway start rest [flags]
 ```
 
 **Flags:**
+
 - `--disable-swagger` - Disable Swagger UI (default: false)
 
 ### `start mcp`
@@ -35,6 +39,7 @@ gateway start rest [flags]
 Starts the MCP (Message-Coupling Protocol) Gateway service.
 
 **Usage:**
+
 ```
 gateway start mcp
 ```
@@ -44,23 +49,27 @@ gateway start mcp
 Starts the MCP Gateway service using stdin/stdout for communication.
 
 **Usage:**
+
 ```
 gateway start mcp-stdio [flags]
 ```
 
 **Flags:**
+
 - `--log-file` - Path to log file (default: "mcp.log")
 
-### `start discover`
+### `discover`
 
 Discovers and generates a gateway configuration based on database schema.
 
 **Usage:**
+
 ```
-gateway start discover [flags]
+gateway discover [flags]
 ```
 
 **Flags:**
+
 - `--database-type` - Type of database to connect to
 - `--tables` - Specific tables to include in the discovery
 - `--ai-api-key` - API key for AI service, for instance OpenAI key
@@ -74,6 +83,7 @@ gateway start discover [flags]
 Lists all available database connectors.
 
 **Usage:**
+
 ```
 gateway connectors [connector_name]
 ```
@@ -85,6 +95,7 @@ If a connector name is provided, displays detailed documentation for that connec
 Lists all available plugins.
 
 **Usage:**
+
 ```
 gateway plugins [plugin_name]
 ```
@@ -101,6 +112,7 @@ The gateway.yaml configuration file defines:
 - Plugin configurations
 
 Example configuration:
+
 ```yaml
 # Example gateway.yaml
 api:
