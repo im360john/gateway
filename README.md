@@ -71,7 +71,7 @@ Exposes APIs through REST, and MCP with built-in authentication via API keys and
 Gateway is LLM-model first, i.e. it's designed to be generated via LLM-models.
 To generate your gateway config simply run discover command with your connection info:
 
-1. Connection info
+1. Connection info, eg connection.yaml
    ```yaml
    hosts:
      - localhost
@@ -83,7 +83,7 @@ To generate your gateway config simply run discover command with your connection
 2. Discovery command
    ```shell
    gateway discover  \
-      --config PATH_TO_CONFIG \
+      --config connection.yaml \
       --db-type postgres \
       --tables table_name_1 --tables table_name_2 \
       --ai-api-key $TOKEN \
