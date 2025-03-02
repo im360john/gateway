@@ -21,8 +21,8 @@ export default defineConfig({
           label: 'Getting Started',
           items: [
             { label: 'Installation', slug: 'content/getting-started/installation' },
-            { label: 'Generate API', slug: 'content/getting-started/generate-api' },
-            { label: 'Launch API', slug: 'content/getting-started/launch-api' },
+            { label: 'Generating an API', slug: 'content/getting-started/generating-api' },
+            { label: 'Launching an API', slug: 'content/getting-started/launching-api' },
           ],
         },
         {
@@ -47,14 +47,14 @@ export default defineConfig({
         {
           label: 'Database Connectors',
           autogenerate: {
-            directory: 'connectors'
-          }
+            directory: 'connectors',
+          },
         },
         {
           label: 'Plugins',
           autogenerate: {
-            directory: 'plugins'
-          }
+            directory: 'plugins',
+          },
         },
         {
           label: 'Terms of Service',

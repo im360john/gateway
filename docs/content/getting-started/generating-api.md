@@ -1,5 +1,5 @@
 ---
-title: 'Generate API'
+title: 'Generating an API'
 ---
 
 # Overview
@@ -12,7 +12,7 @@ Before generating an API, ensure you have:
 
 1. Gateway installed using one of the [installation methods](./installation.md)
 2. Get connection string to your database and make sure its accessable
-3. Get OpenAPI key 
+3. Get OpenAPI key
 
 ## Using the Discovery Command
 
