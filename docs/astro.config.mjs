@@ -26,6 +26,13 @@ export default defineConfig({
           ],
         },
         {
+          label: 'Deployment',
+          items: [
+            { label: 'Helm Installation', link: '/helm/gateway' },
+            { label: 'Kubernetes Example', link: '/example/k8s' },
+          ],
+        },
+        {
           label: 'Integration',
           items: [
             { label: 'ChatGPT', slug: 'content/integration/chatgpt' },
@@ -35,8 +42,6 @@ export default defineConfig({
           ],
         },
         { label: 'CLI (Command Line Interface)', link: '/cli' },
-        { label: 'Helm Installation', link: '/helm/gateway' },
-        { label: 'Kubernetes Example', link: '/example/k8s' },
         {
           label: 'Database Connectors',
           autogenerate: {
