@@ -11,18 +11,18 @@ description: 'Build a data platform for LLMs in one day. Securely connect any da
 
 </div>
 
-AI agents and LLM-powered applications need fast, secure access to data, but traditional APIs and databases aren’t built for this. We’re building an API layer that automatically generates secure, LLM-optimized APIs on top of your structured data.
+AI agents and LLM-powered applications need fast, secure access to data, but traditional APIs and databases aren't built for this. We're building an API layer that automatically generates secure, LLM-optimized APIs on top of your structured data.
 
 - Filters out PII and sensitive data to ensure compliance with GDPR, CPRA, SOC 2, and other regulations.
-- Adds traceability and auditing, so AI applications aren’t black boxes and security teams can control.
+- Adds traceability and auditing, so AI applications aren't black boxes and security teams can control.
 - Optimizes for AI workloads, supports Model Context Protocol (MCP) with extra meta information to help AI agents understand APIs, caching and security.
 
 Our first users are companies deploying AI agents for customer support and analytics, where they need models to access the right data without security risks or compliance headaches.
 
 ![demo](/assets/demo.gif)
 
-
 ## Features
+
 - ⚡ **Automatic API Generation** – Creates APIs using LLM based on table schema and sampled data.
 - 🗄️ **Structured Database Support** – Works with <a href="https://docs.centralmind.ai/connectors/postgres/">PostgreSQL</a>, <a href="https://docs.centralmind.ai/connectors/mysql/">MySQL</a>, <a href="https://docs.centralmind.ai/connectors/clickhouse/">ClickHouse</a>, and <a href="https://docs.centralmind.ai/connectors/snowflake/">Snowflake</a> connectors.
 - 🌍 **Run APIs as Rest or MCP Server** – Easily expose APIs in multiple protocols.
@@ -44,20 +44,24 @@ Our first users are companies deploying AI agents for customer support and analy
 
 </div>
 
-### Connect & Discover  
+### Connect & Discover
+
 Gateway connects to your structured databases like PostgreSQL. Automatically analyzes the schema and samples data to generate an optimized API structure based on your prompt. Ensures security by detecting PII. On this stage the tool is using AI service to generate API configuration. You can use OpenAI or any OpenAI compatible API providers.
 
-### Deploy  
-Runs as a standalone binary, Docker container, or Helm chart for Kubernetes. Configuration is managed via YAML and a plugin system, allowing customization without modifying the core code. Supports row-level security (RLS) with Lua scripts, caching strategies like LRU and time-based expiration, and observability through OpenTelemetry. Cleaning PII data using regex rules.   
+### Deploy
 
-### Use & Integrate  
-Exposes APIs through REST, and MCP with built-in authentication via API keys and OAuth. Designed for seamless integration with AI models, including OpenAI, Anthropic Claude, Google Gemini, and DeepSeek. Automatically provides OpenAPI 3.1.0 documentation for easy adoption and supports flexible query execution with structured access control.  
+Runs as a standalone binary, Docker container, or Helm chart for Kubernetes. Configuration is managed via YAML and a plugin system, allowing customization without modifying the core code. Supports row-level security (RLS) with Lua scripts, caching strategies like LRU and time-based expiration, and observability through OpenTelemetry. Cleaning PII data using regex rules.
+
+### Use & Integrate
+
+Exposes APIs through REST, and MCP with built-in authentication via API keys and OAuth. Designed for seamless integration with AI models, including OpenAI, Anthropic Claude, Google Gemini, and DeepSeek. Automatically provides OpenAPI 3.1.0 documentation for easy adoption and supports flexible query execution with structured access control.
 
 ## Documentation
+
 - Getting Started
-   - <a href="https://docs.centralmind.ai/content/getting-started/installation/">Installation</a>
-   - <a href="https://docs.centralmind.ai/content/getting-started/generate-api/">Generate API</a>
-   - <a href="https://docs.centralmind.ai/content/getting-started/launch-api/">Launch API</a>
+  - <a href="https://docs.centralmind.ai/content/getting-started/installation/">Installation</a>
+  - <a href="https://docs.centralmind.ai/content/getting-started/generate-api/">Generate API</a>
+  - <a href="https://docs.centralmind.ai/content/getting-started/launch-api/">Launch API</a>
 - <a href="https://docs.centralmind.ai/content/integration/chatgpt/"> Integration - ChatGPT</a>
 - <a href="https://docs.centralmind.ai/connectors/"> Database Connectors</a>
 - <a href="https://docs.centralmind.ai/plugins/"> Plugins</a>
@@ -70,7 +74,7 @@ To generate your gateway config simply run discover command with your connection
 1. Connection info
    ```yaml
    hosts:
-   - localhost
+     - localhost
    user: postgres
    password: password
    database: mydb
@@ -78,15 +82,15 @@ To generate your gateway config simply run discover command with your connection
    ```
 2. Discovery command
    ```shell
-   gateway start  \
+   gateway discover  \
       --config PATH_TO_CONFIG \
-      discover \
       --db-type postgres \
-      --tables table_name_1 --tables table_name_2 \ 
+      --tables table_name_1 --tables table_name_2 \
       --ai-api-key $TOKEN \
       --prompt "Generate for me awesome readonly api"
    ```
 3. Wait for completion
+
    ```shell
       INFO 🚀 API Discovery Process
       INFO Step 1: Read configs
@@ -111,7 +115,7 @@ To generate your gateway config simply run discover command with your connection
       INFO ✅ Step 4 completed. Done.
 
       INFO Step 5: Using AI to design API
-      Waiting for OpenAI response... Done!     
+      Waiting for OpenAI response... Done!
       INFO OpenAI usage:  Input tokens=3187 Output tokens=14872 Total tokens=18059
       INFO API Functions Created:
       INFO   - GET /payment_dim/{payment_key} - Retrieve a payment detail by its payment key
@@ -133,36 +137,34 @@ To generate your gateway config simply run discover command with your connection
       INFO API methods created: 18
       INFO Total number of columns with PII data: 2
    ```
+
 4. Explore results, the result would be saved in output file:
    ```yaml
    api:
-       name: Awesome Readonly API
-       description: ""
-       version: "1.0"
+     name: Awesome Readonly API
+     description: ''
+     version: '1.0'
    database:
-       type: YOUR_DB_TYPE
-       connection: YOUR_CONNECTION_INFO
-       tables:
-           - name: table_name_1
-             columns:
-               ... // Columns for this table
-             endpoints:
-               - http_method: GET
-                 http_path: /some_path
-                 mcp_method: some_method
-                 summary: Some readable summary.
-                 description: 'Some description'
-                 query: SQL Query with params
-                 params:
-                   ... // List of params for query
+     type: YOUR_DB_TYPE
+     connection: YOUR_CONNECTION_INFO
+     tables:
+       - name: table_name_1
+         columns: ... // Columns for this table
+         endpoints:
+           - http_method: GET
+             http_path: /some_path
+             mcp_method: some_method
+             summary: Some readable summary.
+             description: 'Some description'
+             query: SQL Query with params
+             params: ... // List of params for query
    ```
-
 
 ## How to start API
 
 ```shell
 go build .
-./gateway start --config ./example/gateway.yaml rest
+gateway start --config ./example/gateway.yaml rest
 ```
 
 ### Docker compose
@@ -176,32 +178,28 @@ docker compose up ./example/docker-compose.yml
 Gateway implement MCP protocol, for easy access to your data right from claude, to use it
 
 1. Build binary
-    ```shell
-    go build .
-    ```
+   ```shell
+   go build .
+   ```
 2. Add gateway to claude integrations config:
    ```json
    {
-    "mcpServers": {
-        "gateway": {
-            "command": "PATH_TO_GATEWAY_BINARY",
-            "args": [
-                "start", 
-                "--config",
-                "PATH_TO_GATEWAY_YAML_CONFIG", 
-                "mcp-stdio"
-            ]
-        }
-    }
+     "mcpServers": {
+       "gateway": {
+         "command": "PATH_TO_GATEWAY_BINARY",
+         "args": ["start", "--config", "PATH_TO_GATEWAY_YAML_CONFIG", "mcp-stdio"]
+       }
+     }
    }
    ```
 3. Ask something regards your data:
    ![claude_integration.png](./assets/claude_integration.png)
 
 ## Roadmap
+
 - 🗄️ **Expand Database Support** – Add support for Redshift, S3, Oracle, MS SQL, Elasticsearch.
 - 🔍 **Complex filters and Aggregations** - Support API methods with advanced filtering and aggregation syntax.
 - 🔐 **MCP with Authentication** – Secure Model Context Protocol with API keys and OAuth.
-- 🤖 **More LLM Providers** – Integrate Anthropic Claude, Google Gemini, DeepSeek.- 🏠 
+- 🤖 **More LLM Providers** – Integrate Anthropic Claude, Google Gemini, DeepSeek.- 🏠
 - 📦 **Schema Evolution & Versioning** – Track changes and auto-migrate APIs.
 - 🚦 **Traffic Control & Rate Limiting** – Intelligent throttling for high-scale environments.

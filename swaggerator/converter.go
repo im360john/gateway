@@ -4,6 +4,7 @@ import (
 	"context"
 	"embed"
 	"github.com/centralmind/gateway/connectors"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
 	"io/fs"
 	"net/http"
@@ -64,7 +65,7 @@ func Schema(schema model.Config, addresses ...string) (*huma.OpenAPI, error) {
 		for _, endpoint := range info.Endpoints {
 			cols, err := connector.InferQuery(context.Background(), endpoint.Query)
 			if err != nil {
-				return nil, xerrors.Errorf("unable to infer query %s: %w", endpoint.Query, err)
+				logrus.Warnf("unable to infer query %s: %v", endpoint.Query, err)
 			}
 			schemaProps := map[string]*huma.Schema{}
 			for _, col := range cols {

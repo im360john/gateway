@@ -36,17 +36,23 @@ services:
 
 
   gateway:
-    build: .. # build main gateway docker CLI
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
     command:
       - start
       - --config
       - /usr/local/bin/config.yaml
-      - --port
-      - "8080"
+      - --addr
+      - ":8182"
+      - rest
     depends_on:
       - postgres
     ports:
-      - "8182:8080"
+      - "8182:8182"
     volumes:
       - ./gateway.yaml:/usr/local/bin/config.yaml
 

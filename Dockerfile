@@ -1,8 +1,27 @@
+# Build stage
+FROM golang:1.23-alpine AS builder
+
+WORKDIR /app
+
+# Install build dependencies
+RUN apk add --no-cache git make
+
+# Build args for cross-compilation
+ARG TARGETOS=linux
+ARG TARGETARCH=amd64
+
+# Copy the source code
+COPY . .
+
+# Build the binary with platform-specific settings
+RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -o gateway
+
+# Final stage
 FROM alpine:3.19
 
-ENV TZ=Etc/UTC, ROTATION_TZ=Etc/UTC
-
-ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Etc/UTC \
+    ROTATION_TZ=Etc/UTC \
+    DEBIAN_FRONTEND=noninteractive
 
 RUN echo $TZ > /etc/timezone && \
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime
@@ -10,13 +29,11 @@ RUN echo $TZ > /etc/timezone && \
 # Create a non-root user and group
 RUN addgroup --system cligroup && adduser --system --ingroup cligroup cliuser
 
-ARG BINARY=gateway
-COPY ${BINARY} /usr/local/bin/gw
+# Copy the binary from builder
+COPY --from=builder /app/gateway /usr/local/bin/gw
 
-RUN chmod +x /usr/local/bin/gw
-
-# Set ownership of the binary to the non-root user
-RUN chown cliuser:cligroup /usr/local/bin/gw
+RUN chmod +x /usr/local/bin/gw && \
+    chown cliuser:cligroup /usr/local/bin/gw
 
 # Switch to the non-root user
 USER cliuser
