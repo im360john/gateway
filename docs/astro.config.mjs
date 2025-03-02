@@ -30,6 +30,7 @@ export default defineConfig({
           items: [
             { label: 'ChatGPT', slug: 'content/integration/chatgpt' },
             { label: 'LangChain', slug: 'content/integration/langchain' },
+            { label: 'Claude Desktop', slug: 'content/integration/claude-desktop' },
           ],
         },
         { label: 'CLI (Command Line Interface)', link: '/cli' },
