@@ -43,8 +43,8 @@ Use the following command to generate an API with AI assistance:
 
 ```bash
 gateway \
-  --config connection.yaml \
   discover \
+  --config connection.yaml \
   --db-type postgres \
   --tables table_name_1 --tables table_name_2 \
   --ai-api-key $OPENAI_KEY \
