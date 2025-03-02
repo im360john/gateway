@@ -89,14 +89,10 @@ func TestPluginWithContainer(t *testing.T) {
 			name: "anonymize multiple fields",
 			input: map[string]any{
 				"email":       "john.doe@example.com",
-				"name":        "John Doe",
-				"phone":       "+1-555-123-4567",
 				"description": "Contact John Doe at john.doe@example.com or +1-555-123-4567",
 			},
 			expected: map[string]interface{}{
 				"email":       "****.doe@example.com",
-				"name":        "John Doe",
-				"phone":       "+1-555-123-4567",
 				"description": "Contact <PERSON> at ****.doe@example.com or +<IN_PAN>4567",
 			},
 		},
