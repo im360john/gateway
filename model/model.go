@@ -115,6 +115,7 @@ type Table struct {
 	Name      string         `yaml:"name" json:"name,omitempty"`
 	Columns   []ColumnSchema `yaml:"columns" json:"columns,omitempty"`
 	Endpoints []Endpoint     `yaml:"endpoints" json:"endpoints,omitempty"`
+	RowCount  int            `yaml:"row_count" json:"row_count,omitempty"`
 }
 
 type ColumnSchema struct {

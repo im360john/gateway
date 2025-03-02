@@ -85,8 +85,7 @@ func (c Connector) Sample(ctx context.Context, table model.Table) ([]map[string]
 }
 
 func (c Connector) Discovery(ctx context.Context) ([]model.Table, error) {
-	rows, err := c.db.Query("SELECT table_name FROM information_schema.tables WHERE table_schema = CURRENT_SCHEMA()")
-
+	rows, err := c.db.QueryContext(ctx, fmt.Sprintf("SHOW TABLES IN SCHEMA %s.%s", c.config.Database, c.config.Schema))
 	if err != nil {
 		return nil, err
 	}
@@ -95,18 +94,30 @@ func (c Connector) Discovery(ctx context.Context) ([]model.Table, error) {
 	var tables []model.Table
 	for rows.Next() {
 		var tableName string
+		var createdOn, kind, databaseName, schemaName, clusterBy, owner, comment, changeTracking, automaticClustering, searchOptimization string
 
-		fmt.Println("TableName")
-		fmt.Println(tableName)
-
-		if err := rows.Scan(&tableName); err != nil {
+		if err := rows.Scan(&createdOn, &tableName, &kind, &databaseName, &schemaName, &clusterBy, &owner, &comment, &changeTracking, &automaticClustering, &searchOptimization); err != nil {
 			return nil, err
 		}
 		columns, err := c.LoadsColumns(ctx, tableName)
 		if err != nil {
 			return nil, err
 		}
-		tables = append(tables, model.Table{Name: tableName, Columns: columns})
+
+		// Get the total row count for this table
+		var rowCount int
+		countQuery := fmt.Sprintf("SELECT COUNT(*) FROM \"%s\".\"%s\".\"%s\"", c.config.Database, c.config.Schema, tableName)
+		err = c.db.Get(&rowCount, countQuery)
+		if err != nil {
+			return nil, xerrors.Errorf("unable to get row count for table %s: %w", tableName, err)
+		}
+
+		table := model.Table{
+			Name:     tableName,
+			Columns:  columns,
+			RowCount: rowCount,
+		}
+		tables = append(tables, table)
 	}
 	return tables, nil
 }

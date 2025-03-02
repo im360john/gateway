@@ -128,7 +128,21 @@ func (c Connector) Discovery(ctx context.Context) ([]model.Table, error) {
 		if err != nil {
 			return nil, err
 		}
-		tables = append(tables, model.Table{Name: tableName, Columns: columns})
+
+		// Get the total row count for this table
+		var rowCount int
+		countQuery := fmt.Sprintf("SELECT COUNT(*) FROM %s", tableName)
+		err = c.db.Get(&rowCount, countQuery)
+		if err != nil {
+			return nil, xerrors.Errorf("unable to get row count for table %s: %w", tableName, err)
+		}
+
+		table := model.Table{
+			Name:     tableName,
+			Columns:  columns,
+			RowCount: rowCount, // Store the row count in the table struct
+		}
+		tables = append(tables, table)
 	}
 	return tables, nil
 }

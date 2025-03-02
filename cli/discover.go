@@ -44,9 +44,10 @@ var (
 )
 
 type TableData struct {
-	Columns []gw_model.ColumnSchema
-	Name    string
-	Sample  []map[string]any
+	Columns  []gw_model.ColumnSchema
+	Name     string
+	Sample   []map[string]any
+	RowCount int
 }
 
 // PromptColumnSchema is used specifically for generating prompts,
@@ -129,7 +130,7 @@ func Discover(configPath *string) *cobra.Command {
 			logrus.Info("Discovered Tables:")
 			for _, table := range allTables {
 				if tableSet[table.Name] {
-					logrus.Infof("  - %s: %d columns", table.Name, len(table.Columns))
+					logrus.Infof("  - %s: %d columns, %d rows", table.Name, len(table.Columns), table.RowCount)
 				}
 			}
 
@@ -147,9 +148,10 @@ func Discover(configPath *string) *cobra.Command {
 					return err
 				}
 				tablesToGenerate = append(tablesToGenerate, TableData{
-					Columns: table.Columns,
-					Name:    table.Name,
-					Sample:  sample,
+					Columns:  table.Columns,
+					Name:     table.Name,
+					Sample:   sample,
+					RowCount: table.RowCount,
 				})
 			}
 
@@ -253,7 +255,7 @@ func generatePrompt(databaseType, extraPrompt string, tables []TableData) string
 	res += "\n" + string(apiConfigSchema) + "\n" + extraPrompt + "\n\n"
 	for _, table := range tables {
 		res += fmt.Sprintf(`
-<%[1]s number_columns=%[5]v number_rows=%[4]v>
+<%[1]s number_columns=%[5]v number_rows=%[6]v>
 schema:
 %[2]s
 ---
@@ -261,7 +263,7 @@ data_sample:
 %[3]s
 </%[1]s>
 
-`, table.Name, yamlify(table.Columns), yamlify(table.Sample), len(table.Sample), len(table.Columns))
+`, table.Name, yamlify(table.Columns), yamlify(table.Sample), len(table.Sample), len(table.Columns), table.RowCount)
 	}
 
 	return res

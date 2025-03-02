@@ -27,7 +27,7 @@ Our first users are companies deploying AI agents for customer support and analy
 - 🗄️ **Structured Database Support** – Works with <a href="https://docs.centralmind.ai/connectors/postgres/">PostgreSQL</a>, <a href="https://docs.centralmind.ai/connectors/mysql/">MySQL</a>, <a href="https://docs.centralmind.ai/connectors/clickhouse/">ClickHouse</a>, and <a href="https://docs.centralmind.ai/connectors/snowflake/">Snowflake</a> connectors.
 - 🌍 **Run APIs as Rest or MCP Server** – Easily expose APIs in multiple protocols.
 - 📜 **Swagger & OpenAPI 3.1.0 Documentation** – Automatically generated API documentation and OpenAPI spec.
-- 🔒 **Automatic PII Cleanup** – Uses <a href="https://docs.centralmind.ai/plugins/pii_remover/">regex plugin</a> or <a href="https://docs.centralmind.ai/plugins/presidio_anonymizer/">Microsoft Presidio plugin</a> for reducting PII or sensetive data.
+- 🔒 **PII Cleanup** – Uses <a href="https://docs.centralmind.ai/plugins/pii_remover/">regex plugin</a> or <a href="https://docs.centralmind.ai/plugins/presidio_anonymizer/">Microsoft Presidio plugin</a> for reducting PII or sensetive data.
 - ⚡ **Configurable via YAML & Plugin System** – Extend API functionality effortlessly.
 - 🐳 **Run as Binary or Docker** – Comes with a ready-to-use <a href="https://docs.centralmind.ai/helm/gateway/">Helm chart</a> and docker container.
 - 📦 **Local & On-Prem Usage** – Allow usage with self-hosted LLMs, just specify --ai-endpoint and --ai-model parameters.

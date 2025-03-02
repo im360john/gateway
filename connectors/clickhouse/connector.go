@@ -91,7 +91,7 @@ func (c Connector) Sample(ctx context.Context, table model.Table) ([]map[string]
 }
 
 func (c Connector) Discovery(ctx context.Context) ([]model.Table, error) {
-	rows, err := c.db.Query("SELECT name FROM system.tables WHERE database = ?", c.config.Database)
+	rows, err := c.db.QueryContext(ctx, fmt.Sprintf("SHOW TABLES FROM %s", c.config.Database))
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +107,21 @@ func (c Connector) Discovery(ctx context.Context) ([]model.Table, error) {
 		if err != nil {
 			return nil, err
 		}
-		tables = append(tables, model.Table{Name: tableName, Columns: columns})
+
+		// Get the total row count for this table
+		var rowCount int
+		countQuery := fmt.Sprintf("SELECT COUNT(*) FROM `%s`.`%s`", c.config.Database, tableName)
+		err = c.db.Get(&rowCount, countQuery)
+		if err != nil {
+			return nil, xerrors.Errorf("unable to get row count for table %s: %w", tableName, err)
+		}
+
+		table := model.Table{
+			Name:     tableName,
+			Columns:  columns,
+			RowCount: rowCount,
+		}
+		tables = append(tables, table)
 	}
 	return tables, nil
 }
