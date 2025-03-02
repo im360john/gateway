@@ -2,9 +2,17 @@ package presidioanonymizer
 
 // Config represents the configuration for the Presidio Anonymizer plugin
 type Config struct {
-	// PresidioURL is the URL of the Presidio Anonymizer API
-	PresidioURL string `json:"presidio_url" yaml:"presidio_url"`
-	// AnonymizerRules defines the anonymization rules that apply to all fields
+	// AnonymizeURL is the URL of the Presidio Anonymizer API
+	AnonymizeURL string `json:"anonymize_url" yaml:"anonymize_url"`
+	// AnalyzerURL is the URL of the Presidio Analyzer API
+	AnalyzerURL string `json:"analyzer_url" yaml:"analyzer_url"`
+	// Language is the language used for analysis (default: "en")
+	Language string `json:"language" yaml:"language"`
+	// HashType is the hash algorithm used for hash operator (e.g., "md5", "sha256")
+	HashType string `json:"hash_type" yaml:"hash_type"`
+	// EncryptKey is the key used for encrypt operator
+	EncryptKey string `json:"encrypt_key" yaml:"encrypt_key"`
+	// AnonymizerRules defines the anonymization rules that apply to detected entities
 	AnonymizerRules []AnonymizerRule `json:"anonymizer_rules" yaml:"anonymizer_rules"`
 }
 
@@ -12,7 +20,7 @@ type Config struct {
 type AnonymizerRule struct {
 	// Type of PII to detect (e.g. "PERSON", "PHONE_NUMBER", etc.)
 	Type string `json:"type" yaml:"type"`
-	// Operator defines the anonymization operation ("replace" or "mask")
+	// Operator defines the anonymization operation ("mask", "replace", "hash", "encrypt")
 	Operator string `json:"operator" yaml:"operator"`
 	// NewValue is used with "replace" operator
 	NewValue string `json:"new_value,omitempty" yaml:"new_value,omitempty"`
@@ -28,4 +36,4 @@ func (c Config) Doc() string {
 
 func (c Config) Tag() string {
 	return "presidio_anonymizer"
-} 
+}
