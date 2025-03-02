@@ -53,6 +53,14 @@ Runs as a standalone binary, Docker container, or Helm chart for Kubernetes. Con
 ### Use & Integrate  
 Exposes APIs through REST, and MCP with built-in authentication via API keys and OAuth. Designed for seamless integration with AI models, including OpenAI, Anthropic Claude, Google Gemini, and DeepSeek. Automatically provides OpenAPI 3.1.0 documentation for easy adoption and supports flexible query execution with structured access control.  
 
+## Documentation
+- Getting Started
+   - <a href="https://docs.centralmind.ai/content/getting-started/installation/">Installation</a>
+   - <a href="https://docs.centralmind.ai/content/getting-started/generate-api/">Generate API</a>
+   - <a href="https://docs.centralmind.ai/content/getting-started/launch-api/">Launch API</a>
+- <a href="https://docs.centralmind.ai/content/integration/chatgpt/"> Integration - ChatGPT</a>
+- <a href="https://docs.centralmind.ai/connectors/"> Database Connectors</a>
+- <a href="https://docs.centralmind.ai/plugins/"> Plugins</a>
 
 ## How to generate
 
