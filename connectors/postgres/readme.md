@@ -13,6 +13,7 @@ PostgreSQL connector allows querying PostgreSQL databases.
 | user | string | yes | Username |
 | password | string | yes | Password |
 | port | integer | yes | TCP port (default 5432) |
+| schema | string | no | instead of "public" it could be custom |
 | tlsFile | string | no | PEM-encoded certificate for TLS |
 | enableTLS | boolean | no | Enable TLS/SSL connection |
 
@@ -25,6 +26,7 @@ database: mydb
 user: postgres
 password: secret
 port: 5432
+schema: sales
 tlsFile: ""        # Optional PEM-encoded certificate
 enableTLS: false   # Enable TLS/SSL connection 
 ```
