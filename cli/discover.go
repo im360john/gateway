@@ -69,10 +69,11 @@ func columnToPromptSchema(col gw_model.ColumnSchema) PromptColumnSchema {
 func init() {
 	// Configure logrus for nicer output
 	logrus.SetFormatter(&logrus.TextFormatter{
-		ForceColors:      true,
-		FullTimestamp:    false,
-		TimestampFormat:  "",
-		DisableTimestamp: true,
+		DisableLevelTruncation: true,
+		ForceColors:            true,
+		FullTimestamp:          false,
+		TimestampFormat:        "",
+		DisableTimestamp:       true,
 	})
 }
 
@@ -84,6 +85,14 @@ func Discover(configPath *string) *cobra.Command {
 	var aiModel string
 	var output string
 	var extraPrompt string
+
+	//var red string = "\033[31m"
+	//var green = "\033[32m"
+	var cyan = "\033[36m"
+	var yellow = "\033[33m"
+	var violet = "\033[35m"
+	var reset = "\033[0m" // reset color
+
 	cmd := &cobra.Command{
 		Use:   "discover",
 		Short: "Discover generates gateway config",
@@ -130,7 +139,7 @@ func Discover(configPath *string) *cobra.Command {
 			logrus.Info("Discovered Tables:")
 			for _, table := range allTables {
 				if tableSet[table.Name] {
-					logrus.Infof("  - %s: %d columns, %d rows", table.Name, len(table.Columns), table.RowCount)
+					logrus.Infof("  - "+cyan+"%s"+reset+": "+yellow+"%d"+reset+" columns, "+yellow+"%d"+reset+" rows", table.Name, len(table.Columns), table.RowCount)
 				}
 			}
 
@@ -158,7 +167,7 @@ func Discover(configPath *string) *cobra.Command {
 			// Show sampled data
 			logrus.Info("Data Sampling Results:")
 			for _, table := range tablesToGenerate {
-				logrus.Infof("  - %s: %d rows sampled", table.Name, len(table.Sample))
+				logrus.Infof("  - "+cyan+"%s"+reset+": "+yellow+"%d"+reset+" rows sampled", table.Name, len(table.Sample))
 			}
 
 			logrus.Info("✅ Step 3 completed. Done.")
@@ -187,7 +196,7 @@ func Discover(configPath *string) *cobra.Command {
 			logrus.Info("API Functions Created:")
 			for _, table := range config.Database.Tables {
 				for _, endpoint := range table.Endpoints {
-					logrus.Infof("  - %s %s - %s", endpoint.HTTPMethod, endpoint.HTTPPath, endpoint.Summary)
+					logrus.Infof("  - "+cyan+"%s"+reset+" "+violet+"%s"+reset+" - %s", endpoint.HTTPMethod, endpoint.HTTPPath, endpoint.Summary)
 					apiEndpoints++
 				}
 			}
@@ -206,8 +215,8 @@ func Discover(configPath *string) *cobra.Command {
 				logrus.Error("failed:", err)
 				return err
 			}
-
-			logrus.Infof("API schema saved to: %s", output)
+			logrus.Info("\r\n")
+			logrus.Infof("API schema saved to: "+cyan+"%s"+reset, output)
 			logrus.Info("\r\n")
 			logrus.Info("✅ Step 5: API Specification Generation Completed!")
 			logrus.Info("\r\n")
@@ -218,11 +227,11 @@ func Discover(configPath *string) *cobra.Command {
 			logrus.Info("✅ All steps completed. Done.")
 			logrus.Info("\r\n")
 			logrus.Info("--- Execution Statistics ---")
-			logrus.Infof("Total time taken: %v", duration.Round(time.Second))
-			logrus.Infof("Tokens used: %d (Estimated cost: $%.4f)",
+			logrus.Infof("Total time taken: "+yellow+"%v"+reset, duration.Round(time.Second))
+			logrus.Infof("Tokens used: "+yellow+"%d"+reset+" (Estimated cost: "+violet+"$%.4f"+reset+")",
 				tokensUsed, (float64(resp.Usage.PromptTokens)/1000000)*1.1+(float64(resp.Usage.CompletionTokens)/1000000)*4.4)
-			logrus.Infof("Tables processed: %d", len(tablesToGenerate))
-			logrus.Infof("API methods created: %d", apiEndpoints)
+			logrus.Infof("Tables processed: "+yellow+"%d"+reset, len(tablesToGenerate))
+			logrus.Infof("API methods created: "+yellow+"%d"+reset, apiEndpoints)
 
 			// Count PII columns from the generated config
 			var piiColumnsCount int
@@ -233,7 +242,7 @@ func Discover(configPath *string) *cobra.Command {
 					}
 				}
 			}
-			logrus.Infof("Total number of columns with PII data: %d", piiColumnsCount)
+			logrus.Infof("Total number of columns with PII data: "+yellow+"%d"+reset, piiColumnsCount)
 
 			return nil
 		},
