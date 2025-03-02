@@ -2,5 +2,6 @@ hosts:
   - localhost
 user: postgres
 password: mysecretpassword
-database: sampledb
+database: postgres
 port: 5432
+schema: cd

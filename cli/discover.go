@@ -35,7 +35,8 @@ var (
 	- Sensitive Data Handling: If any columns contain sensitive or PII data like phone number, SSN, address, credit card etc, they must be flagged appropriately (e.g., using a "pii" flag).
 	- Each Parameter in API endpoints may have default value taken from corresponded example rows, only if it's not PII or sensitive data
 	- If some entity require pagination, there should be separate API that calculate total_count, so pagination can be queried
-	- For Postgres, use all table names and column names in double quotes, e.g., "table_name" and "column_name".
+	- For Postgres, use all table names and column names in double quotes, e.g., "table_name" and "column_name". 
+	- If a schema is specified in the table name (format: schema.table), use it in your queries appropriately for the database type. For Postgres, this would be "schema"."table_name".
 `
 )
 
@@ -184,7 +185,7 @@ func Discover(configPath *string) *cobra.Command {
 			logrus.Info("\r\n")
 			// Prepare prompt
 			logrus.Info("Step 4: Prepare prompt to AI")
-			fullPrompt := generatePrompt(databaseType, extraPrompt, tablesToGenerate)
+			fullPrompt := generatePrompt(databaseType, extraPrompt, tablesToGenerate, getSchemaFromConfig(databaseType, configRaw))
 			promptFilename := "prompt_default.txt"
 			if err := saveToFile(promptFilename, fullPrompt); err != nil {
 				logrus.Error("failed to save prompt:", err)
@@ -267,12 +268,22 @@ func Discover(configPath *string) *cobra.Command {
 	return cmd
 }
 
-func generatePrompt(databaseType, extraPrompt string, tables []TableData) string {
+func generatePrompt(databaseType, extraPrompt string, tables []TableData, schema string) string {
 	res := "I need a config for an automatic API that will be used by another AI bot or LLMs..."
 	res += "\n"
 	res += strings.ReplaceAll(basePrompt, "{database_type}", databaseType)
 	res += "\n" + string(apiConfigSchema) + "\n" + extraPrompt + "\n\n"
 	for _, table := range tables {
+		// Apply schema to table name if schema is provided and not empty
+		var tableName string
+		if schema != "" && schema != "public" {
+			// Qualify the table name with schema
+			tableName = fmt.Sprintf("%s.%s", schema, table.Name)
+		} else {
+			// Use the table name as is
+			tableName = table.Name
+		}
+
 		res += fmt.Sprintf(`
 <%[1]s number_columns=%[5]v number_rows=%[6]v>
 schema:
@@ -282,7 +293,7 @@ data_sample:
 %[3]s
 </%[1]s>
 
-`, table.Name, yamlify(table.Columns), yamlify(table.Sample), len(table.Sample), len(table.Columns), table.RowCount)
+`, tableName, yamlify(table.Columns), yamlify(table.Sample), len(table.Sample), len(table.Columns), table.RowCount)
 	}
 
 	return res
@@ -370,4 +381,28 @@ func callOpenAI(apiKey string, prompt string, endpoint string, model string) (*g
 		return nil, openai.ChatCompletionResponse{}, xerrors.Errorf("unable to unmarshal response: %w", err)
 	}
 	return &res, resp, nil
+}
+
+// Get schema from database config if it exists
+func getSchemaFromConfig(databaseType string, configRaw []byte) string {
+	// Default schema is empty
+	schema := ""
+
+	// Try to parse the config to get the schema for any database type
+	var generalConfig struct {
+		Schema string `yaml:"schema"`
+	}
+
+	if err := yaml.Unmarshal(configRaw, &generalConfig); err == nil {
+		if generalConfig.Schema != "" {
+			schema = generalConfig.Schema
+		}
+	}
+
+	// Handle special case for PostgreSQL where public is the default schema
+	if databaseType == "postgres" && schema == "" {
+		schema = "public"
+	}
+
+	return schema
 }

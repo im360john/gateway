@@ -91,7 +91,16 @@ func (c *Connector) InferResultColumns(ctx context.Context, query string) ([]mod
 }
 
 func (c Connector) Sample(ctx context.Context, table model.Table) ([]map[string]any, error) {
-	rows, err := c.db.NamedQueryContext(ctx, fmt.Sprintf("select * from \"%s\" limit 5", table.Name), map[string]any{})
+	// Use the schema from config, default to 'public' if not specified
+	schema := "public"
+	if c.config.Schema != "" {
+		schema = c.config.Schema
+	}
+
+	// Create schema-qualified table name
+	qualifiedTableName := fmt.Sprintf("\"%s\".\"%s\"", schema, table.Name)
+
+	rows, err := c.db.NamedQueryContext(ctx, fmt.Sprintf("select * from %s limit 5", qualifiedTableName), map[string]any{})
 	if err != nil {
 		return nil, xerrors.Errorf("unable to ping db: %w", err)
 	}
@@ -113,7 +122,14 @@ func (c Connector) Discovery(ctx context.Context) ([]model.Table, error) {
 		return nil, xerrors.Errorf("unable to prepare pg config: %w", err)
 	}
 	db := sqlx.NewDb(stdlib.OpenDB(*cfg), "pgx")
-	rows, err := db.Query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'")
+
+	// Use the schema from config, default to 'public' if not specified
+	schema := "public"
+	if c.config.Schema != "" {
+		schema = c.config.Schema
+	}
+
+	rows, err := db.Query("SELECT table_name FROM information_schema.tables WHERE table_schema = $1", schema)
 	if err != nil {
 		return nil, err
 	}
@@ -131,7 +147,9 @@ func (c Connector) Discovery(ctx context.Context) ([]model.Table, error) {
 
 		// Get the total row count for this table
 		var rowCount int
-		countQuery := fmt.Sprintf("SELECT COUNT(*) FROM \"%s\"", tableName)
+		// Create schema-qualified table name
+		qualifiedTableName := fmt.Sprintf("\"%s\".\"%s\"", schema, tableName)
+		countQuery := fmt.Sprintf("SELECT COUNT(*) FROM %s", qualifiedTableName)
 		err = c.db.Get(&rowCount, countQuery)
 		if err != nil {
 			return nil, xerrors.Errorf("unable to get row count for table %s: %w", tableName, err)
@@ -188,10 +206,16 @@ func (c Connector) Query(ctx context.Context, endpoint model.Endpoint, params ma
 }
 
 func (c Connector) LoadsColumns(ctx context.Context, tableName string) ([]model.ColumnSchema, error) {
+	// Use the schema from config, default to 'public' if not specified
+	schema := "public"
+	if c.config.Schema != "" {
+		schema = c.config.Schema
+	}
+
 	rows, err := c.db.QueryContext(
 		ctx,
-		`SELECT column_name, data_type, is_nullable FROM information_schema.columns WHERE table_name = $1`,
-		tableName,
+		`SELECT column_name, data_type, is_nullable FROM information_schema.columns WHERE table_name = $1 AND table_schema = $2`,
+		tableName, schema,
 	)
 	if err != nil {
 		return nil, err

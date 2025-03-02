@@ -22,6 +22,7 @@ type Config struct {
 	TLSFile    string
 	EnableTLS  bool
 	ConnString string // Connection string in format: postgresql://user:password@host:port/database
+	Schema     string // Database schema name for table access (format: schema.table_name)
 }
 
 // UnmarshalYAML implements the yaml.Unmarshaler interface to allow for both
