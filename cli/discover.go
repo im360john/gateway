@@ -35,6 +35,7 @@ var (
 	- Sensitive Data Handling: If any columns contain sensitive or PII data like phone number, SSN, address, credit card etc, they must be flagged appropriately (e.g., using a "pii" flag).
 	- Each Parameter in API endpoints may have default value taken from corresponded example rows, only if it's not PII or sensitive data
 	- If some entity require pagination, there should be separate API that calculate total_count, so pagination can be queried
+	- For Postgres, use all table names and column names in double quotes, e.g., "table_name" and "column_name".
 `
 )
 
