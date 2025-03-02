@@ -144,6 +144,15 @@ func Discover(configPath *string) *cobra.Command {
 				}
 			}
 
+			// Check if any tables were found after filtering
+			var filteredTablesCount int
+			for range tableSet {
+				filteredTablesCount++
+			}
+			if filteredTablesCount == 0 {
+				return fmt.Errorf("error: no tables found to process. Please verify your database connection and table selection criteria")
+			}
+
 			logrus.Info("✅ Step 2 completed. Done.")
 			logrus.Info("\r\n")
 			// Sample data
