@@ -3,9 +3,8 @@ package presidioanonymizer
 import (
 	_ "embed"
 	"encoding/json"
-	"fmt"
-
 	"github.com/sirupsen/logrus"
+	"golang.org/x/xerrors"
 
 	"github.com/centralmind/gateway/plugins"
 )
@@ -108,10 +107,10 @@ func (p *Plugin) Process(data map[string]any, _ map[string][]string) (processed 
 
 func New(config Config) (plugins.Interceptor, error) {
 	if config.AnonymizeURL == "" {
-		return nil, fmt.Errorf("presidio_url is required")
+		return nil, xerrors.Errorf("presidio_url is required")
 	}
 	if config.AnalyzerURL == "" {
-		return nil, fmt.Errorf("analyzer_url is required")
+		return nil, xerrors.Errorf("analyzer_url is required")
 	}
 	if config.Language == "" {
 		config.Language = "en"
