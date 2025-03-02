@@ -46,7 +46,7 @@ gateway \
   discover \
   --config connection.yaml \
   --db-type postgres \
-  --tables table_name_1 --tables table_name_2 \
+  --tables "table_name_1,table_name_2" \
   --ai-api-key $OPENAI_KEY \
   --prompt "Develop an API that enables a chatbot to retrieve information about data. \
 Try to place yourself as analyst and think what kind of data you will require, \
@@ -58,7 +58,7 @@ based on that come up with useful API methods for that"
 - `discover`: Activates the discovery mechanism to analyze your database using AI
 - `--config connection.yaml`: Path to the database connection configuration file
 - `--db-type postgres`: Specifies the database type (in this case, postgres)
-- `--tables`: Specify which tables to include in API generation (can be used multiple times)
+- `--tables`: Specify which tables to include in API generation (can accept comma-separated list, eg "orders,sales,customers")
 - `--ai-api-key $OPENAI_KEY`: Your OpenAI API key for AI-assisted API generation
 - `--prompt "..."`: Customizes the AI's approach to generating the API based on your specific needs
 
