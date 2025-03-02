@@ -1,6 +1,7 @@
 .idea
 .trunk
 gateway.exe
+/gateway
 gateway.yaml
 open-ai-raw.log
 prompt.txt
