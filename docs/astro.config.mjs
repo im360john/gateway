@@ -28,8 +28,10 @@ export default defineConfig({
         {
           label: 'Deployment',
           items: [
-            { label: 'Helm Installation', link: '/helm/gateway' },
+            { label: 'Docker Compose', link: '/example/simple' },
+            { label: 'Plugin Integrations', link: '/example/complex' },
             { label: 'Kubernetes Example', link: '/example/k8s' },
+            { label: 'Helm Installation', link: '/helm/gateway' },
           ],
         },
         {

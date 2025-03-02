@@ -3,8 +3,6 @@ title: 'Simple Gateway API Example'
 description: 'This example demonstrates a basic setup of the Gateway API with a PostgreSQL database, showcasing how to create a simple REST API service.'
 ---
 
-# Simple Gateway API Example
-
 This example demonstrates a basic setup of the Gateway API with a PostgreSQL database, showcasing how to create a simple REST API service.
 
 ## Components
@@ -74,19 +72,19 @@ GET /personas/total_count
 
 The database contains two main tables:
 
-### Teams Table (gachi_teams)
+### Teams Table
 - `id`: Serial Primary Key
 - `team_name`: VARCHAR(50)
 - `motto`: VARCHAR(100)
 
-### Personas Table (gachi_personas)
+### Personas Table
 - `id`: Serial Primary Key
 - `name`: VARCHAR(50)
 - `strength_level`: INT
 - `special_move`: VARCHAR(100)
 - `favorite_drink`: VARCHAR(50)
 - `battle_cry`: VARCHAR(100)
-- `team_id`: INT (Foreign Key to gachi_teams)
+- `team_id`: INT (Foreign Key to Teams Table)
 
 ## Configuration Files
 

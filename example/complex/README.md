@@ -3,8 +3,6 @@ title: 'Complex E2E Example with Gateway API'
 description: 'This example demonstrates a complete end-to-end setup of the Gateway API with various features including data access control, caching, and PII data handling.'
 ---
 
-# Complex E2E Example with Gateway API
-
 This example demonstrates a complete end-to-end setup of the Gateway API with various features including data access control, caching, and PII data handling.
 
 ## Components
