@@ -1,11 +1,21 @@
 import { readFile, writeFile, mkdir, copyFile as fsCopyFile, rm } from 'fs/promises';
-import { dirname, join, basename, extname } from 'path';
+import { dirname, join, basename, extname, sep } from 'path';
 import { fileURLToPath } from 'url';
 import { glob } from 'glob';
 import { watch } from 'fs';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import sharp from 'sharp';
+import os from 'os';
+
+// Check if we're running on Windows
+const isWindows = os.platform() === 'win32';
+
+// Helper function to normalize paths across platforms
+function normalizePath(path) {
+  // Convert backslashes to forward slashes for consistency
+  return path.replace(/\\/g, '/');
+}
 
 const execAsync = promisify(exec);
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -31,7 +41,9 @@ function generateTitle(filePath) {
   if (dir === '.') return 'Root Documentation';
 
   // Split the path into parts and take the last directory
-  const parts = dir.split('/');
+  // Normalize the path first to ensure consistent separator usage
+  const normalizedPath = normalizePath(dir);
+  const parts = normalizedPath.split('/');
   const lastDir = parts[parts.length - 1];
 
   // Transform kebab-case or snake_case to Title Case
@@ -44,8 +56,10 @@ function generateTitle(filePath) {
 }
 
 function generateDescription(filePath) {
-  // Создаем описание на основе пути к файлу
-  const parts = filePath.split('/').filter((part) => part !== 'README.md');
+  // Create description based on file path
+  // Normalize the path first
+  const normalizedPath = normalizePath(filePath);
+  const parts = normalizedPath.split('/').filter((part) => part !== 'README.md');
   if (parts.length === 0) return 'Main project documentation';
 
   return `Documentation for the ${parts.join(' ')} component`;
@@ -78,13 +92,17 @@ function simplifyPath(filePath) {
 }
 
 async function copyFile(file) {
-  const sourcePath = join(rootDir, file);
-  let targetDir = join(docsDir, dirname(file));
+  // Normalize file path first
+  const normalizedFile = normalizePath(file);
+  const sourcePath = join(rootDir, normalizedFile);
+  let targetDir = join(docsDir, dirname(normalizedFile));
   let targetPath = join(targetDir, 'index.md');
-  const parentDir = dirname(file);
-  const parts = targetPath.split('/');
+  
+  // Normalize path for parts checking
+  const normalizedTargetPath = normalizePath(targetPath);
+  const parts = normalizedTargetPath.split('/');
 
-  if (targetPath && (parts.includes('connectors') || parts.includes('plugins'))) {
+  if (normalizedTargetPath && (parts.includes('connectors') || parts.includes('plugins'))) {
     const parentDir = parts[parts.length - 2];
 
     if (parentDir !== 'connectors' && parentDir !== 'plugins') {
@@ -93,12 +111,14 @@ async function copyFile(file) {
   }
 
   // Special handling for connectors and plugins
-  if ((file.includes('/connectors/') || file.includes('/plugins/')) && file.toLowerCase().endsWith('readme.md')) {
-    const parts = file.split('/');
-    const typeIndex = parts.findIndex((part) => part === 'connectors' || part === 'plugins');
-    if (typeIndex !== -1 && typeIndex + 1 < parts.length) {
-      const type = parts[typeIndex];
-      const name = parts[typeIndex + 1];
+  // Use normalized paths for includes checks
+  if ((normalizedFile.includes('/connectors/') || normalizedFile.includes('/plugins/')) && 
+      normalizedFile.toLowerCase().endsWith('readme.md')) {
+    const pathParts = normalizedFile.split('/');
+    const typeIndex = pathParts.findIndex((part) => part === 'connectors' || part === 'plugins');
+    if (typeIndex !== -1 && typeIndex + 1 < pathParts.length) {
+      const type = pathParts[typeIndex];
+      const name = pathParts[typeIndex + 1];
       targetDir = join(docsDir, type);
       targetPath = join(targetDir, `${name}.md`);
     }
@@ -112,14 +132,14 @@ async function copyFile(file) {
     const content = await readFile(sourcePath, 'utf8');
 
     // Add frontmatter if needed
-    const processedContent = addFrontMatter(content, file);
+    const processedContent = addFrontMatter(content, normalizedFile);
 
     // Write the processed content
     await writeFile(targetPath, processedContent);
 
-    console.log(`Copied and processed ${file} to ${targetPath}`);
+    console.log(`Copied and processed ${normalizedFile} to ${targetPath}`);
   } catch (error) {
-    console.error(`Error copying file ${file}:`, error);
+    console.error(`Error copying file ${normalizedFile}:`, error);
   }
 }
 
@@ -177,8 +197,9 @@ async function copyAssets() {
     console.log('Found asset files content:', assetFilesContent);
 
     for (const file of assetFiles) {
-      const sourcePath = join(rootDir, file);
-      const targetPath = join(assetsDir, basename(file));
+      const normalizedFile = normalizePath(file);
+      const sourcePath = join(rootDir, normalizedFile);
+      const targetPath = join(assetsDir, basename(normalizedFile));
 
       try {
         // Create assets directory if it doesn't exist
@@ -187,13 +208,14 @@ async function copyAssets() {
         // Process and copy the asset file
         await processAndCopyImage(sourcePath, targetPath);
       } catch (error) {
-        console.error(`Error copying asset ${file}:`, error);
+        console.error(`Error copying asset ${normalizedFile}:`, error);
       }
     }
 
     for (const file of assetFilesContent) {
-      const sourcePath = join(rootDir, file);
-      const targetPath = join(docsDir, file.replace('docs/', ''));
+      const normalizedFile = normalizePath(file);
+      const sourcePath = join(rootDir, normalizedFile);
+      const targetPath = join(docsDir, normalizedFile.replace('docs/', ''));
 
       try {
         // Create assets directory if it doesn't exist
@@ -202,7 +224,7 @@ async function copyAssets() {
         // Process and copy the asset file
         await fsCopyFile(sourcePath, targetPath);
       } catch (error) {
-        console.error(`Error copying asset ${file}:`, error);
+        console.error(`Error copying asset ${normalizedFile}:`, error);
       }
     }
   } catch (error) {
@@ -226,7 +248,7 @@ async function collectConnectorsDocs() {
 
     // Process each connector
     for (const connectorDir of connectorDirs) {
-      const connectorName = connectorDir.replace(/\/$/, ''); // Remove trailing slash
+      const connectorName = normalizePath(connectorDir).replace(/\/$/, ''); // Remove trailing slash
       const readmeFiles = await glob('readme.md', {
         cwd: join(connectorsPath, connectorDir),
         nocase: true,
@@ -238,7 +260,8 @@ async function collectConnectorsDocs() {
         const connectorDocPath = join(connectorsDocsDir, `${connectorName}.md`);
 
         // Add frontmatter and write content
-        await writeFile(connectorDocPath, addFrontMatter(content, `connectors/${connectorName}/README.md`));
+        // Ensure path is normalized for frontmatter generation
+        await writeFile(connectorDocPath, addFrontMatter(content, normalizePath(`connectors/${connectorName}/README.md`)));
         console.log(`Generated documentation for connector ${connectorName}`);
       } catch (error) {
         if (error.code === 'ENOENT') {
@@ -259,7 +282,7 @@ description: List of all available connectors and their documentation
 
 ${connectorDirs
   .map((dir) => {
-    const name = dir.replace(/\/$/, '');
+    const name = normalizePath(dir).replace(/\/$/, '');
     return `- [${name}](${name})`;
   })
   .join('\n')}
@@ -288,7 +311,7 @@ async function collectPluginsDocs() {
 
     // Process each plugin
     for (const pluginDir of pluginDirs) {
-      const pluginName = pluginDir.replace(/\/$/, ''); // Remove trailing slash
+      const pluginName = normalizePath(pluginDir).replace(/\/$/, ''); // Remove trailing slash
       const readmePath = join(pluginsPath, pluginDir, 'README.md');
 
       try {
@@ -296,7 +319,7 @@ async function collectPluginsDocs() {
         const pluginDocPath = join(pluginsDocsDir, `${pluginName}.md`);
 
         // Add frontmatter and write content
-        await writeFile(pluginDocPath, addFrontMatter(content, `plugins/${pluginName}/README.md`));
+        await writeFile(pluginDocPath, addFrontMatter(content, normalizePath(`plugins/${pluginName}/README.md`)));
         console.log(`Generated documentation for plugin ${pluginName}`);
       } catch (error) {
         if (error.code === 'ENOENT') {
@@ -317,7 +340,7 @@ description: List of all available plugins and their documentation
 
 ${pluginDirs
   .map((dir) => {
-    const name = dir.replace(/\/$/, '');
+    const name = normalizePath(dir).replace(/\/$/, '');
     return `- [${name}](${name})`;
   })
   .join('\n')}
@@ -395,8 +418,8 @@ async function watchFiles() {
   watch(rootDir, { recursive: true }, async (eventType, filename) => {
     if (!filename) return;
 
-    // Normalize path for Windows
-    const relativePath = filename.replace(/\\/g, '/');
+    // Normalize path for all platforms
+    const relativePath = normalizePath(filename);
 
     if (shouldProcessFile(relativePath)) {
       console.log(`Change detected in ${relativePath}`);

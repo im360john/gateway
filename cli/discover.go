@@ -217,7 +217,7 @@ func Discover(configPath *string) *cobra.Command {
 			}
 			logrus.Info("\r\n")
 			logrus.Infof("API schema saved to: "+cyan+"%s"+reset, output)
-			logrus.Info("\r\n")
+
 			logrus.Info("✅ Step 5: API Specification Generation Completed!")
 			logrus.Info("\r\n")
 			// Show statistics
