@@ -17,6 +17,21 @@ export default defineConfig({
       customCss: ['./src/styles/custom.css'],
       sidebar: [
         { label: 'Introduction', slug: '' },
+        {
+          label: 'Getting Started',
+          items: [
+            { label: 'Installation', slug: 'content/getting-started/installation' },
+            { label: 'Generate API', slug: 'content/getting-started/generate-api' },
+            { label: 'Launch API', slug: 'content/getting-started/launch-api' },
+          ],
+        },
+        {
+          label: 'Integration',
+          items: [
+            { label: 'ChatGPT', slug: 'content/integration/chatgpt' },
+            { label: 'LangChain', slug: 'content/integration/langchain' },
+          ],
+        },
         { label: 'CLI (Command Line Interface)', link: '/cli' },
         { label: 'Helm Installation', link: '/helm/gateway' },
         { label: 'Kubernetes Example', link: '/example/k8s' },
@@ -35,9 +50,9 @@ export default defineConfig({
         {
           label: 'Terms of Service',
           items: [
-            { label: 'Terms of Service', slug: 'content/terms' },
-            { label: 'Privacy Policy', slug: 'content/privacy' },
-            { label: 'Cookie Policy', slug: 'content/cookie' },
+            { label: 'Terms of Service', slug: 'content/legal/terms' },
+            { label: 'Privacy Policy', slug: 'content/legal/privacy' },
+            { label: 'Cookie Policy', slug: 'content/legal/cookie' },
           ],
         },
       ],
