@@ -71,7 +71,7 @@ gateway discover [flags]
 **Flags:**
 
 - `--database-type` - Type of database to connect to
-- `--tables` - Specific tables to include in the discovery
+- `--tables` - Specific tables to include in the discovery, you can specify comma-separated list eg "sales,orders,customers"
 - `--ai-api-key` - API key for AI service, for instance OpenAI key
 - `--ai-endpoint` - Endpoint for AI service, compatible with OpenAI api schema
 - `--ai-model` - Model name for AI service, eg o3-mini

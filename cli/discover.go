@@ -82,7 +82,7 @@ func init() {
 func Discover() *cobra.Command {
 	var configPath string
 	var databaseType string
-	var tables []string
+	var tables string
 	var aiAPIKey string
 	var aiEndpoint string
 	var aiModel string
@@ -102,6 +102,16 @@ func Discover() *cobra.Command {
 		Args:  cobra.MatchAll(cobra.ExactArgs(0)),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			startTime := time.Now()
+
+			// Parse comma-separated tables list
+			var tablesList []string
+			if tables != "" {
+				tablesList = strings.Split(tables, ",")
+				// Trim spaces from table names
+				for i := range tablesList {
+					tablesList[i] = strings.TrimSpace(tablesList[i])
+				}
+			}
 
 			// Configure header
 			logrus.Info("\r\n")
@@ -129,10 +139,10 @@ func Discover() *cobra.Command {
 			}
 
 			tableSet := map[string]bool{}
-			for _, table := range tables {
+			for _, table := range tablesList {
 				tableSet[table] = true
 			}
-			if len(tables) == 0 {
+			if len(tablesList) == 0 {
 				for _, table := range allTables {
 					tableSet[table.Name] = true
 				}
@@ -260,7 +270,7 @@ func Discover() *cobra.Command {
 		},
 	}
 	cmd.Flags().StringVar(&configPath, "config", "connection.yaml", "Path to connection yaml file")
-	cmd.Flags().StringSliceVar(&tables, "tables", nil, "List of table to include")
+	cmd.Flags().StringVar(&tables, "tables", "", "Comma-separated list of tables to include (e.g. 'table1,table2,table3')")
 	cmd.Flags().StringVar(&databaseType, "db-type", "postgres", "Type of database")
 	cmd.Flags().StringVar(&aiAPIKey, "ai-api-key", "ai-api-key", "AI API token")
 	cmd.Flags().StringVar(&aiEndpoint, "ai-endpoint", "", "Custom OpenAI-compatible API endpoint URL")
