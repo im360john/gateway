@@ -22,7 +22,7 @@ Before integrating with ChatGPT, ensure you have:
 1. Log in to your ChatGPT Plus account
 2. Navigate to GPT Builder at https://chatgpt.com/gpts/mine
 
-![img](./mygpts.jpg)
+![img](/assets/mygpts.jpg)
 
 ### Step 2: Set Up Your Custom GPT
 
