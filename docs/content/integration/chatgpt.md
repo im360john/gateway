@@ -2,8 +2,6 @@
 title: 'ChatGPT Integration'
 ---
 
-# Overview
-
 This guide explains how to integrate your Gateway-generated API with ChatGPT by creating a custom GPT with actions.
 
 ## Prerequisites

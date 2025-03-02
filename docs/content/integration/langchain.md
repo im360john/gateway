@@ -2,8 +2,6 @@
 title: 'LangChain Integration'
 ---
 
-# Overview
-
 This guide explains how to integrate your Gateway-generated API with LangChain, allowing you to create AI agents that can interact with your data through the API.
 
 ## Prerequisites

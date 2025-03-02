@@ -3,8 +3,6 @@ title: Using Locally Running Models
 description: Guide to using locally running models with Gateway using LM Studio
 ---
 
-# Using Locally Running Models with Gateway
-
 This guide explains how to set up and use locally running models with Gateway using LM Studio.
 
 ## 1. Installing LM Studio

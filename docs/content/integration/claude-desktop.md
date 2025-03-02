@@ -2,8 +2,6 @@
 title: 'Claude Desktop Integration'
 ---
 
-# Integrating Gateway with Claude Desktop
-
 This guide explains how to integrate your Gateway API with Claude Desktop by adding Gateway as a custom tool.
 
 ## Prerequisites
