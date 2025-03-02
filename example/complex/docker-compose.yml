@@ -14,11 +14,17 @@ services:
       - "4317:4317"   # OTLP gRPC receiver
       - "4318:4318"   # OTLP Protobuf or OTLP JSON
 
-  presidio:
+  presidio-anonymizer:
     image: mcr.microsoft.com/presidio-anonymizer:latest
-    container_name: presidio
+    container_name: anonymizer
     ports:
       - "5001:3000"
+
+  presidio-analyzer:
+    image: mcr.microsoft.com/presidio-analyzer:latest
+    container_name: analyzer
+    ports:
+      - "5002:3000"
 
   postgres:
     image: postgres:latest
@@ -37,7 +43,7 @@ services:
 
   gateway:
     build:
-      context: ..
+      context: ../..
       dockerfile: Dockerfile
       platforms:
         - linux/amd64
@@ -54,7 +60,7 @@ services:
     ports:
       - "8182:8182"
     volumes:
-      - ./gateway.yaml:/usr/local/bin/config.yaml
+      - ./config.yaml:/usr/local/bin/config.yaml
 
 
 volumes:

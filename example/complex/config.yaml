@@ -3,6 +3,24 @@ api:
     version: "1.0"
 
 plugins:
+    presidio_anonymizer:
+      anonymize_url: http://presidio-anonymizer:3000/anonymize
+      analyzer_url: http://presidio-anonymizer:3000/analyze
+      language: en
+      hash_type: md5    # Optional, used for hash operator
+      encrypt_key: ""    # Optional, used for encrypt operator
+      anonymizer_rules:
+        - type: EMAIL_ADDRESS
+          operator: mask
+          masking_char: "*"
+          chars_to_mask: 4
+        - type: PERSON
+          operator: replace
+          new_value: "[REDACTED]"
+        - type: PHONE_NUMBER
+          operator: hash
+        - type: CREDIT_CARD
+          operator: encrypt
     lru_cache:
         max_size: 1024
         ttl: 15s
