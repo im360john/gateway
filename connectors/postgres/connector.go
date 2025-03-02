@@ -91,7 +91,7 @@ func (c *Connector) InferResultColumns(ctx context.Context, query string) ([]mod
 }
 
 func (c Connector) Sample(ctx context.Context, table model.Table) ([]map[string]any, error) {
-	rows, err := c.db.NamedQueryContext(ctx, fmt.Sprintf("select * from %s limit 5", table.Name), map[string]any{})
+	rows, err := c.db.NamedQueryContext(ctx, fmt.Sprintf("select * from \"%s\" limit 5", table.Name), map[string]any{})
 	if err != nil {
 		return nil, xerrors.Errorf("unable to ping db: %w", err)
 	}
@@ -131,7 +131,7 @@ func (c Connector) Discovery(ctx context.Context) ([]model.Table, error) {
 
 		// Get the total row count for this table
 		var rowCount int
-		countQuery := fmt.Sprintf("SELECT COUNT(*) FROM %s", tableName)
+		countQuery := fmt.Sprintf("SELECT COUNT(*) FROM \"%s\"", tableName)
 		err = c.db.Get(&rowCount, countQuery)
 		if err != nil {
 			return nil, xerrors.Errorf("unable to get row count for table %s: %w", tableName, err)
