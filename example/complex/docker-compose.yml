@@ -44,7 +44,7 @@ services:
   gateway:
     build:
       context: ../..
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.build
       platforms:
         - linux/amd64
         - linux/arm64
