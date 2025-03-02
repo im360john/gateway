@@ -71,7 +71,7 @@ Exposes APIs through REST, and MCP with built-in authentication via API keys and
 Gateway is LLM-model first, i.e. it's designed to be generated via LLM-models.
 To generate your gateway config simply run discover command with your connection info:
 
-1. Connection info, eg connection.yaml
+1. Create a connection configuration file (e.g., `connection.yaml`) with your database credentials:
    ```yaml
    hosts:
      - localhost
