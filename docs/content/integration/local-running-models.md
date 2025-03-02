@@ -41,7 +41,7 @@ This guide explains how to set up and use locally running models with Gateway us
 3. Run Gateway with the `--ai-endpoint` and `--ai-model` parameters, specifying the copied values:
 
 ```bash
-gateway start discover \
+gateway discover \
   --ai-endpoint "http://localhost:1234/v1" \
   --ai-model "llama3-8b" \
   --db-type postgres \
