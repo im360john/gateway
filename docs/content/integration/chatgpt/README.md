@@ -20,7 +20,7 @@ Before integrating with ChatGPT, ensure you have:
 1. Log in to your ChatGPT Plus account
 2. Navigate to GPT Builder at https://chatgpt.com/gpts/mine
 
-![img](/assets/mygpts.jpg)
+![img](../../../../assets/mygpts.jpg)
 
 ### Step 2: Set Up Your Custom GPT
 
@@ -30,22 +30,22 @@ Before integrating with ChatGPT, ensure you have:
    - Description: Explain what your API does and how users can interact with it
    - Instructions: Provide detailed guidance on how the GPT should use your API
 
-[IMAGE PLACEHOLDER: Screenshot of the "Create new GPT" form with fields filled in]
+![img](../../../../assets/creategpt.jpg)
+
 
 ### Step 3: Add Actions to Connect to Your Gateway API
 
 1. In the GPT Builder interface, navigate to the "Actions" tab
 2. Click "Create new action"
 
-[IMAGE PLACEHOLDER: Screenshot of the Actions tab with "Create new action" button]
+
+
 
 3. Enter a name for your action that describes what it does
 4. For "Authentication," select the appropriate method:
    - "None" if your API is publicly accessible
    - "API Key" if your API uses key-based authentication
    - "OAuth" for OAuth authentication
-
-[IMAGE PLACEHOLDER: Screenshot of action creation form with authentication options]
 
 ### Step 4: Configure OpenAPI Specification
 
@@ -56,7 +56,7 @@ Before integrating with ChatGPT, ensure you have:
    - Click "Import from URL" and enter your OpenAPI URL
    - Copy and paste the OpenAPI JSON directly into the schema field
 
-[IMAGE PLACEHOLDER: Screenshot of entering the OpenAPI URL]
+![img](../../../../assets/chatgpt-create-action.jpg)
 
 ### Step 5: Customize Privacy and Settings
 
@@ -66,7 +66,6 @@ Before integrating with ChatGPT, ensure you have:
    - For API Key authentication, specify the header name (e.g., `X-API-KEY`)
    - Enter placeholder values that users will need to provide
 
-[IMAGE PLACEHOLDER: Screenshot of privacy and authentication settings]
 
 ### Step 6: Save and Test Your Custom GPT
 
@@ -74,22 +73,13 @@ Before integrating with ChatGPT, ensure you have:
 2. Test your API connection with example queries
 3. Make adjustments to the instructions as needed to optimize the interaction
 
-[IMAGE PLACEHOLDER: Screenshot of testing interface with example query]
 
 ## Example Conversation Flow
 
 Here's an example of how a conversation with your Gateway API-enabled GPT might look:
 
-**User**: "Can you show me data about product sales for Q2?"
-
-**ChatGPT**: "I'll retrieve that information for you. Let me access the sales data API..."
-[ChatGPT uses your Gateway API to fetch the data]
-"Here are the Q2 product sales:
-- Product A: $125,000
-- Product B: $93,500
-- Product C: $78,200
-
-Would you like to see any specific product's details or compare with previous quarters?"
+**User**: "Can you show me pricing for instance c6g.2xlarge and specification?"
+![img](../../../../assets/chatgpt-working.jpg)
 
 ## Troubleshooting
 
