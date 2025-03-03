@@ -69,5 +69,3 @@ chmod +x gateway
 # Run the application
 ./gateway
 ```
-
-For more detailed configuration options, refer to the [Configuration Guide](./configuration.md).
