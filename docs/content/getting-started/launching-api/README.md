@@ -10,8 +10,8 @@ This guide explains how to launch the API you created using the Gateway discover
 
 Before launching your API, ensure you have:
 
-1. Gateway installed using one of the [installation methods](./installation)
-2. A generated `gateway.yaml` configuration file from the [API generation process](./generating-api)
+1. Gateway installed using one of the [installation methods](/docs/content/getting-started/installation)
+2. A generated `gateway.yaml` configuration file from the [API generation process](/docs/content/getting-started/generating-api)
 
 ## Starting the API Server
 

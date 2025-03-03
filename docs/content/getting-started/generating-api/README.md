@@ -10,7 +10,7 @@ This guide explains how to generate an API using Gateway's discovery mechanism.
 
 Before generating an API, ensure you have:
 
-1. Gateway installed using one of the [installation methods](./installation)
+1. Gateway installed using one of the [installation methods](/docs/content/getting-started/installation)
 2. Get connection string to your database and make sure its accessable
 3. Get OpenAPI key
 
