@@ -13,8 +13,10 @@ export default defineConfig({
     starlight({
       title: 'CentralMind',
       logo: { dark: './src/assets/logo-dark.svg', light: './src/assets/logo-light.svg' },
-
       customCss: ['./src/styles/custom.css'],
+      social: {
+        github: 'https://github.com/centralmind/gateway',
+      },
       sidebar: [
         { label: 'Introduction', slug: '' },
         {
