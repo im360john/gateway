@@ -37,8 +37,15 @@ jobs:
 
       - name: Build Binaries
         run: |
-          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o gateway-amd64 .
-          CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o gateway-arm64 .
+          # Linux builds
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o gateway-linux-amd64 .
+          CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o gateway-linux-arm64 .
+          # macOS builds
+          CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o gateway-darwin-amd64 .
+          CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o gateway-darwin-arm64 .
+          # Windows builds
+          CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o gateway-windows-amd64.exe .
+          CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build -o gateway-windows-arm64.exe .
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -57,7 +64,7 @@ jobs:
         run: |
           # Build and push AMD64
           docker buildx build --platform linux/amd64 \
-            --build-arg BINARY=gateway-amd64 \
+            --build-arg BINARY=gateway-linux-amd64 \
             -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.version }} \
             -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
             --push \
@@ -65,8 +72,78 @@ jobs:
 
           # Build and push ARM64
           docker buildx build --platform linux/arm64 \
-            --build-arg BINARY=gateway-arm64 \
+            --build-arg BINARY=gateway-linux-arm64 \
             -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.version }} \
             -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
             --push \
             .
+
+      - name: Create Binary Archives
+        run: |
+          # Create archives for each platform
+          tar -czf gateway-linux-amd64.tar.gz gateway-linux-amd64
+          tar -czf gateway-linux-arm64.tar.gz gateway-linux-arm64
+          tar -czf gateway-darwin-amd64.tar.gz gateway-darwin-amd64
+          tar -czf gateway-darwin-arm64.tar.gz gateway-darwin-arm64
+          zip gateway-windows-amd64.zip gateway-windows-amd64.exe
+          zip gateway-windows-arm64.zip gateway-windows-arm64.exe
+
+      - name: Upload Binaries
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./gateway-linux-amd64.tar.gz
+          asset_name: gateway-linux-amd64.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload ARM64 Linux Binary
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./gateway-linux-arm64.tar.gz
+          asset_name: gateway-linux-arm64.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload macOS AMD64 Binary
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./gateway-darwin-amd64.tar.gz
+          asset_name: gateway-darwin-amd64.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload macOS ARM64 Binary
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./gateway-darwin-arm64.tar.gz
+          asset_name: gateway-darwin-arm64.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload Windows AMD64 Binary
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./gateway-windows-amd64.zip
+          asset_name: gateway-windows-amd64.zip
+          asset_content_type: application/zip
+
+      - name: Upload Windows ARM64 Binary
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./gateway-windows-arm64.zip
+          asset_name: gateway-windows-arm64.zip
+          asset_content_type: application/zip
