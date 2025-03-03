@@ -2,6 +2,7 @@
 .trunk
 gateway.exe
 /gateway
+/connection.yaml
 gateway.yaml
 open-ai-raw.log
 prompt.txt

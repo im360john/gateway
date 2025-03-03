@@ -20,9 +20,9 @@ export default defineConfig({
         {
           label: 'Getting Started',
           items: [
-            { label: 'Installation', slug: 'content/getting-started/installation' },
-            { label: 'Generating an API', slug: 'content/getting-started/generating-api' },
-            { label: 'Launching an API', slug: 'content/getting-started/launching-api' },
+            { label: 'Installation', slug: 'docs/content/getting-started/installation' },
+            { label: 'Generating an API', slug: 'docs/content/getting-started/generating-api' },
+            { label: 'Launching an API', slug: 'docs/content/getting-started/launching-api' },
           ],
         },
         {
@@ -37,10 +37,10 @@ export default defineConfig({
         {
           label: 'Integration',
           items: [
-            { label: 'ChatGPT', slug: 'content/integration/chatgpt' },
-            { label: 'LangChain', slug: 'content/integration/langchain' },
-            { label: 'Claude Desktop', slug: 'content/integration/claude-desktop' },
-            { label: 'Local Running Models', slug: 'content/integration/local-running-models' },
+            { label: 'ChatGPT', slug: 'docs/content/integration/chatgpt' },
+            { label: 'LangChain', slug: 'docs/content/integration/langchain' },
+            { label: 'Claude Desktop', slug: 'docs/content/integration/claude-desktop' },
+            { label: 'Local Running Models', slug: 'docs/content/integration/local-running-models' },
           ],
         },
         { label: 'CLI (Command Line Interface)', link: '/cli' },
@@ -59,9 +59,9 @@ export default defineConfig({
         {
           label: 'Terms of Service',
           items: [
-            { label: 'Terms of Service', slug: 'content/legal/terms' },
-            { label: 'Privacy Policy', slug: 'content/legal/privacy' },
-            { label: 'Cookie Policy', slug: 'content/legal/cookie' },
+            { label: 'Terms of Service', slug: 'docs/content/legal/terms' },
+            { label: 'Privacy Policy', slug: 'docs/content/legal/privacy' },
+            { label: 'Cookie Policy', slug: 'docs/content/legal/cookie' },
           ],
         },
       ],

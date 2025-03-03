@@ -59,3 +59,5 @@ Our services may integrate with third-party platforms or APIs. We are not respon
 ## Contact Us
 
 If you have any questions about these Terms of Service, please contact us at: [support@centralmind.ai](mailto:support@centralmind.ai).
+
+![img.png](../../../../assets/mygpts.jpg)

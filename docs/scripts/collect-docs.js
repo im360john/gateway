@@ -26,7 +26,7 @@ const assetsDir = join(__dirname, '../src/content/docs/assets');
 // Patterns to ignore
 const ignorePatterns = [
   '**/node_modules/**',
-  '**/docs/**',
+  '**/docs/src/**',
   '**/dist/**',
   '**/vendor/**',
   '**/build/**',
@@ -97,7 +97,7 @@ async function copyFile(file) {
   const sourcePath = join(rootDir, normalizedFile);
   let targetDir = join(docsDir, dirname(normalizedFile));
   let targetPath = join(targetDir, 'index.md');
-  
+
   // Normalize path for parts checking
   const normalizedTargetPath = normalizePath(targetPath);
   const parts = normalizedTargetPath.split('/');
@@ -112,8 +112,10 @@ async function copyFile(file) {
 
   // Special handling for connectors and plugins
   // Use normalized paths for includes checks
-  if ((normalizedFile.includes('/connectors/') || normalizedFile.includes('/plugins/')) && 
-      normalizedFile.toLowerCase().endsWith('readme.md')) {
+  if (
+    (normalizedFile.includes('/connectors/') || normalizedFile.includes('/plugins/')) &&
+    normalizedFile.toLowerCase().endsWith('readme.md')
+  ) {
     const pathParts = normalizedFile.split('/');
     const typeIndex = pathParts.findIndex((part) => part === 'connectors' || part === 'plugins');
     if (typeIndex !== -1 && typeIndex + 1 < pathParts.length) {
@@ -188,13 +190,7 @@ async function copyAssets() {
       nocase: true,
     });
 
-    const assetFilesContent = await glob('**/docs/content/**/*.md', {
-      cwd: rootDir,
-      nocase: true,
-    });
-
     console.log('Found asset files:', assetFiles);
-    console.log('Found asset files content:', assetFilesContent);
 
     for (const file of assetFiles) {
       const normalizedFile = normalizePath(file);
@@ -207,22 +203,6 @@ async function copyAssets() {
 
         // Process and copy the asset file
         await processAndCopyImage(sourcePath, targetPath);
-      } catch (error) {
-        console.error(`Error copying asset ${normalizedFile}:`, error);
-      }
-    }
-
-    for (const file of assetFilesContent) {
-      const normalizedFile = normalizePath(file);
-      const sourcePath = join(rootDir, normalizedFile);
-      const targetPath = join(docsDir, normalizedFile.replace('docs/', ''));
-
-      try {
-        // Create assets directory if it doesn't exist
-        await mkdir(dirname(targetPath), { recursive: true });
-
-        // Process and copy the asset file
-        await fsCopyFile(sourcePath, targetPath);
       } catch (error) {
         console.error(`Error copying asset ${normalizedFile}:`, error);
       }
@@ -253,7 +233,10 @@ async function collectConnectorsDocs() {
         cwd: join(connectorsPath, connectorDir),
         nocase: true,
       });
-      const readmePath = readmeFiles.length > 0 ? join(connectorsPath, connectorDir, readmeFiles[0]) : join(connectorsPath, connectorDir, 'README.md');
+      const readmePath =
+        readmeFiles.length > 0
+          ? join(connectorsPath, connectorDir, readmeFiles[0])
+          : join(connectorsPath, connectorDir, 'README.md');
 
       try {
         const content = await readFile(readmePath, 'utf8');
