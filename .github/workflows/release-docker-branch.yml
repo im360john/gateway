@@ -4,6 +4,10 @@ on:
   push:
     branches: [ '*' ]
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   release:
     uses: ./.github/workflows/build-docker.yml
