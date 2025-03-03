@@ -59,10 +59,10 @@ Exposes APIs through REST, and MCP with built-in authentication via API keys and
 ## Documentation
 
 - Getting Started
-  - <a href="https://docs.centralmind.ai/content/getting-started/installation/">Installation</a>
-  - <a href="https://docs.centralmind.ai/content/getting-started/generating-api/">Generating an API</a>
-  - <a href="https://docs.centralmind.ai/content/getting-started/launching-api/">Launching an API</a>
-- <a href="https://docs.centralmind.ai/content/integration/chatgpt/"> Integration - ChatGPT</a>
+  - <a href="https://docs.centralmind.ai/docs/content/getting-started/installation/">Installation</a>
+  - <a href="https://docs.centralmind.ai/docs/content/getting-started/generating-api/">Generating an API</a>
+  - <a href="https://docs.centralmind.ai/docs/content/getting-started/launching-api/">Launching an API</a>
+- <a href="https://docs.centralmind.ai/docs/content/integration/chatgpt/"> Integration - ChatGPT</a>
 - <a href="https://docs.centralmind.ai/connectors/"> Database Connectors</a>
 - <a href="https://docs.centralmind.ai/plugins/"> Plugins</a>
 
