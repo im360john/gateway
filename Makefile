@@ -42,7 +42,7 @@ run-tests:
 	      --junitfile-testsuite-name="short" \
 	      --rerun-fails \
 	      --format github-actions \
-	      --packages="$$dir/..." \
+	      --packages="$$dir" \
 	      -- -timeout=15m; \
 	    echo "::endgroup::"; \
 	  else \
