@@ -1,0 +1,86 @@
+name: Build Docker Images
+
+on:
+  workflow_call:
+    inputs:
+      extra_args:
+        description: Extra args for go-releaser, for example '--snapshot'
+        required: false
+        type: string
+      version:
+        description: Version of base image
+        required: true
+        type: string
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: centralmind/gateway
+      VERSION: ${{ github.event.release.tag_name || github.sha }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.23'
+          cache: true
+
+      - name: Build Linux Binaries
+        run: |
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o gateway-linux-amd64 .
+          CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o gateway-linux-arm64 .
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push Images
+        run: |
+          # Build and push AMD64
+          docker buildx build --platform linux/amd64 \
+            --build-arg BINARY=gateway-linux-amd64 \
+            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }} \
+            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
+            --push \
+            .
+
+          # Build and push ARM64
+          docker buildx build --platform linux/arm64 \
+            --build-arg BINARY=gateway-linux-arm64 \
+            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }} \
+            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
+            --push \
+            .
+
+      - name: Tag Release Images
+        if: github.event_name == 'release'
+        run: |
+          docker buildx build --platform linux/amd64 \
+            --build-arg BINARY=gateway-linux-amd64 \
+            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.release.tag_name }} \
+            --push \
+            .
+          docker buildx build --platform linux/arm64 \
+            --build-arg BINARY=gateway-linux-arm64 \
+            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.release.tag_name }} \
+            --push \
+            . 
