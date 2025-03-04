@@ -6,14 +6,16 @@ This guide provides three ways to install Gateway:
 
 ## 1. Binary Installation
 
-The simplest method is to download and use the pre-compiled binary:
+Choose your operating system below for specific installation instructions for Linux:
+
 
 ```bash
-# Download the latest binary
-wget https://github.com/centralmind/gateway/releases/latest/download/gateway_linux_amd64.tar.gz
+# Download the latest binary for Linux
+wget https://github.com/centralmind/gateway/releases/latest/download/gateway-linux-amd64.tar.gz
 
 # Extract the archive
-tar -xzf gateway_linux_amd64.tar.gz
+tar -xzf gateway-linux-amd64.tar.gz
+mv gateway-linux-amd64 gateway
 
 # Make the binary executable
 chmod +x gateway
@@ -21,6 +23,58 @@ chmod +x gateway
 # Move to a directory in your PATH (optional)
 sudo mv gateway /usr/local/bin/
 ```
+
+<details>
+<summary>Windows (Intel)</summary>
+
+```powershell
+# Download the latest binary for Windows
+Invoke-WebRequest -Uri https://github.com/centralmind/gateway/releases/latest/download/gateway-windows-amd64.zip -OutFile gateway-windows.zip
+
+# Extract the archive
+Expand-Archive -Path gateway-windows.zip -DestinationPath .
+
+# Rename
+Rename-Item -Path "gateway-windows-amd64.exe" -NewName "gateway.exe"
+
+```
+</details>
+
+<details>
+<summary>macOS (Intel)</summary>
+
+```bash
+# Download the latest binary for macOS (Intel)
+curl -LO https://github.com/centralmind/gateway/releases/latest/download/gateway-darwin-amd64.tar.gz
+
+# Extract the archive
+tar -xzf gateway-darwin-amd64.tar.gz
+mv gateway-darwin-amd64 gateway
+
+# Make the binary executable
+chmod +x gateway
+
+```
+</details>
+
+<details>
+<summary>macOS (Apple Silicon)</summary>
+ 
+```bash
+# Download the latest binary for macOS (Apple Silicon)
+curl -LO https://github.com/centralmind/gateway/releases/latest/download/gateway-darwin-arm64.tar.gz
+
+# Extract the archive
+tar -xzf gateway-darwin-arm64.tar.gz
+mv gateway-darwin-arm64 gateway
+
+# Make the binary executable
+chmod +x gateway
+
+```
+
+</details>
+
 
 ## 2. Docker Installation
 
@@ -65,5 +119,5 @@ go build -o gateway
 chmod +x gateway
 
 # Run the application
-./gateway
+./gateway --help
 ```
