@@ -14,16 +14,11 @@ This guide explains how to set up a PostgreSQL database using Docker and restore
 docker pull postgres
 ```
 
-2. Create Docker Network:
-```bash
-docker network create sample_network
-```
 
-3. Start PostgreSQL container:
+2. Start PostgreSQL container:
 
 ```bash
-docker run -d \
-    --network sample_network \
+docker run -d \    
     --name some-postgres \
     -e POSTGRES_PASSWORD=mysecretpassword \
     -e POSTGRES_USER=postgres \
@@ -32,25 +27,25 @@ docker run -d \
     postgres
 ```
 
-4. Download the sample database, that prepared by Neon:
+3. Download the sample database, that prepared by Neon:
 
 ```bash
 curl -O https://neon.tech/postgresqltutorial/dvdrental.zip
 ```
 
-5. Extract the downloaded file:
+4. Extract the downloaded file:
 
 ```bash
 unzip dvdrental.zip
 ```
 
-6. Copy the tar file into the container:
+5. Copy the tar file into the container:
 
 ```bash
 docker cp dvdrental.tar some-postgres:/tmp/
 ```
 
-7. Restore the database:
+6. Restore the database:
 
 ```bash
 docker exec -it some-postgres pg_restore -U postgres -d dvdrental /tmp/dvdrental.tar

@@ -3,34 +3,94 @@ This guide will help you get started with Gateway using Docker, discover your da
 
 ## Prerequisites
 
-- <a href="https://docs.docker.com/get-started/get-docker/">Docker</a> installed on your system
 - <a href="https://platform.openai.com/api-keys">OpenAI API key</a> for AI-powered API generation
 - Your PostgreSQL Database or any other db that gateway supports. You can also take our example databases:
     - <a href="/example/postgresql-dvdstore-sample/">PostgreSQL DVD Store Sample Database</a>. 
     - <a href="/example/postgresql-ecommerce-sample/">PostgreSQL Ecommerce Sample Database</a>. 
 
-## Installation Steps
+## Installation and Launching Steps
 
-1. Pull the latest Gateway Docker image:
+### 1. Binary Installation
+
+Choose your operating system below for specific installation instructions for Linux:
+
 ```bash
-docker pull ghcr.io/centralmind/gateway:latest
+# Download the latest binary for Linux
+wget https://github.com/centralmind/gateway/releases/latest/download/gateway-linux-amd64.tar.gz
+
+# Extract the archive
+tar -xzf gateway-linux-amd64.tar.gz
+mv gateway-linux-amd64 gateway
+
+# Make the binary executable
+chmod +x gateway
 ```
 
-2. Create a `connection.yaml` configuration file:
+<details>
+<summary>Windows (Intel)</summary>
+
+```powershell
+# Download the latest binary for Windows
+Invoke-WebRequest -Uri https://github.com/centralmind/gateway/releases/latest/download/gateway-windows-amd64.zip -OutFile gateway-windows.zip
+
+# Extract the archive
+Expand-Archive -Path gateway-windows.zip -DestinationPath .
+
+# Rename
+Rename-Item -Path "gateway-windows-amd64.exe" -NewName "gateway.exe"
+
+```
+</details>
+
+<details>
+<summary>macOS (Intel)</summary>
+
+```bash
+# Download the latest binary for macOS (Intel)
+curl -LO https://github.com/centralmind/gateway/releases/latest/download/gateway-darwin-amd64.tar.gz
+
+# Extract the archive
+tar -xzf gateway-darwin-amd64.tar.gz
+mv gateway-darwin-amd64 gateway
+
+# Make the binary executable
+chmod +x gateway
+
+```
+</details>
+
+<details>
+<summary>macOS (Apple Silicon)</summary>
+ 
+```bash
+# Download the latest binary for macOS (Apple Silicon)
+curl -LO https://github.com/centralmind/gateway/releases/latest/download/gateway-darwin-arm64.tar.gz
+
+# Extract the archive
+tar -xzf gateway-darwin-arm64.tar.gz
+mv gateway-darwin-arm64 gateway
+
+# Make the binary executable
+chmod +x gateway
+
+```
+</details>
+
+
+### 2. Create a `connection.yaml` configuration file:
 ```bash
 echo 'hosts:
-  - some-postgres
+  - localhost
 user: "your-database-user"
 password: "your-database-password"
 database: "your-database-name"
 port: 5432' > connection.yaml
 ```
 
-3. Run the discovery process with AI-powered API generation:
+### 3. Run the discovery process with AI-powered API generation:
 ```bash
-docker run --network sample_network -v $(pwd)/connection.yaml:/usr/local/bin/connection.yaml \
-  ghcr.io/centralmind/gateway:latest discover \
-  --config /usr/local/bin/connection.yaml \
+./gateway discover \
+  --config connection.yaml \
   --db-type postgres \
   --ai-api-key $OPENAI_KEY \
   --prompt "Develop an API that enables a chatbot to retrieve information about data. \
@@ -38,11 +98,9 @@ Try to place yourself as analyst and think what kind of data you will require, \
 based on that come up with useful API methods for that"
 ```
 
-4. Start the REST server:
+### 4. Start the REST server:
 ```bash
-docker run -p 9090:9090 -v \
-  -v $(pwd)/gateway.yaml:/app/gateway.yaml \
-  ghcr.io/centralmind/gateway:latest start --config gateway.yaml rest
+./gateway --config gateway.yaml start rest
 ```
 
 ## Verification

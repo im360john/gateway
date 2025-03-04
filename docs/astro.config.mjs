@@ -22,7 +22,7 @@ export default defineConfig({
         {
           label: 'Getting Started',
           items: [
-            //{ label: 'Quickstart', slug: 'docs/content/getting-started/quickstart' },
+            { label: 'Quickstart', slug: 'docs/content/getting-started/quickstart' },
             { label: 'Installation', slug: 'docs/content/getting-started/installation' },
             { label: 'Generating an API', slug: 'docs/content/getting-started/generating-api' },
             { label: 'Launching an API', slug: 'docs/content/getting-started/launching-api' },

@@ -53,7 +53,7 @@ docker exec -it some-postgres psql -U postgres -d sampledb -c "\dt"
 
 You can use these connection details to connect to the database:
 
-- Host: some-postgres
+- Host: localhost
 - Port: 5432
 - Database: sampledb
 - Username: postgres
@@ -63,7 +63,7 @@ Create a `connection.yaml` file with these settings:
 
 ```bash
 echo "hosts:
-  - some-postgres
+  - localhost
 user: postgres
 password: mysecretpassword
 database: sampledb
@@ -74,7 +74,7 @@ Or manually create `connection.yaml` with this content:
 
 ```yaml
 hosts:
-  - some-postgres
+  - localhost
 user: postgres
 password: mysecretpassword
 database: sampledb

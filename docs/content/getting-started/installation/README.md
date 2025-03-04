@@ -20,8 +20,6 @@ mv gateway-linux-amd64 gateway
 # Make the binary executable
 chmod +x gateway
 
-# Move to a directory in your PATH (optional)
-sudo mv gateway /usr/local/bin/
 ```
 
 <details>
