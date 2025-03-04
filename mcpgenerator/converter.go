@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	"github.com/centralmind/gateway/connectors"
+	"github.com/centralmind/gateway/mcp"
 	"github.com/centralmind/gateway/model"
 	"github.com/centralmind/gateway/plugins"
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	"github.com/centralmind/gateway/server"
 	"golang.org/x/xerrors"
 )
 
@@ -20,6 +21,7 @@ func New(
 	schema model.Config,
 ) (*MCPServer, error) {
 	srv := server.NewMCPServer("mcp-data-gateway", "0.0.1")
+
 	var interceptors []plugins.Interceptor
 	for k, v := range schema.Plugins {
 		plugin, err := plugins.New(k, v)
@@ -64,7 +66,7 @@ func New(
 				res, err := connector.Query(ctx, endpoint, request.Params.Arguments)
 				if err != nil {
 					return &mcp.CallToolResult{
-						Content: []interface{}{
+						Content: []mcp.Content{
 							mcp.TextContent{
 								Type: "text",
 								Text: fmt.Sprintf("Unable to query: %s", err),
@@ -73,7 +75,7 @@ func New(
 						IsError: true,
 					}, nil
 				}
-				var content []interface{}
+				var content []mcp.Content
 				content = append(content, mcp.TextContent{
 					Type: "text",
 					Text: fmt.Sprintf("Found a %v row-(s) in %s.", len(res), info.Name),
@@ -103,7 +105,7 @@ func jsonify(data any) string {
 }
 
 func (s *MCPServer) ServeSSE(addr string) *server.SSEServer {
-	return server.NewSSEServer(s.server, fmt.Sprintf("http://%s", addr))
+	return server.NewSSEServer(s.server, fmt.Sprintf("http://localhost%s", addr))
 }
 
 func (s *MCPServer) ServeStdio() *server.StdioServer {

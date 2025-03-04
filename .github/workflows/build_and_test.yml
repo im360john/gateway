@@ -44,6 +44,8 @@ jobs:
           { group: "connectors", name: "postgres", path: "postgres" },
           { group: "connectors", name: "mysql", path: "mysql" },
           { group: "plugins", name: "plugins", path: "..." },
+          { group: "mcp", name: "mcp", path: "..." },
+          { group: "server", name: "server", path: "..." },
         ]
     steps:
       - name: Checkout
