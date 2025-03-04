@@ -10,6 +10,11 @@ RUN echo $TZ > /etc/timezone && \
 # Create a non-root user and group
 RUN addgroup --system cligroup && adduser --system --ingroup cligroup cliuser
 
+# Create necessary directories with proper permissions
+RUN mkdir -p /var/log/gateway /etc/gateway && \
+    chown -R cliuser:cligroup /var/log/gateway /etc/gateway && \
+    chmod 755 /var/log/gateway /etc/gateway
+
 ARG BINARY=gateway
 COPY ${BINARY} /usr/local/bin/gw
 

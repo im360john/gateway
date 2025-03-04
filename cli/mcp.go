@@ -2,11 +2,12 @@ package cli
 
 import (
 	"context"
+	"os"
+
 	"github.com/centralmind/gateway/mcpgenerator"
 	gw_model "github.com/centralmind/gateway/model"
 	"github.com/spf13/cobra"
 	"golang.org/x/xerrors"
-	"os"
 )
 
 func MCP(configPath *string, addr *string) *cobra.Command {
@@ -54,6 +55,6 @@ func MCPStdio(configPath *string) *cobra.Command {
 			return srv.ServeStdio().Listen(context.Background(), os.Stdin, os.Stdout)
 		},
 	}
-	res.Flags().StringVar(&logFile, "log-file", "mcp.log", "path to log file")
+	res.Flags().StringVar(&logFile, "log-file", "/var/log/gateway/mcp.log", "path to log file")
 	return res
 }

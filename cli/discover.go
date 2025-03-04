@@ -88,6 +88,8 @@ func Discover() *cobra.Command {
 	var aiModel string
 	var output string
 	var extraPrompt string
+	var promptFile string
+	var openaiLogFile string
 
 	//var red string = "\033[31m"
 	//var green = "\033[32m"
@@ -197,11 +199,10 @@ func Discover() *cobra.Command {
 			// Prepare prompt
 			logrus.Info("Step 4: Prepare prompt to AI")
 			fullPrompt := generatePrompt(databaseType, extraPrompt, tablesToGenerate, getSchemaFromConfig(databaseType, configRaw))
-			promptFilename := "prompt_default.txt"
-			if err := saveToFile(promptFilename, fullPrompt); err != nil {
+			if err := saveToFile(promptFile, fullPrompt); err != nil {
 				logrus.Error("failed to save prompt:", err)
 			}
-			logrus.Infof("Prompt saved locally to %s", promptFilename)
+			logrus.Infof("Prompt saved locally to %s", promptFile)
 
 			logrus.Info("✅ Step 4 completed. Done.")
 			logrus.Info("\r\n")
@@ -266,6 +267,15 @@ func Discover() *cobra.Command {
 			}
 			logrus.Infof("Total number of columns with PII data: "+yellow+"%d"+reset, piiColumnsCount)
 
+			answerText := strings.TrimSpace(resp.Choices[0].Message.Content)
+			if err := saveToFile(openaiLogFile, answerText); err != nil {
+				logrus.Error("failed to save OpenAI response:", err)
+			}
+
+			var res gw_model.Config
+			if err := yaml.Unmarshal([]byte(answerText), &res); err != nil {
+				return err
+			}
 			return nil
 		},
 	}
@@ -277,6 +287,8 @@ func Discover() *cobra.Command {
 	cmd.Flags().StringVar(&aiModel, "ai-model", "o3-mini", "AI model to use")
 	cmd.Flags().StringVar(&output, "output", "gateway.yaml", "Resulted yaml path")
 	cmd.Flags().StringVar(&extraPrompt, "prompt", "generate reasonable set of API-s for this data", "Custom input to generate API-s")
+	cmd.Flags().StringVar(&promptFile, "prompt-file", "/var/log/gateway/prompt_default.txt", "Path to save the generated prompt")
+	cmd.Flags().StringVar(&openaiLogFile, "openai-log", "/var/log/gateway/open-ai-raw.log", "Path to save OpenAI raw response")
 	return cmd
 }
 
