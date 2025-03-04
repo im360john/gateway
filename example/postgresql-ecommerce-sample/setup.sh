@@ -22,10 +22,12 @@ unzip -o sample_data.zip -d data
 if docker ps -a --format '{{.Names}}' | grep -Eq "^some-postgres\$"; then
     echo "Removing existing container some-postgres..."
     docker rm -f some-postgres
+    docker network rm sample_network
 fi
 
 echo "Starting the PostgreSQL Docker container..."
-docker run --name some-postgres \
+docker network create sample_network
+docker run --network sample_network --name some-postgres \
   -e POSTGRES_PASSWORD=mysecretpassword \
   -p 5432:5432 \
   -v "$(pwd)/data":/var/lib/postgresql/csv \

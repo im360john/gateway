@@ -17,21 +17,21 @@ docker pull ghcr.io/centralmind/gateway:latest
 ```
 
 2. Create a `connection.yaml` configuration file:
-```yaml
-hosts:
-  - localhost
+```bash
+echo 'hosts:
+  - some-postgres
 user: "your-database-user"
 password: "your-database-password"
 database: "your-database-name"
-port: 5432
+port: 5432' > connection.yaml
 ```
 
 3. Run the discovery process with AI-powered API generation:
 ```bash
-docker run -v $(pwd)/connection.yaml:/app/connection.yaml \
+docker run --network sample_network -v $(pwd)/connection.yaml:/usr/local/bin/connection.yaml \
   ghcr.io/centralmind/gateway:latest discover \
-  --config connection.yaml \
-  --db-type postgres \  
+  --config /usr/local/bin/connection.yaml \
+  --db-type postgres \
   --ai-api-key $OPENAI_KEY \
   --prompt "Develop an API that enables a chatbot to retrieve information about data. \
 Try to place yourself as analyst and think what kind of data you will require, \
