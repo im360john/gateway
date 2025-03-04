@@ -105,7 +105,7 @@ func jsonify(data any) string {
 }
 
 func (s *MCPServer) ServeSSE(addr string) *server.SSEServer {
-	return server.NewSSEServer(s.server, fmt.Sprintf("http://localhost%s", addr))
+	return server.NewSSEServer(s.server, addr)
 }
 
 func (s *MCPServer) ServeStdio() *server.StdioServer {

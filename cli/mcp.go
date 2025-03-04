@@ -2,16 +2,19 @@ package cli
 
 import (
 	"context"
+	"fmt"
 	"os"
+	"strings"
 
 	"github.com/centralmind/gateway/mcpgenerator"
 	gw_model "github.com/centralmind/gateway/model"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"golang.org/x/xerrors"
 )
 
 func MCP(configPath *string, addr *string) *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "mcp",
 		Short: "MCP gateway",
 		Args:  cobra.MatchAll(cobra.ExactArgs(0)),
@@ -24,13 +27,35 @@ func MCP(configPath *string, addr *string) *cobra.Command {
 			if err != nil {
 				return xerrors.Errorf("unable to parse config file: %w", err)
 			}
+
+			servers, _ := cmd.Flags().GetString("servers")
+			serverAddresses := []string{}
+
+			// Add additional servers from the --servers flag if provided
+			if servers != "" {
+				additionalServers := strings.Split(servers, ",")
+				for _, server := range additionalServers {
+					serverAddresses = append(serverAddresses, strings.TrimSpace(server))
+				}
+			}
+
+			if len(serverAddresses) == 0 {
+				serverAddresses = append(serverAddresses, fmt.Sprintf("http://localhost%s", *addr))
+			}
+
 			srv, err := mcpgenerator.New(*gw)
 			if err != nil {
 				return xerrors.Errorf("unable to init mcp generator: %w", err)
 			}
-			return srv.ServeSSE(*addr).Start(*addr)
+
+			logrus.Infof("MCP server is running at: %s/sse", serverAddresses[0])
+			return srv.ServeSSE(serverAddresses[0]).Start(*addr)
 		},
 	}
+
+	cmd.Flags().String("servers", "", "comma-separated list of server addresses")
+
+	return cmd
 }
 
 func MCPStdio(configPath *string) *cobra.Command {
