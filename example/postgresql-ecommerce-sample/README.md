@@ -21,8 +21,6 @@ cd gateway/example/postgresql-ecommerce-sample
 
 ```bash
 curl -O https://raw.githubusercontent.com/centralmind/sample_databases/refs/heads/main/ecommerce/sample_data.zip
-# or using wget:
-# wget https://raw.githubusercontent.com/centralmind/sample_databases/refs/heads/main/ecommerce/sample_data.zip
 ```
 
 3. Make the setup script executable:
