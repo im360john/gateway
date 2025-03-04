@@ -2,8 +2,6 @@
 title: 'Generating an API'
 ---
 
-# Overview
-
 This guide explains how to generate an API using Gateway's discovery mechanism.
 
 ## Prerequisites

@@ -30,3 +30,8 @@ schema: sales
 tlsFile: ""        # Optional PEM-encoded certificate
 enableTLS: false   # Enable TLS/SSL connection 
 ```
+
+## Deploy PostgreSQL Sample Databases 
+
+ - You can deploy sample database using a docker and example of DVD store data
+<a href="/example/postgresql-dvdstore-sample" /> DVDStore Sample Database</a>

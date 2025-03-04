@@ -2,7 +2,6 @@
 title: 'Launching an API'
 ---
 
-# Overview
 
 This guide explains how to launch the API you created using the Gateway discovery process.
 

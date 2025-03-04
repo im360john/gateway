@@ -2,8 +2,6 @@
 title: 'Installation'
 ---
 
-# Overview
-
 This guide provides three ways to install Gateway:
 
 ## 1. Binary Installation
