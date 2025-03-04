@@ -66,7 +66,22 @@ Exposes APIs through REST, and MCP with built-in authentication via API keys and
 - <a href="https://docs.centralmind.ai/connectors/"> Database Connectors</a>
 - <a href="https://docs.centralmind.ai/plugins/"> Plugins</a>
 
-## How to generate
+## How to build
+
+```shell
+   git clone https://github.com/centralmind/gateway.git
+
+   cd gateway
+
+   # Install dependencies
+   go mod download
+
+   # Building
+   go build .
+
+```
+
+## How to generate API
 
 Gateway is LLM-model first, i.e. it's designed to be generated via LLM-models.
 To generate your gateway config simply run discover command with your connection info:
@@ -119,10 +134,7 @@ To generate your gateway config simply run discover command with your connection
       INFO OpenAI usage:  Input tokens=3187 Output tokens=14872 Total tokens=18059
       INFO API Functions Created:
       INFO   - GET /payment_dim/{payment_key} - Retrieve a payment detail by its payment key
-      INFO   - GET /payment_dim - List payment records with pagination
-      INFO   - GET /payment_dim/count - Retrieve total count of payment records
-      INFO   - GET /fact_table/{payment_key} - Retrieve a transaction detail by its payment key
-      INFO   - GET /fact_table - List transaction records with pagination
+      .....
       .....
       INFO API schema saved to: gateway.yaml
 
@@ -138,7 +150,7 @@ To generate your gateway config simply run discover command with your connection
       INFO Total number of columns with PII data: 2
    ```
 
-4. Explore results, the result would be saved in output file:
+4. Explore results, the result would be saved in output file `gateway.yaml`:
    ```yaml
    api:
      name: Awesome Readonly API
@@ -163,19 +175,18 @@ To generate your gateway config simply run discover command with your connection
 ## How to start API
 
 ```shell
-go build .
-gateway start --config ./example/gateway.yaml rest
+gateway start --config gateway.yaml rest
 ```
 
 ### Docker compose
 
 ```shell
-docker compose up ./example/docker-compose.yml
+docker compose up ./example/simple/docker-compose.yml
 ```
 
 ### MCP Protocol
 
-Gateway implement MCP protocol, for easy access to your data right from claude, to use it
+Gateway implement MCP protocol, for easy access to your data right from claude, to use it. Full instruction how to setup MCP and integrate with <a href="https://docs.centralmind.ai/docs/content/integration/claude-desktop/">Anthropic Claude is here</a>.
 
 1. Build binary
    ```shell
