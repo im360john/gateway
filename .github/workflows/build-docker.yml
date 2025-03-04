@@ -53,23 +53,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and Push Images
+      - name: Build and Push Multi-Arch Image
         run: |
-          # Build and push AMD64
-          docker buildx build --platform linux/amd64 \
+          docker buildx build --platform linux/amd64,linux/arm64 \
             --build-arg BINARY=gateway-linux-amd64 \
             -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }} \
             -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
-            --push \
-            .
-
-          # Build and push ARM64
-          docker buildx build --platform linux/arm64 \
-            --build-arg BINARY=gateway-linux-arm64 \
-            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }} \
-            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
-            --push \
-            .
+            --push .
 
       - name: Tag Release Images
         if: github.event_name == 'release'
