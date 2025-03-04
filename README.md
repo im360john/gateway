@@ -59,6 +59,7 @@ Exposes APIs through REST, and MCP with built-in authentication via API keys and
 ## Documentation
 
 - Getting Started
+  - <a href="https://docs.centralmind.ai/docs/content/getting-started/quickstart/">Quickstart</a>
   - <a href="https://docs.centralmind.ai/docs/content/getting-started/installation/">Installation</a>
   - <a href="https://docs.centralmind.ai/docs/content/getting-started/generating-api/">Generating an API</a>
   - <a href="https://docs.centralmind.ai/docs/content/getting-started/launching-api/">Launching an API</a>
@@ -87,13 +88,13 @@ Gateway is LLM-model first, i.e. it's designed to be generated via LLM-models.
 To generate your gateway config simply run discover command with your connection info:
 
 1. Create a connection configuration file (e.g., `connection.yaml`) with your database credentials:
-   ```yaml
-   hosts:
-     - localhost
-   user: postgres
-   password: password
-   database: mydb
-   port: 5432
+   ```shell
+   echo 'hosts:
+         - localhost
+         user: "your-database-user"
+         password: "your-database-password"
+         database: "your-database-name"
+         port: 5432' > connection.yaml
    ```
 2. Discovery command
    ```shell
