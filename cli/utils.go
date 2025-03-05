@@ -5,14 +5,27 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"sync"
 
 	"github.com/sirupsen/logrus"
 )
 
 const logDirName = "centralmind"
 
+var (
+	cachedLogDir     string
+	cachedLogDirOnce sync.Once
+)
+
 func getDefaultLogDir() string {
-	if envDir := os.Getenv("GATEWAY_LOG_DIR"); envDir != "" {
+	cachedLogDirOnce.Do(func() {
+		cachedLogDir = evaluateDefaultLogDir()
+	})
+	return cachedLogDir
+}
+
+func evaluateDefaultLogDir() string {
+	if envDir := os.Getenv("CENTRALMIND_LOG_DIR"); envDir != "" {
 		if ensureDirectoryExists(envDir) {
 			logrus.Debugf("Using log directory from environment: %s", envDir)
 			return envDir
@@ -21,7 +34,6 @@ func getDefaultLogDir() string {
 	}
 
 	var defaultDir string
-
 	switch runtime.GOOS {
 	case "windows":
 		// On Windows, try ProgramData first; if not available, fall back to the executable directory.
@@ -60,16 +72,18 @@ func getDefaultLogDir() string {
 		defaultDir = "."
 	}
 
-	logrus.Debugf("Using log directory: %s", defaultDir)
+	logrus.Infof("Using log directory: %s", defaultDir)
 	return defaultDir
 }
 
-// ensureDirectoryExists checks if a directory exists and creates it if necessary.
-// It returns true if the directory exists or was created successfully.
+// ensureDirectoryExists checks if a directory exists, creates it if necessary,
+// and verifies it is writable. It returns true if the directory exists or
+// was created successfully AND is writable.
 func ensureDirectoryExists(dir string) bool {
 	// Check if the directory already exists.
 	if fi, err := os.Stat(dir); err == nil && fi.IsDir() {
-		return true
+		// Directory exists, check if it's writable
+		return isDirectoryWritable(dir)
 	}
 
 	// Try to create the directory.
@@ -79,5 +93,25 @@ func ensureDirectoryExists(dir string) bool {
 	}
 
 	logrus.WithField("directory", dir).Info("Created log directory")
+
+	// Verify the newly created directory is writable
+	return isDirectoryWritable(dir)
+}
+
+// isDirectoryWritable tests if a directory is writable by creating a temporary file.
+func isDirectoryWritable(dir string) bool {
+	// Try to create a test file
+	f, err := os.CreateTemp(dir, ".write_test_*")
+	if err != nil {
+		logrus.WithError(err).WithField("directory", dir).Warn("Directory is not writable")
+		return false
+	}
+
+	// Close and remove the test file
+	filename := f.Name()
+	f.Close()
+	os.Remove(filename)
+
+	logrus.Debugf("Verified directory is writable: %s", dir)
 	return true
 }
