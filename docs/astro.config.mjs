@@ -43,6 +43,7 @@ export default defineConfig({
             { label: 'ChatGPT', slug: 'docs/content/integration/chatgpt' },
             { label: 'LangChain', slug: 'docs/content/integration/langchain' },
             { label: 'Claude Desktop', slug: 'docs/content/integration/claude-desktop' },
+            { label: 'Cursor', slug: 'docs/content/integration/cursor' },
             { label: 'Local Running Models', slug: 'docs/content/integration/local-running-models' },
           ],
         },
