@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/centralmind/gateway/mcpgenerator"
@@ -80,6 +81,6 @@ func MCPStdio(configPath *string) *cobra.Command {
 			return srv.ServeStdio().Listen(context.Background(), os.Stdin, os.Stdout)
 		},
 	}
-	res.Flags().StringVar(&logFile, "log-file", "/var/log/gateway/mcp.log", "path to log file")
+	res.Flags().StringVar(&logFile, "log-file", filepath.Join(getDefaultLogDir(), "mcp.log"), "path to log file")
 	return res
 }

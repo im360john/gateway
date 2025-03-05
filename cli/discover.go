@@ -5,6 +5,7 @@ import (
 	_ "embed"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -287,8 +288,8 @@ func Discover() *cobra.Command {
 	cmd.Flags().StringVar(&aiModel, "ai-model", "o3-mini", "AI model to use")
 	cmd.Flags().StringVar(&output, "output", "gateway.yaml", "Resulted yaml path")
 	cmd.Flags().StringVar(&extraPrompt, "prompt", "generate reasonable set of API-s for this data", "Custom input to generate API-s")
-	cmd.Flags().StringVar(&promptFile, "prompt-file", "/var/log/gateway/prompt_default.txt", "Path to save the generated prompt")
-	cmd.Flags().StringVar(&openaiLogFile, "openai-log", "/var/log/gateway/open-ai-raw.log", "Path to save OpenAI raw response")
+	cmd.Flags().StringVar(&promptFile, "prompt-file", filepath.Join(getDefaultLogDir(), "prompt_default.txt"), "Path to save the generated prompt")
+	cmd.Flags().StringVar(&openaiLogFile, "openai-log", filepath.Join(getDefaultLogDir(), "open-ai-raw.log"), "Path to save OpenAI raw response")
 	return cmd
 }
 
