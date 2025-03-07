@@ -1,4 +1,4 @@
-This connector allows you to automatically generate an API layer over your Supabase database tables using CentralMind Gateway.
+This connector allows you to automatically generate an secured API layer over your Supabase database tables using CentralMind Gateway. API methods will be automatically created based on your tables and prompt using LLM (OpenAI model).
 
 ## Prerequisites
 
@@ -10,7 +10,7 @@ This connector allows you to automatically generate an API layer over your Supab
 
 Create `connection.yaml` with your Supabase database credentials. You can find credentials on your project's home page if you will click `connect` button in the menu on top. Pick `Transaction pooler` connection string cause its have ipv4 on free tier or any other that is more suitable for your case.
 
-![img](/assets/supabase-connection.jpg)
+![img](/../../assets/supabase-connection.jpg)
 
 ```bash
 echo "hosts:
@@ -42,7 +42,7 @@ Start the REST API server:
 ./gateway start --config gateway.yaml rest
 ```
 
-![img](/../../assets/supabase-swagger.jpg)
+
 
 [Optional] Start the MCP SSE API server:
 
@@ -60,18 +60,20 @@ Start the REST API server:
 By default the Swagger UI for API will available locally on:
 
 ```
-http://localhost:9090/
+http://localhost:9090/swagger/
 ```
 
+![img](/../../assets/supabase-swagger.jpg)
 
 ## Available Plugins
 
 You can enhance your API with various plugins:
-- PII Data Cleaning
-- OAuth Authentication
-- API Keys Management
-- LRU Cache
-- OpenTelemetry Integration
+- <a href="../../plugins/pii_remover/"> PII Data reduction using Regex </a>
+- <a href="../../plugins/presidio_anonymizer/"> PII Data reduction using Microsoft Presidio</a>
+- <a href="../../plugins/oauth/"> OAuth Authentication</a>
+- <a href="../../plugins/api_keys/"> API Keys Management</a>
+- <a href="../../plugins/lru_cache/"> LRU Cache</a>
+- <a href="../../plugins/otel/"> OpenTelemetry Integration</a>
 - And more...
 
 
