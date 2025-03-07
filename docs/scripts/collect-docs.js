@@ -25,6 +25,8 @@ const assetsDir = join(__dirname, '../src/content/docs/assets');
 
 // Patterns to ignore
 const ignorePatterns = [
+  'CODE_OF_CONDUCT.md',
+  'CONTRIBUTING.md',
   '**/node_modules/**',
   '**/docs/src/**',
   '**/dist/**',
