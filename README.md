@@ -215,3 +215,4 @@ Gateway implement MCP protocol, for easy access to your data right from claude, 
 - 🤖 **More LLM Providers** – Integrate Anthropic Claude, Google Gemini, DeepSeek.- 🏠
 - 📦 **Schema Evolution & Versioning** – Track changes and auto-migrate APIs.
 - 🚦 **Traffic Control & Rate Limiting** – Intelligent throttling for high-scale environments.
+- ✍️ **Write and Update** – Support also inserts, updates and upserts operations.

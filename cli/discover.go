@@ -301,12 +301,13 @@ func generatePrompt(databaseType, extraPrompt string, tables []TableData, schema
 	for _, table := range tables {
 		// Apply schema to table name if schema is provided and not empty
 		var tableName string
-		if schema != "" && schema != "public" {
+
+		if schema != "" {
 			// Qualify the table name with schema
 			tableName = fmt.Sprintf("%s.%s", schema, table.Name)
 		} else {
 			// Use the table name as is
-			tableName = table.Name
+			tableName = fmt.Sprintf("%s.%s", "public", table.Name)
 		}
 
 		res += fmt.Sprintf(`
