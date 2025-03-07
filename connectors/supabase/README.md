@@ -8,10 +8,12 @@ This connector allows you to automatically generate an secured API layer over yo
 
 ## Configuration
 
-Create `connection.yaml` with your Supabase database credentials. You can find credentials on your project's home page if you will click `connect` button in the menu on top. Pick `Transaction pooler` connection string cause its have ipv4 on free tier or any other that is more suitable for your case.
+You can find credentials on your project's home page if you will click `connect` button in the menu on top. Pick `Transaction pooler` connection string cause its have ipv4 on free tier or any other that is more suitable for your case.
 
-![img](/../../assets/supabase-connection.jpg)
+![img](../assets/supabase-connection.jpg)
 
+
+Create `connection.yaml` with your Supabase database credentials. 
 ```bash
 echo "hosts:
   - xxx.pooler.supabase.com
@@ -31,6 +33,7 @@ port: 6543" > connection.yaml
 
 2.Verify the generated configuration in `gateway.yaml`. You can:
    - Review the API structure and SQL Queries
+   - Limit tables using `--tables` parameter
    - Add plugins if needed (e.g., PII data cleaning)
    - Configure additional settings
 
@@ -63,7 +66,8 @@ By default the Swagger UI for API will available locally on:
 http://localhost:9090/swagger/
 ```
 
-![img](/../../assets/supabase-swagger.jpg)
+You should see Swagger UI with ability to execute methods
+![img](../assets/supabase-swagger.jpg)
 
 ## Available Plugins
 
