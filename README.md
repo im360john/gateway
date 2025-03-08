@@ -1,3 +1,5 @@
+![Build Binaries](https://github.com/centralmind/gateway/actions/workflows/build-binaries.yml/badge.svg)
+
 ---
 title: 'CentralMind'
 description: 'Build a data platform for LLMs in one day. Securely connect any data source and let AI handle the rest.'
@@ -111,7 +113,7 @@ port: 5432
 
 2. Run the discovery command:
 ```shell
-gateway discover \
+./gateway discover \
   --config connection.yaml \
   --db-type postgres \  
   --ai-api-key $OPENAI_API_KEY \
@@ -168,7 +170,7 @@ database:
 
 ### Binary Mode
 ```shell
-gateway start --config gateway.yaml rest
+./gateway start --config gateway.yaml rest
 ```
 
 ### Docker Compose

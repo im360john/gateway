@@ -18,7 +18,7 @@ Gateway provides a convenient command for automatically discovering and generati
 
 ```bash
 # Basic command to get help
-gateway --help
+./gateway --help
 ```
 
 ### Setting up Database Connection
@@ -40,7 +40,7 @@ port: 5432
 Use the following command to generate an API with AI assistance:
 
 ```bash
-gateway \
+./gateway \
   discover \
   --config connection.yaml \
   --db-type postgres \
@@ -77,5 +77,5 @@ After generating your API:
 2. Customize endpoints and parameters as needed
 3. Run Gateway with your configuration:
    ```bash
-   gateway start --config gateway.yaml rest
+   ./gateway start --config gateway.yaml rest
    ```
