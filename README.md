@@ -1,10 +1,5 @@
 ![Build Binaries](https://github.com/centralmind/gateway/actions/workflows/build-binaries.yml/badge.svg)
 
----
-title: 'CentralMind'
-description: 'Build a data platform for LLMs in one day. Securely connect any data source and let AI handle the rest.'
----
-
 <h1 align="center">CentralMind Gateway: AI-First Data Gateway</h1>
 
 <div align="center">
