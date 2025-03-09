@@ -103,7 +103,7 @@ func isDirectoryWritable(dir string) bool {
 	// Try to create a test file
 	f, err := os.CreateTemp(dir, ".write_test_*")
 	if err != nil {
-		logrus.WithError(err).WithField("directory", dir).Warn("Directory is not writable")
+		logrus.WithError(err).WithField("directory", dir).Debug("Directory is not writable")
 		return false
 	}
 
