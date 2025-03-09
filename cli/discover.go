@@ -23,19 +23,19 @@ import (
 var (
 	basePrompt = `
 !Important rules:
-	- The most important:The final output must contain *only valid single JSON* with no additional commentary, explanations, or markdown formatting!
+	- The most important: The final output must contain *only valid single JSON* with no additional commentary, explanations, or markdown formatting!
 	- The JSON configuration must strictly adhere to the provided JSON schema, including all required fields.
-	- Description of API endpoints should have also an example, to help chatbot to use it.
-	- All descriptions and summary must not have any sensetive information/data from security point of view including database types, password and etc.
+	- Description of API endpoints should also have an example, to help chatbot to use it.
+	- All descriptions and summary must not have any sensitive information/data from security point of view including database types, password and etc.
 	- All SQL queries must be Pure SQL that will be used in golang SQLx on top of database - {database_type} and be fully parameterized (using named parameters) to prevent SQL injection.
-	- Do not generate output schema for endpoints..
+	- Do not generate output schema for endpoints.
 	- All SQL queries must be verified that they will not return array of data where expected one item.
-	- SQL queries should be optimized for {database_type} and use appropirate indexes.
+	- SQL queries should be optimized for {database_type} and use appropriate indexes.
 	- Endpoints that return lists must include pagination parameters (offset and limit).
 	- Consistent Endpoint Definitions: Each table defined in the DDL should have corresponding endpoints as specified by the JSON schema, including method, path, description, SQL query, and parameters.
 	- Sensitive Data Handling: If any columns contain sensitive or PII data like phone number, SSN, address, credit card etc, they must be flagged appropriately (e.g., using a "pii" flag).
 	- Each Parameter in API endpoints may have default value taken from corresponded example rows, only if it's not PII or sensitive data
-	- If some entity require pagination, there should be separate API that calculate total_count, so pagination can be queried
+	- If some entity requires pagination, there should be separate API that calculates total_count, so pagination can be queried
 	- For Postgres, use all table names and column names in double quotes, e.g., "table_name" and "column_name". 
 	- If a schema is specified in the table name (format: schema.table), use it in your queries appropriately for the database type. For Postgres, this would be "schema"."table_name".
 `
@@ -84,9 +84,16 @@ func Discover() *cobra.Command {
 	var configPath string
 	var databaseType string
 	var tables string
-	var aiAPIKey string
+	var aiProvider string
 	var aiEndpoint string
+	var aiAPIKey string
 	var aiModel string
+	var aiMaxTokens int
+	var aiTemperature float32
+	var aiReasoning bool
+	var bedrockRegion string
+	var vertexAIRegion string
+	var vertexAIProject string
 	var output string
 	var extraPrompt string
 	var promptFile string
@@ -198,7 +205,7 @@ func Discover() *cobra.Command {
 			logrus.Info("✅ Step 3 completed. Done.")
 			logrus.Info("\r\n")
 			// Prepare prompt
-			logrus.Info("Step 4: Prepare prompt to AI")
+			logrus.Info("Step 4: Prepare the prompt for the AI")
 			fullPrompt := generatePrompt(databaseType, extraPrompt, tablesToGenerate, getSchemaFromConfig(databaseType, configRaw))
 			if err := saveToFile(promptFile, fullPrompt); err != nil {
 				logrus.Error("failed to save prompt:", err)
@@ -280,16 +287,29 @@ func Discover() *cobra.Command {
 			return nil
 		},
 	}
+
 	cmd.Flags().StringVar(&configPath, "config", "connection.yaml", "Path to connection yaml file")
 	cmd.Flags().StringVar(&tables, "tables", "", "Comma-separated list of tables to include (e.g. 'table1,table2,table3')")
 	cmd.Flags().StringVar(&databaseType, "db-type", "postgres", "Type of database")
-	cmd.Flags().StringVar(&aiAPIKey, "ai-api-key", "ai-api-key", "AI API token")
+	/*
+		AI provider options:
+	*/
+	cmd.Flags().StringVar(&aiProvider, "ai-provider", "openai", "AI provider to use")
 	cmd.Flags().StringVar(&aiEndpoint, "ai-endpoint", "", "Custom OpenAI-compatible API endpoint URL")
-	cmd.Flags().StringVar(&aiModel, "ai-model", "o3-mini", "AI model to use")
+	cmd.Flags().StringVar(&aiAPIKey, "ai-api-key", "ai-api-key", "AI API token")
+	cmd.Flags().StringVar(&bedrockRegion, "bedrock-region", "", "Bedrock region")
+	cmd.Flags().StringVar(&vertexAIRegion, "vertexai-region", "", "Vertex AI region")
+	cmd.Flags().StringVar(&vertexAIProject, "vertexai-project", "", "Vertex AI project")
+	cmd.Flags().StringVar(&aiModel, "ai-model", "", "AI model to use")
+	cmd.Flags().IntVar(&aiMaxTokens, "ai-max-tokens", 0, "Maximum tokens to use")
+	cmd.Flags().Float32Var(&aiTemperature, "ai-temperature", -1.0, "AI temperature")
+	cmd.Flags().BoolVar(&aiReasoning, "ai-reasoning", true, "Enable reasoning")
+
 	cmd.Flags().StringVar(&output, "output", "gateway.yaml", "Resulted yaml path")
 	cmd.Flags().StringVar(&extraPrompt, "prompt", "generate reasonable set of API-s for this data", "Custom input to generate API-s")
 	cmd.Flags().StringVar(&promptFile, "prompt-file", filepath.Join(getDefaultLogDir(), "prompt_default.txt"), "Path to save the generated prompt")
 	cmd.Flags().StringVar(&openaiLogFile, "openai-log", filepath.Join(getDefaultLogDir(), "open-ai-raw.log"), "Path to save OpenAI raw response")
+
 	return cmd
 }
 
