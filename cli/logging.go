@@ -30,7 +30,7 @@ func evaluateDefaultLogDir() string {
 			logrus.Debugf("Using log directory from environment: %s", envDir)
 			return envDir
 		}
-		logrus.Warnf("Environment-specified log directory %s is not accessible, falling back to defaults", envDir)
+		logrus.Debugf("Environment-specified log directory %s is not accessible, falling back to defaults", envDir)
 	}
 
 	var defaultDir string
@@ -42,7 +42,7 @@ func evaluateDefaultLogDir() string {
 		} else if exe, err := os.Executable(); err == nil {
 			defaultDir = filepath.Join(filepath.Dir(exe), logDirName)
 		} else {
-			logrus.WithError(err).Warn("Unable to get executable path, using current directory as fallback")
+			logrus.WithError(err).Debug("Unable to get executable path, using current directory as fallback")
 			defaultDir = filepath.Join(".", logDirName)
 		}
 	case "darwin": // macOS
@@ -50,7 +50,7 @@ func evaluateDefaultLogDir() string {
 		if exe, err := os.Executable(); err == nil {
 			defaultDir = filepath.Join(filepath.Dir(exe), fmt.Sprintf(".%s", logDirName))
 		} else {
-			logrus.WithError(err).Warn("Unable to get executable path, using current directory as fallback")
+			logrus.WithError(err).Debug("Unable to get executable path, using current directory as fallback")
 			defaultDir = filepath.Join(".", logDirName)
 		}
 	default: // Linux and other Unix-like systems
@@ -60,7 +60,7 @@ func evaluateDefaultLogDir() string {
 			if homeDir, err := os.UserHomeDir(); err == nil {
 				defaultDir = filepath.Join(homeDir, fmt.Sprintf(".%s", logDirName))
 			} else {
-				logrus.WithError(err).Warn("Unable to determine user home directory, using current directory as fallback")
+				logrus.WithError(err).Debug("Unable to determine user home directory, using current directory as fallback")
 				defaultDir = filepath.Join(".", logDirName)
 			}
 		}
@@ -68,7 +68,7 @@ func evaluateDefaultLogDir() string {
 
 	// Ensure the chosen directory exists.
 	if !ensureDirectoryExists(defaultDir) {
-		logrus.Warnf("Failed to create log directory %s, using current directory as last resort", defaultDir)
+		logrus.Debugf("Failed to create log directory %s, using current directory as last resort", defaultDir)
 		defaultDir = "."
 	}
 
@@ -88,7 +88,7 @@ func ensureDirectoryExists(dir string) bool {
 
 	// Try to create the directory.
 	if err := os.MkdirAll(dir, 0755); err != nil {
-		logrus.WithError(err).WithField("directory", dir).Warn("Failed to create log directory")
+		logrus.WithError(err).WithField("directory", dir).Debug("Failed to create log directory")
 		return false
 	}
 
@@ -103,7 +103,7 @@ func isDirectoryWritable(dir string) bool {
 	// Try to create a test file
 	f, err := os.CreateTemp(dir, ".write_test_*")
 	if err != nil {
-		logrus.WithError(err).WithField("directory", dir).Warn("Directory is not writable")
+		logrus.WithError(err).WithField("directory", dir).Debug("Directory is not writable")
 		return false
 	}
 
@@ -113,5 +113,5 @@ func isDirectoryWritable(dir string) bool {
 	os.Remove(filename)
 
 	logrus.Debugf("Verified directory is writable: %s", dir)
-	return true
+	return false
 }
