@@ -35,6 +35,7 @@ var (
 )
 
 type DiscoverQueryParams struct {
+	LLMLogFile    string
 	Provider      string
 	Endpoint      string
 	APIKey        string
@@ -108,7 +109,7 @@ func makeDiscoverQuery(params DiscoverQueryParams, prompt string) (DiscoverQuery
 	request := &providers.ConversationRequest{
 		Reasoning:    params.Reasoning,
 		JsonResponse: true,
-		System:       "You must always respond in pure JSON",
+		System:       "You must always respond in pure JSON. No markdown, no comments, no explanations.",
 		Messages: []providers.Message{
 			{
 				Role: providers.UserRole,
@@ -128,14 +129,6 @@ func makeDiscoverQuery(params DiscoverQueryParams, prompt string) (DiscoverQuery
 
 	done <- true
 
-	costEstimate := provider.CostEstimate(llmResponse.ModelId, *llmResponse.Usage)
-
-	logrus.WithFields(logrus.Fields{
-		"Total tokens":  llmResponse.Usage.TotalTokens,
-		"Input tokens":  llmResponse.Usage.InputTokens,
-		"Output tokens": llmResponse.Usage.OutputTokens,
-	}).Info("LLM usage:")
-
 	var responseContentBuilder strings.Builder
 	for _, contentBlock := range llmResponse.Content {
 		if textBlock, ok := contentBlock.(*providers.ContentBlockText); ok {
@@ -144,6 +137,18 @@ func makeDiscoverQuery(params DiscoverQueryParams, prompt string) (DiscoverQuery
 	}
 
 	rawContent := strings.TrimSpace(responseContentBuilder.String())
+
+	if err := saveToFile(params.LLMLogFile, rawContent); err != nil {
+		logrus.Error("Failed to save LLM response:", err)
+	}
+
+	costEstimate := provider.CostEstimate(llmResponse.ModelId, *llmResponse.Usage)
+
+	logrus.WithFields(logrus.Fields{
+		"Total tokens":  llmResponse.Usage.TotalTokens,
+		"Input tokens":  llmResponse.Usage.InputTokens,
+		"Output tokens": llmResponse.Usage.OutputTokens,
+	}).Info("LLM usage:")
 
 	var response gw_model.Config
 	if err := yaml.Unmarshal([]byte(rawContent), &response); err != nil {

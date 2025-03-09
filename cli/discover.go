@@ -193,6 +193,7 @@ func Discover() *cobra.Command {
 			// Call API
 			logrus.Info("Step 5: Using AI to design API")
 			response, err := makeDiscoverQuery(DiscoverQueryParams{
+				LLMLogFile:    llmLogFile,
 				Provider:      aiProvider,
 				Endpoint:      aiEndpoint,
 				APIKey:        aiAPIKey,
@@ -265,10 +266,6 @@ func Discover() *cobra.Command {
 
 			logrus.Infof("Total number of columns containing PII data: "+yellow+"%d"+reset, piiColumnsCount)
 
-			if err := saveToFile(llmLogFile, response.RawContent); err != nil {
-				logrus.Error("Failed to save LLM response:", err)
-			}
-
 			return nil
 		},
 	}
@@ -293,7 +290,7 @@ func Discover() *cobra.Command {
 	cmd.Flags().StringVar(&output, "output", "gateway.yaml", "Resulted yaml path")
 	cmd.Flags().StringVar(&extraPrompt, "prompt", "generate reasonable set of API-s for this data", "Custom input to generate API-s")
 	cmd.Flags().StringVar(&promptFile, "prompt-file", filepath.Join(getDefaultLogDir(), "prompt_default.txt"), "Path to save the generated prompt")
-	cmd.Flags().StringVar(&llmLogFile, "llm-log", filepath.Join(getDefaultLogDir(), "llm-raw.log"), "Path to save the raw LLM response")
+	cmd.Flags().StringVar(&llmLogFile, "llm-log", filepath.Join(getDefaultLogDir(), "llm_raw_response.log"), "Path to save the raw LLM response")
 
 	return cmd
 }
