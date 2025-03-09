@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"os"
+	"strings"
 	"time"
 
 	anthropic "github.com/anthropics/anthropic-sdk-go"
@@ -42,7 +43,22 @@ func (ap *AnthropicProvider) GetName() string {
 }
 
 func (ap *AnthropicProvider) CostEstimate(modelId string, usage ModelUsage) float64 {
-	return 0.0
+	var inputPrice, outputPrice float64
+	const oneMillion = 1_000_000.0
+
+	switch {
+	case strings.Contains(modelId, "sonnet"):
+		inputPrice = 3.75 / oneMillion
+		outputPrice = 15.0 / oneMillion
+	default:
+		return 0.0
+	}
+
+	inputCost := float64(usage.InputTokens) * inputPrice
+	outputCost := float64(usage.OutputTokens) * outputPrice
+	totalCost := inputCost + outputCost
+
+	return totalCost
 }
 
 func NewAnthropicProvider(providerConfig ModelProviderConfig, vertexAI bool) (*AnthropicProvider, error) {

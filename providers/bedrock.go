@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"os"
+	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -37,7 +38,22 @@ func (bp *BedrockProvider) GetName() string {
 }
 
 func (ap *BedrockProvider) CostEstimate(modelId string, usage ModelUsage) float64 {
-	return 0.0
+	var inputPrice, outputPrice float64
+	const oneMillion = 1_000_000.0
+
+	switch {
+	case strings.Contains(modelId, "sonnet"):
+		inputPrice = 3.75 / oneMillion
+		outputPrice = 15.0 / oneMillion
+	default:
+		return 0.0
+	}
+
+	inputCost := float64(usage.InputTokens) * inputPrice
+	outputCost := float64(usage.OutputTokens) * outputPrice
+	totalCost := inputCost + outputCost
+
+	return totalCost
 }
 
 func NewBedrockProvider(providerConfig ModelProviderConfig) (*BedrockProvider, error) {

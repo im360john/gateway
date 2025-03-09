@@ -186,7 +186,7 @@ func Discover() *cobra.Command {
 				logrus.Error("failed to save prompt:", err)
 			}
 
-			logrus.Infof("Prompt saved locally to %s", promptFile)
+			logrus.Debugf("Prompt saved locally to %s", promptFile)
 			logrus.Info("✅ Step 4 completed. Done.")
 			logrus.Info("\r\n")
 
@@ -281,7 +281,7 @@ func Discover() *cobra.Command {
 	*/
 	cmd.Flags().StringVar(&aiProvider, "ai-provider", "openai", "AI provider to use")
 	cmd.Flags().StringVar(&aiEndpoint, "ai-endpoint", "", "Custom OpenAI-compatible API endpoint URL")
-	cmd.Flags().StringVar(&aiAPIKey, "ai-api-key", "ai-api-key", "AI API token")
+	cmd.Flags().StringVar(&aiAPIKey, "ai-api-key", "", "AI API token")
 	cmd.Flags().StringVar(&bedrockRegion, "bedrock-region", "", "Bedrock region")
 	cmd.Flags().StringVar(&vertexAIRegion, "vertexai-region", "", "Vertex AI region")
 	cmd.Flags().StringVar(&vertexAIProject, "vertexai-project", "", "Vertex AI project")
