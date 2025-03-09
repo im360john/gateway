@@ -3,7 +3,6 @@ package providers
 import (
 	"context"
 	"errors"
-	"fmt"
 	"os"
 	"time"
 
@@ -40,6 +39,10 @@ func (ap *AnthropicProvider) GetName() string {
 	}
 
 	return "Anthropic"
+}
+
+func (ap *AnthropicProvider) CostEstimate(modelId string, usage ModelUsage) float64 {
+	return 0.0
 }
 
 func NewAnthropicProvider(providerConfig ModelProviderConfig, vertexAI bool) (*AnthropicProvider, error) {
@@ -151,7 +154,7 @@ func (ap *AnthropicProvider) Chat(ctx context.Context, req *ConversationRequest)
 
 	resp, err := ap.Client.Messages.New(ctx, params, option.WithRequestTimeout(15*60*time.Second))
 	if err != nil {
-		return nil, fmt.Errorf("error during conversation: %w", err)
+		return nil, err
 	}
 
 	if len(resp.Content) == 0 {
@@ -161,9 +164,16 @@ func (ap *AnthropicProvider) Chat(ctx context.Context, req *ConversationRequest)
 	var responseContentBlocks []ContentBlock
 	for _, block := range resp.Content {
 		if block.Type == "text" {
-			responseContentBlocks = append(responseContentBlocks, &ContentBlockText{
-				Value: block.Text,
-			})
+			if req.JsonResponse {
+
+				responseContentBlocks = append(responseContentBlocks, &ContentBlockText{
+					Value: ExtractJSON(block.Text),
+				})
+			} else {
+				responseContentBlocks = append(responseContentBlocks, &ContentBlockText{
+					Value: block.Text,
+				})
+			}
 		}
 	}
 

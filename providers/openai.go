@@ -3,8 +3,8 @@ package providers
 import (
 	"context"
 	"errors"
-	"fmt"
 	"os"
+	"strings"
 
 	openai "github.com/sashabaranov/go-openai"
 )
@@ -30,6 +30,34 @@ var _ ModelProvider = (*OpenAIProvider)(nil)
 
 func (op *OpenAIProvider) GetName() string {
 	return "OpenAI"
+}
+
+func (ap *OpenAIProvider) CostEstimate(modelId string, usage ModelUsage) float64 {
+	var inputPrice, outputPrice float64
+	const oneMillion = 1_000_000.0
+
+	switch {
+	case strings.HasPrefix(modelId, "gpt-4o-mini"):
+		inputPrice = 0.15 / oneMillion
+		outputPrice = 0.60 / oneMillion
+	case strings.HasPrefix(modelId, "gpt-4o"):
+		inputPrice = 2.5 / oneMillion
+		outputPrice = 10.0 / oneMillion
+	case strings.HasPrefix(modelId, "o3-mini"):
+		inputPrice = 1.1 / oneMillion
+		outputPrice = 4.4 / oneMillion
+	case strings.HasPrefix(modelId, "o1"):
+		inputPrice = 15 / oneMillion
+		outputPrice = 60 / oneMillion
+	default:
+		return 0.0
+	}
+
+	inputCost := float64(usage.InputTokens) * inputPrice
+	outputCost := float64(usage.OutputTokens) * outputPrice
+	totalCost := inputCost + outputCost
+
+	return totalCost
 }
 
 func NewOpenAIProvider(providerConfig ModelProviderConfig) (*OpenAIProvider, error) {
@@ -85,18 +113,21 @@ func (op *OpenAIProvider) Chat(ctx context.Context, req *ConversationRequest) (*
 		Messages:            messages,
 		Temperature:         req.Temperature,
 		MaxCompletionTokens: maxTokens,
-		ResponseFormat: &openai.ChatCompletionResponseFormat{
-			Type: "json_object",
-		},
 	}
 
 	if req.Reasoning {
 		request.ReasoningEffort = "high"
 	}
 
+	if req.JsonResponse {
+		request.ResponseFormat = &openai.ChatCompletionResponseFormat{
+			Type: "json_object",
+		}
+	}
+
 	resp, err := op.Client.CreateChatCompletion(ctx, request)
 	if err != nil {
-		return nil, fmt.Errorf("error during conversation: %w", err)
+		return nil, err
 	}
 
 	if len(resp.Choices) == 0 {
@@ -104,9 +135,15 @@ func (op *OpenAIProvider) Chat(ctx context.Context, req *ConversationRequest) (*
 	}
 
 	var responseContentBlocks []ContentBlock
-	responseContentBlocks = append(responseContentBlocks, &ContentBlockText{
-		Value: resp.Choices[0].Message.Content,
-	})
+	if req.JsonResponse {
+		responseContentBlocks = append(responseContentBlocks, &ContentBlockText{
+			Value: ExtractJSON(resp.Choices[0].Message.Content),
+		})
+	} else {
+		responseContentBlocks = append(responseContentBlocks, &ContentBlockText{
+			Value: resp.Choices[0].Message.Content,
+		})
+	}
 
 	stopReason := convertOpenAIStopReason(resp.Choices[0].FinishReason)
 	usage := convertOpenAIUsage(resp.Usage)
@@ -177,7 +214,7 @@ func (op *OpenAIProvider) ChatStream(ctx context.Context, req *ConversationReque
 
 	stream, err := op.Client.CreateChatCompletionStream(ctx, request)
 	if err != nil {
-		return nil, fmt.Errorf("error creating stream: %w", err)
+		return nil, err
 	}
 
 	eventCh := make(chan StreamChunk, defaultOpenAIStreamBufferSize)

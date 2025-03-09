@@ -3,7 +3,6 @@ package providers
 import (
 	"context"
 	"errors"
-	"fmt"
 	"os"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -11,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime/document"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime/types"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -36,6 +36,10 @@ func (bp *BedrockProvider) GetName() string {
 	return "Bedrock"
 }
 
+func (ap *BedrockProvider) CostEstimate(modelId string, usage ModelUsage) float64 {
+	return 0.0
+}
+
 func NewBedrockProvider(providerConfig ModelProviderConfig) (*BedrockProvider, error) {
 	effectiveRegion := providerConfig.BedrockRegion
 	if effectiveRegion == "" {
@@ -50,7 +54,7 @@ func NewBedrockProvider(providerConfig ModelProviderConfig) (*BedrockProvider, e
 
 	cfg, err := config.LoadDefaultConfig(context.Background(), config.WithRegion(effectiveRegion))
 	if err != nil {
-		return nil, fmt.Errorf("failed to load AWS config: %w", err)
+		return nil, err
 	}
 
 	client := bedrockruntime.NewFromConfig(cfg)
@@ -115,7 +119,7 @@ func (bp *BedrockProvider) Chat(ctx context.Context, req *ConversationRequest) (
 
 	output, err := bp.Client.Converse(ctx, converseInput)
 	if err != nil {
-		return nil, fmt.Errorf("error during conversation: %w", err)
+		return nil, err
 	}
 
 	response, ok := output.Output.(*types.ConverseOutputMemberMessage)
@@ -126,9 +130,16 @@ func (bp *BedrockProvider) Chat(ctx context.Context, req *ConversationRequest) (
 	var responseContentBlocks []ContentBlock
 	for _, block := range response.Value.Content {
 		if textBlock, ok := block.(*types.ContentBlockMemberText); ok {
-			responseContentBlocks = append(responseContentBlocks, &ContentBlockText{
-				Value: textBlock.Value,
-			})
+			if req.JsonResponse {
+				responseContentBlocks = append(responseContentBlocks, &ContentBlockText{
+					Value: ExtractJSON(textBlock.Value),
+				})
+
+			} else {
+				responseContentBlocks = append(responseContentBlocks, &ContentBlockText{
+					Value: textBlock.Value,
+				})
+			}
 		}
 	}
 
@@ -214,7 +225,7 @@ func (bp *BedrockProvider) ChatStream(ctx context.Context, req *ConversationRequ
 
 	res, err := bp.Client.ConverseStream(ctx, converseStreamInput)
 	if err != nil {
-		return nil, fmt.Errorf("error creating stream: %w", err)
+		return nil, err
 	}
 
 	eventCh := make(chan StreamChunk, defaultBedrockStreamBufferSize)
@@ -271,9 +282,9 @@ func (bp *BedrockProvider) ChatStream(ctx context.Context, req *ConversationRequ
 				}
 			case *types.UnknownUnionMember:
 				// Log but don't crash on unknown event types
-				fmt.Printf("Unknown event type with tag: %s\n", v.Tag)
+				logrus.Debugf("Unknown event type with tag: %s\n", v.Tag)
 			default:
-				fmt.Printf("Unhandled event type: %T\n", v)
+				logrus.Debugf("Unhandled event type: %T\n", v)
 			}
 		}
 	}()

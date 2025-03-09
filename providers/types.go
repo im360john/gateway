@@ -25,12 +25,13 @@ type Message struct {
 }
 
 type ConversationRequest struct {
-	ModelId     string    `json:"modelId"`
-	System      string    `json:"system,omitempty"`
-	Messages    []Message `json:"messages"`
-	MaxTokens   int       `json:"maxTokens,omitempty"`
-	Temperature float32   `json:"temperature,omitempty"`
-	Reasoning   bool      `json:"reasoning,omitempty"`
+	ModelId      string    `json:"modelId"`
+	System       string    `json:"system,omitempty"`
+	Messages     []Message `json:"messages"`
+	MaxTokens    int       `json:"maxTokens,omitempty"`
+	Temperature  float32   `json:"temperature,omitempty"`
+	Reasoning    bool      `json:"reasoning,omitempty"`
+	JsonResponse bool      `json:"requireJson,omitempty"`
 }
 
 type StopReason string
@@ -94,6 +95,7 @@ type ChatStream interface {
 
 type ModelProvider interface {
 	GetName() string
+	CostEstimate(modelId string, usage ModelUsage) float64
 	Chat(ctx context.Context, req *ConversationRequest) (*ConversationResponse, error)
 	ChatStream(ctx context.Context, req *ConversationRequest) (ChatStreamOutput, error)
 }
