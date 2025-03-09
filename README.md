@@ -8,6 +8,8 @@
 
 </div>
 
+<a href="https://codespaces.new/centralmind/sample_databases"> 🚀 Interactive Demo via Github CodeSpaces </a>
+
 AI agents and LLM-powered applications need fast, secure access to data, but traditional APIs and databases aren't built for this purpose. We're building an API layer that automatically generates secure, LLM-optimized APIs for your structured data.
 
 Our solution:
