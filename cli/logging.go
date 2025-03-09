@@ -10,7 +10,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const logDirName = "gateway.log"
+const logDirName = "gateway"
 
 var (
 	cachedLogDir     string
