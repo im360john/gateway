@@ -1,4 +1,4 @@
-package aiproviders
+package providers
 
 import (
 	"context"
@@ -16,7 +16,6 @@ import (
 const (
 	defaultBedrockRegionName       = "us-east-1"
 	defaultBedrockModelId          = "us.anthropic.claude-3-7-sonnet-20250219-v1:0"
-	defaultBedrockTemperature      = float32(1)
 	defaultBedrockMaxTokens        = int32(64000)
 	defaultBedrockStreamBufferSize = 100
 )
@@ -83,9 +82,9 @@ func (bp *BedrockProvider) Chat(ctx context.Context, req *ConversationRequest) (
 		})
 	}
 
-	temperature := aws.Float32(defaultBedrockTemperature)
-	if req.Temperature >= 0 {
-		temperature = aws.Float32(req.Temperature)
+	temperature := aws.Float32(req.Temperature)
+	if req.Reasoning {
+		temperature = aws.Float32(1.0)
 	}
 
 	maxTokens := defaultBedrockMaxTokens
@@ -138,9 +137,9 @@ func (bp *BedrockProvider) Chat(ctx context.Context, req *ConversationRequest) (
 
 	return &ConversationResponse{
 		ProviderName: "Bedrock",
+		ModelId:      modelId,
 		Content:      responseContentBlocks,
 		StopReason:   stopReason,
-		ModelId:      modelId,
 		Usage:        usage,
 	}, nil
 }
@@ -182,9 +181,9 @@ func (bp *BedrockProvider) ChatStream(ctx context.Context, req *ConversationRequ
 		})
 	}
 
-	temperature := aws.Float32(defaultBedrockTemperature)
-	if req.Temperature >= 0 {
-		temperature = aws.Float32(req.Temperature)
+	temperature := aws.Float32(req.Temperature)
+	if req.Reasoning {
+		temperature = aws.Float32(1.0)
 	}
 
 	maxTokens := defaultBedrockMaxTokens
@@ -266,7 +265,8 @@ func (bp *BedrockProvider) ChatStream(ctx context.Context, req *ConversationRequ
 				if v.Value.Usage != nil {
 					usage := convertBedrockUsage(v.Value.Usage)
 					eventCh <- &StreamChunkUsage{
-						Usage: usage,
+						ModelId: modelId,
+						Usage:   usage,
 					}
 				}
 			case *types.UnknownUnionMember:

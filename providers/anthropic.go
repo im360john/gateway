@@ -1,4 +1,4 @@
-package aiproviders
+package providers
 
 import (
 	"context"
@@ -16,7 +16,6 @@ const (
 	defaultVertexAIRegion            = "us-east1"
 	defaultAnthropicModelId          = "claude-3-7-sonnet-20250219"
 	defaultVertexAIModelId           = "claude-3-7-sonnet@20250219"
-	defaultAnthropicTemperature      = float32(1)
 	defaultAnthropicMaxTokens        = 64000
 	defaultAnthropicStreamBufferSize = 100
 )
@@ -115,9 +114,9 @@ func (ap *AnthropicProvider) Chat(ctx context.Context, req *ConversationRequest)
 		}
 	}
 
-	temperature := defaultAnthropicTemperature
-	if req.Temperature >= 0 {
-		temperature = req.Temperature
+	temperature := req.Temperature
+	if req.Reasoning {
+		temperature = 1.0
 	}
 
 	maxTokens := defaultAnthropicMaxTokens
@@ -177,9 +176,9 @@ func (ap *AnthropicProvider) Chat(ctx context.Context, req *ConversationRequest)
 
 	return &ConversationResponse{
 		ProviderName: "Anthropic",
+		ModelId:      modelId,
 		Content:      responseContentBlocks,
 		StopReason:   stopReason,
-		ModelId:      modelId,
 		Usage:        usage,
 	}, nil
 }
@@ -218,9 +217,9 @@ func (ap *AnthropicProvider) ChatStream(ctx context.Context, req *ConversationRe
 		}
 	}
 
-	temperature := defaultAnthropicTemperature
-	if req.Temperature >= 0 {
-		temperature = req.Temperature
+	temperature := req.Temperature
+	if req.Reasoning {
+		temperature = 1.0
 	}
 
 	maxTokens := defaultAnthropicMaxTokens
@@ -292,6 +291,7 @@ func (ap *AnthropicProvider) ChatStream(ctx context.Context, req *ConversationRe
 					}
 
 					eventCh <- &StreamChunkUsage{
+						ModelId: modelId,
 						Usage: &ModelUsage{
 							InputTokens:  int(message.Usage.InputTokens),
 							OutputTokens: int(message.Usage.OutputTokens),

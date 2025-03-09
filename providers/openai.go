@@ -1,4 +1,4 @@
-package aiproviders
+package providers
 
 import (
 	"context"
@@ -11,7 +11,6 @@ import (
 
 const (
 	defaultOpenAIModelId          = "o3-mini"
-	defaultOpenAITemperature      = float32(0)
 	defaultOpenAIMaxTokens        = 100_000
 	defaultOpenAIStreamBufferSize = 100
 )
@@ -76,11 +75,6 @@ func (op *OpenAIProvider) Chat(ctx context.Context, req *ConversationRequest) (*
 
 	messages := prepareOpenAIMessages(req.Messages, req.System)
 
-	temperature := defaultOpenAITemperature
-	if req.Temperature >= 0 {
-		temperature = req.Temperature
-	}
-
 	maxTokens := defaultOpenAIMaxTokens
 	if req.MaxTokens > 0 {
 		maxTokens = req.MaxTokens
@@ -89,7 +83,7 @@ func (op *OpenAIProvider) Chat(ctx context.Context, req *ConversationRequest) (*
 	request := openai.ChatCompletionRequest{
 		Model:               modelId,
 		Messages:            messages,
-		Temperature:         temperature,
+		Temperature:         req.Temperature,
 		MaxCompletionTokens: maxTokens,
 		ResponseFormat: &openai.ChatCompletionResponseFormat{
 			Type: "json_object",
@@ -119,9 +113,9 @@ func (op *OpenAIProvider) Chat(ctx context.Context, req *ConversationRequest) (*
 
 	return &ConversationResponse{
 		ProviderName: "OpenAI",
+		ModelId:      modelId,
 		Content:      responseContentBlocks,
 		StopReason:   stopReason,
-		ModelId:      modelId,
 		Usage:        usage,
 	}, nil
 }
@@ -158,11 +152,6 @@ func (op *OpenAIProvider) ChatStream(ctx context.Context, req *ConversationReque
 
 	messages := prepareOpenAIMessages(req.Messages, req.System)
 
-	temperature := defaultOpenAITemperature
-	if req.Temperature >= 0 {
-		temperature = req.Temperature
-	}
-
 	maxTokens := defaultOpenAIMaxTokens
 	if req.MaxTokens > 0 {
 		maxTokens = req.MaxTokens
@@ -171,7 +160,7 @@ func (op *OpenAIProvider) ChatStream(ctx context.Context, req *ConversationReque
 	request := openai.ChatCompletionRequest{
 		Model:               modelId,
 		Messages:            messages,
-		Temperature:         temperature,
+		Temperature:         req.Temperature,
 		MaxCompletionTokens: maxTokens,
 		Stream:              true,
 		StreamOptions: &openai.StreamOptions{
@@ -221,7 +210,8 @@ func (op *OpenAIProvider) ChatStream(ctx context.Context, req *ConversationReque
 
 				if response.Usage != nil {
 					eventCh <- &StreamChunkUsage{
-						Usage: convertOpenAIUsage(*response.Usage),
+						ModelId: modelId,
+						Usage:   convertOpenAIUsage(*response.Usage),
 					}
 				}
 

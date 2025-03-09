@@ -1,4 +1,4 @@
-package aiproviders
+package providers
 
 import "context"
 
@@ -43,9 +43,9 @@ const (
 
 type ConversationResponse struct {
 	ProviderName string         `json:"providerName,omitempty"`
+	ModelId      string         `json:"modelId,omitempty"`
 	Content      []ContentBlock `json:"content"`
 	StopReason   StopReason     `json:"stopReason,omitempty"`
-	ModelId      string         `json:"modelId,omitempty"`
 	Usage        *ModelUsage    `json:"usage,omitempty"`
 }
 
@@ -74,7 +74,8 @@ type StreamChunkStop struct {
 func (*StreamChunkUsage) isStreamChunk() {}
 
 type StreamChunkUsage struct {
-	Usage *ModelUsage `json:"usage,omitempty"`
+	ModelId string      `json:"modelId,omitempty"`
+	Usage   *ModelUsage `json:"usage,omitempty"`
 }
 
 type ModelUsage struct {

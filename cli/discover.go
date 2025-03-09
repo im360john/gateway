@@ -206,6 +206,7 @@ func Discover() *cobra.Command {
 			logrus.Info("\r\n")
 			// Prepare prompt
 			logrus.Info("Step 4: Prepare the prompt for the AI")
+			makeDiscoverQuery()
 			fullPrompt := generatePrompt(databaseType, extraPrompt, tablesToGenerate, getSchemaFromConfig(databaseType, configRaw))
 			if err := saveToFile(promptFile, fullPrompt); err != nil {
 				logrus.Error("failed to save prompt:", err)

@@ -1,4 +1,4 @@
-package aiproviders
+package providers
 
 import (
 	"errors"
