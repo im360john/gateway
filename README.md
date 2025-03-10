@@ -50,7 +50,7 @@ Our primary users are companies deploying AI agents for customer support, analyt
 
 Gateway connects to your structured databases like PostgreSQL and automatically analyzes the schema and data samples
 to generate an optimized API structure based on your prompt. LLM is used only on discovery stage to produce API configuration.
-The tool uses AI services ([OpenAI or compatible providers](https://docs.centralmind.ai/providers)) to generate the API configuration while ensuring security
+The tool uses [AI Providers](https://docs.centralmind.ai/providers) to generate the API configuration while ensuring security
 through PII detection.
 
 ### 2. Deploy
