@@ -18,6 +18,7 @@ var (
 !Important rules:
 	- The most important: The final output must contain *only valid single JSON* with no additional commentary, explanations, or markdown formatting!
 	- The JSON configuration must strictly adhere to the provided JSON schema, including all required fields.
+	- You must always match all parameter names. Ensure you use the same name for the same entity, especially in HTTP routes. Use full names for parameters in HTTP routes, such as "userId" instead of "id".
 	- Description of API endpoints should also have an example, to help chatbot to use it.
 	- All descriptions and summary must not have any sensitive information/data from security point of view including database types, password and etc.
 	- All SQL queries must be Pure SQL that will be used in golang SQLx on top of database - {database_type} and be fully parameterized (using named parameters) to prevent SQL injection.
