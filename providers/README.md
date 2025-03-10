@@ -12,10 +12,12 @@ We support the following AI providers:
 - [**OpenAI**](/providers/openai) and all OpenAI-compatible providers
 - [**Anthropic**](/providers/anthropic)
 - [**Amazon Bedrock**](/providers/bedrock)
-- [**Google Gemini**](/providers/gemini)
 - [**Google Vertex AI (Anthropic)**](/providers/anthropic-vertexai)
+- [**Google Gemini**](/providers/gemini)
 
 We've tested with `OpenAI o3-mini`, `Anthropic Claude 3.7` and `Gemini 2.0 Flash Thinking`, which we recommend for optimal performance.
+
+[Google Gemini](https://docs.centralmind.ai/providers/gemini) provides a generous **free tier**.
 
 ## Recommended Models
 

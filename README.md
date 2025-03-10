@@ -122,19 +122,23 @@ port: 5432
 - [Google Vertex AI (Anthropic)](https://docs.centralmind.ai/providers/anthropic-vertexai)
 - [Google Gemini](https://docs.centralmind.ai/providers/gemini)
 
-[Google Gemini](https://docs.centralmind.ai/providers/gemini) provides a generous **free tier**.
+[Google Gemini](https://docs.centralmind.ai/providers/gemini) provides a generous **free tier**. You can obtain an API key by visiting Google AI Studio:
 
-Configure AI provider authorization. For OpenAI, set an API key.
+- [Google AI Studio](https://aistudio.google.com/prompts/new_chat)
+
+Once logged in, you can create an API key in the API section of AI Studio. The free tier includes a generous monthly token allocation, making it accessible for development and testing purposes.
+
+Configure AI provider authorization. For Google Gemini, set an API key.
 
 ```bash
-export OPENAI_API_KEY='yourkey'
+export GEMINI_API_KEY='yourkey'
 ```
 
 3. Run the discovery command:
 
 ```shell
 ./gateway discover \
-  --ai-provider openai \
+  --ai-provider gemini \
   --config connection.yaml \
   --prompt "Generate for me awesome readonly API"
 ```
