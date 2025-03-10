@@ -191,7 +191,7 @@ func Discover() *cobra.Command {
 			logrus.Info("\r\n")
 
 			// Call API
-			logrus.Info("Step 5: Using AI to design API")
+			logrus.Info("Step 5: Use AI to design the API")
 			response, err := makeDiscoverQuery(DiscoverQueryParams{
 				LLMLogFile:    llmLogFile,
 				Provider:      aiProvider,
@@ -287,8 +287,8 @@ func Discover() *cobra.Command {
 	cmd.Flags().Float32Var(&aiTemperature, "ai-temperature", -1.0, "AI temperature")
 	cmd.Flags().BoolVar(&aiReasoning, "ai-reasoning", true, "Enable reasoning")
 
-	cmd.Flags().StringVar(&output, "output", "gateway.yaml", "Resulted yaml path")
-	cmd.Flags().StringVar(&extraPrompt, "prompt", "generate reasonable set of API-s for this data", "Custom input to generate API-s")
+	cmd.Flags().StringVar(&output, "output", "gateway.yaml", "Resulted YAML path")
+	cmd.Flags().StringVar(&extraPrompt, "prompt", "generate reasonable set of APIs for this data", "Custom input to generate APIs")
 	cmd.Flags().StringVar(&promptFile, "prompt-file", filepath.Join(getDefaultLogDir(), "prompt_default.txt"), "Path to save the generated prompt")
 	cmd.Flags().StringVar(&llmLogFile, "llm-log", filepath.Join(getDefaultLogDir(), "llm_raw_response.log"), "Path to save the raw LLM response")
 
