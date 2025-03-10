@@ -15,19 +15,20 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: 'go.mod'
       - name: Go Dependencies Cache
         uses: actions/cache@v3
         with:
           path: |
             ~/.cache/go-build
             ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          key: ${{ runner.os }}-go-${{ hashFiles('go.sum') }}-${{ github.sha }}
           restore-keys: |
+            ${{ runner.os }}-go-${{ hashFiles('go.sum') }}-
             ${{ runner.os }}-go-
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
       - shell: bash
         run: |
           make build
