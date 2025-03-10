@@ -1,4 +1,4 @@
-package providers
+package openai
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/centralmind/gateway/providers"
 	openai "github.com/sashabaranov/go-openai"
 )
 
@@ -26,13 +27,17 @@ type OpenAIProvider struct {
 	Endpoint string
 }
 
-var _ ModelProvider = (*OpenAIProvider)(nil)
+var _ providers.ModelProvider = (*OpenAIProvider)(nil)
+
+func init() {
+	providers.RegisterModelProvider("openai", NewOpenAIProvider)
+}
 
 func (op *OpenAIProvider) GetName() string {
 	return "OpenAI"
 }
 
-func (ap *OpenAIProvider) CostEstimate(modelId string, usage ModelUsage) float64 {
+func (ap *OpenAIProvider) CostEstimate(modelId string, usage providers.ModelUsage) float64 {
 	var inputPrice, outputPrice float64
 	const oneMillion = 1_000_000.0
 
@@ -60,7 +65,7 @@ func (ap *OpenAIProvider) CostEstimate(modelId string, usage ModelUsage) float64
 	return totalCost
 }
 
-func NewOpenAIProvider(providerConfig ModelProviderConfig) (*OpenAIProvider, error) {
+func NewOpenAIProvider(providerConfig providers.ModelProviderConfig) (providers.ModelProvider, error) {
 	effectiveAPIKey := providerConfig.APIKey
 	if effectiveAPIKey == "" {
 		effectiveAPIKey = os.Getenv("OPENAI_API_KEY")
@@ -87,7 +92,7 @@ func NewOpenAIProvider(providerConfig ModelProviderConfig) (*OpenAIProvider, err
 	}, nil
 }
 
-func (op *OpenAIProvider) Chat(ctx context.Context, req *ConversationRequest) (*ConversationResponse, error) {
+func (op *OpenAIProvider) Chat(ctx context.Context, req *providers.ConversationRequest) (*providers.ConversationResponse, error) {
 	if op.Client == nil {
 		return nil, ErrClientNotInit
 	}
@@ -134,13 +139,13 @@ func (op *OpenAIProvider) Chat(ctx context.Context, req *ConversationRequest) (*
 		return nil, ErrEmptyChoices
 	}
 
-	var responseContentBlocks []ContentBlock
+	var responseContentBlocks []providers.ContentBlock
 	if req.JsonResponse {
-		responseContentBlocks = append(responseContentBlocks, &ContentBlockText{
-			Value: ExtractJSON(resp.Choices[0].Message.Content),
+		responseContentBlocks = append(responseContentBlocks, &providers.ContentBlockText{
+			Value: providers.ExtractJSON(resp.Choices[0].Message.Content),
 		})
 	} else {
-		responseContentBlocks = append(responseContentBlocks, &ContentBlockText{
+		responseContentBlocks = append(responseContentBlocks, &providers.ContentBlockText{
 			Value: resp.Choices[0].Message.Content,
 		})
 	}
@@ -148,7 +153,7 @@ func (op *OpenAIProvider) Chat(ctx context.Context, req *ConversationRequest) (*
 	stopReason := convertOpenAIStopReason(resp.Choices[0].FinishReason)
 	usage := convertOpenAIUsage(resp.Usage)
 
-	return &ConversationResponse{
+	return &providers.ConversationResponse{
 		ProviderName: "OpenAI",
 		ModelId:      modelId,
 		Content:      responseContentBlocks,
@@ -161,19 +166,19 @@ type OpenAIStreamOutput struct {
 	stream *OpenAIStream
 }
 
-func (o *OpenAIStreamOutput) GetStream() ChatStream {
+func (o *OpenAIStreamOutput) GetStream() providers.ChatStream {
 	return o.stream
 }
 
 type OpenAIStream struct {
-	eventCh chan StreamChunk
+	eventCh chan providers.StreamChunk
 }
 
-func (s *OpenAIStream) Events() <-chan StreamChunk {
+func (s *OpenAIStream) Events() <-chan providers.StreamChunk {
 	return s.eventCh
 }
 
-func (op *OpenAIProvider) ChatStream(ctx context.Context, req *ConversationRequest) (ChatStreamOutput, error) {
+func (op *OpenAIProvider) ChatStream(ctx context.Context, req *providers.ConversationRequest) (providers.ChatStreamOutput, error) {
 	if op.Client == nil {
 		return nil, ErrClientNotInit
 	}
@@ -217,7 +222,7 @@ func (op *OpenAIProvider) ChatStream(ctx context.Context, req *ConversationReque
 		return nil, err
 	}
 
-	eventCh := make(chan StreamChunk, defaultOpenAIStreamBufferSize)
+	eventCh := make(chan providers.StreamChunk, defaultOpenAIStreamBufferSize)
 	openaiStream := &OpenAIStream{
 		eventCh: eventCh,
 	}
@@ -226,12 +231,12 @@ func (op *OpenAIProvider) ChatStream(ctx context.Context, req *ConversationReque
 		defer close(eventCh)
 		defer stream.Close()
 
-		var stopReason StopReason = StopReasonStop
+		var stopReason providers.StopReason = providers.StopReasonStop
 
 		for {
 			select {
 			case <-ctx.Done():
-				eventCh <- &StreamChunkError{
+				eventCh <- &providers.StreamChunkError{
 					Error: ctx.Err().Error(),
 				}
 				return
@@ -239,14 +244,14 @@ func (op *OpenAIProvider) ChatStream(ctx context.Context, req *ConversationReque
 				response, err := stream.Recv()
 
 				if err != nil {
-					eventCh <- &StreamChunkError{
+					eventCh <- &providers.StreamChunkError{
 						Error: err.Error(),
 					}
 					return
 				}
 
 				if response.Usage != nil {
-					eventCh <- &StreamChunkUsage{
+					eventCh <- &providers.StreamChunkUsage{
 						ModelId: modelId,
 						Usage:   convertOpenAIUsage(*response.Usage),
 					}
@@ -256,8 +261,8 @@ func (op *OpenAIProvider) ChatStream(ctx context.Context, req *ConversationReque
 					choice := response.Choices[0]
 
 					if choice.Delta.Content != "" {
-						eventCh <- &StreamChunkContent{
-							Content: &ContentBlockText{
+						eventCh <- &providers.StreamChunkContent{
+							Content: &providers.ContentBlockText{
 								Value: choice.Delta.Content,
 							},
 						}
@@ -265,7 +270,7 @@ func (op *OpenAIProvider) ChatStream(ctx context.Context, req *ConversationReque
 
 					if choice.FinishReason != "" {
 						stopReason = convertOpenAIStopReason(choice.FinishReason)
-						eventCh <- &StreamChunkStop{
+						eventCh <- &providers.StreamChunkStop{
 							StopReason: stopReason,
 						}
 					}
@@ -279,7 +284,7 @@ func (op *OpenAIProvider) ChatStream(ctx context.Context, req *ConversationReque
 	}, nil
 }
 
-func prepareOpenAIMessages(messages []Message, systemContent string) []openai.ChatCompletionMessage {
+func prepareOpenAIMessages(messages []providers.Message, systemContent string) []openai.ChatCompletionMessage {
 	var openaiMessages []openai.ChatCompletionMessage
 
 	if systemContent != "" {
@@ -291,13 +296,13 @@ func prepareOpenAIMessages(messages []Message, systemContent string) []openai.Ch
 
 	for _, msg := range messages {
 		role := openai.ChatMessageRoleUser
-		if msg.Role == AssistantRole {
+		if msg.Role == providers.AssistantRole {
 			role = openai.ChatMessageRoleAssistant
 		}
 
 		var contentText string
 		for _, content := range msg.Content {
-			if textBlock, ok := content.(*ContentBlockText); ok {
+			if textBlock, ok := content.(*providers.ContentBlockText); ok {
 				contentText += textBlock.Value
 			}
 		}
@@ -311,21 +316,21 @@ func prepareOpenAIMessages(messages []Message, systemContent string) []openai.Ch
 	return openaiMessages
 }
 
-func convertOpenAIStopReason(reason openai.FinishReason) StopReason {
+func convertOpenAIStopReason(reason openai.FinishReason) providers.StopReason {
 	switch reason {
 	case openai.FinishReasonStop:
-		return StopReasonStop
+		return providers.StopReasonStop
 	case openai.FinishReasonToolCalls:
-		return StopReasonToolCalls
+		return providers.StopReasonToolCalls
 	case openai.FinishReasonLength:
-		return StopReasonLength
+		return providers.StopReasonLength
 	default:
-		return StopReasonStop
+		return providers.StopReasonStop
 	}
 }
 
-func convertOpenAIUsage(usage openai.Usage) *ModelUsage {
-	return &ModelUsage{
+func convertOpenAIUsage(usage openai.Usage) *providers.ModelUsage {
+	return &providers.ModelUsage{
 		InputTokens:  usage.PromptTokens,
 		OutputTokens: usage.CompletionTokens,
 		TotalTokens:  usage.TotalTokens,

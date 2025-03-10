@@ -1,4 +1,4 @@
-package providers
+package anthropic
 
 import (
 	"context"
@@ -10,6 +10,7 @@ import (
 	anthropic "github.com/anthropics/anthropic-sdk-go"
 	"github.com/anthropics/anthropic-sdk-go/option"
 	"github.com/anthropics/anthropic-sdk-go/vertex"
+	"github.com/centralmind/gateway/providers"
 )
 
 const (
@@ -32,7 +33,12 @@ type AnthropicProvider struct {
 	VertexAI bool
 }
 
-var _ ModelProvider = (*AnthropicProvider)(nil)
+var _ providers.ModelProvider = (*AnthropicProvider)(nil)
+
+func init() {
+	providers.RegisterModelProvider("anthropic", NewAnthropicProvider)
+	providers.RegisterModelProvider("anthropic-vertexai", NewAnthropicVertexAIProvider)
+}
 
 func (ap *AnthropicProvider) GetName() string {
 	if ap.VertexAI {
@@ -42,7 +48,7 @@ func (ap *AnthropicProvider) GetName() string {
 	return "Anthropic"
 }
 
-func (ap *AnthropicProvider) CostEstimate(modelId string, usage ModelUsage) float64 {
+func (ap *AnthropicProvider) CostEstimate(modelId string, usage providers.ModelUsage) float64 {
 	var inputPrice, outputPrice float64
 	const oneMillion = 1_000_000.0
 
@@ -61,7 +67,15 @@ func (ap *AnthropicProvider) CostEstimate(modelId string, usage ModelUsage) floa
 	return totalCost
 }
 
-func NewAnthropicProvider(providerConfig ModelProviderConfig, vertexAI bool) (*AnthropicProvider, error) {
+func NewAnthropicProvider(providerConfig providers.ModelProviderConfig) (providers.ModelProvider, error) {
+	return NewAnthropicProviderIntl(providerConfig, false)
+}
+
+func NewAnthropicVertexAIProvider(providerConfig providers.ModelProviderConfig) (providers.ModelProvider, error) {
+	return NewAnthropicProviderIntl(providerConfig, true)
+}
+
+func NewAnthropicProviderIntl(providerConfig providers.ModelProviderConfig, vertexAI bool) (providers.ModelProvider, error) {
 	var client *anthropic.Client
 
 	effectiveEndpoint := providerConfig.Endpoint
@@ -115,7 +129,7 @@ func NewAnthropicProvider(providerConfig ModelProviderConfig, vertexAI bool) (*A
 	}, nil
 }
 
-func (ap *AnthropicProvider) Chat(ctx context.Context, req *ConversationRequest) (*ConversationResponse, error) {
+func (ap *AnthropicProvider) Chat(ctx context.Context, req *providers.ConversationRequest) (*providers.ConversationResponse, error) {
 	if ap.Client == nil {
 		return nil, ErrAnthropicClientNotInit
 	}
@@ -177,16 +191,16 @@ func (ap *AnthropicProvider) Chat(ctx context.Context, req *ConversationRequest)
 		return nil, ErrAnthropicEmptyResponse
 	}
 
-	var responseContentBlocks []ContentBlock
+	var responseContentBlocks []providers.ContentBlock
 	for _, block := range resp.Content {
 		if block.Type == "text" {
 			if req.JsonResponse {
 
-				responseContentBlocks = append(responseContentBlocks, &ContentBlockText{
-					Value: ExtractJSON(block.Text),
+				responseContentBlocks = append(responseContentBlocks, &providers.ContentBlockText{
+					Value: providers.ExtractJSON(block.Text),
 				})
 			} else {
-				responseContentBlocks = append(responseContentBlocks, &ContentBlockText{
+				responseContentBlocks = append(responseContentBlocks, &providers.ContentBlockText{
 					Value: block.Text,
 				})
 			}
@@ -194,13 +208,13 @@ func (ap *AnthropicProvider) Chat(ctx context.Context, req *ConversationRequest)
 	}
 
 	stopReason := convertAnthropicStopReason(string(resp.StopReason))
-	usage := &ModelUsage{
+	usage := &providers.ModelUsage{
 		InputTokens:  int(resp.Usage.InputTokens),
 		OutputTokens: int(resp.Usage.OutputTokens),
 		TotalTokens:  int(resp.Usage.InputTokens + resp.Usage.OutputTokens),
 	}
 
-	return &ConversationResponse{
+	return &providers.ConversationResponse{
 		ProviderName: "Anthropic",
 		ModelId:      modelId,
 		Content:      responseContentBlocks,
@@ -213,19 +227,19 @@ type AnthropicStreamOutput struct {
 	stream *AnthropicStream
 }
 
-func (o *AnthropicStreamOutput) GetStream() ChatStream {
+func (o *AnthropicStreamOutput) GetStream() providers.ChatStream {
 	return o.stream
 }
 
 type AnthropicStream struct {
-	eventCh chan StreamChunk
+	eventCh chan providers.StreamChunk
 }
 
-func (s *AnthropicStream) Events() <-chan StreamChunk {
+func (s *AnthropicStream) Events() <-chan providers.StreamChunk {
 	return s.eventCh
 }
 
-func (ap *AnthropicProvider) ChatStream(ctx context.Context, req *ConversationRequest) (ChatStreamOutput, error) {
+func (ap *AnthropicProvider) ChatStream(ctx context.Context, req *providers.ConversationRequest) (providers.ChatStreamOutput, error) {
 	if ap.Client == nil {
 		return nil, ErrAnthropicClientNotInit
 	}
@@ -280,7 +294,7 @@ func (ap *AnthropicProvider) ChatStream(ctx context.Context, req *ConversationRe
 
 	stream := ap.Client.Messages.NewStreaming(ctx, params)
 
-	eventCh := make(chan StreamChunk, defaultAnthropicStreamBufferSize)
+	eventCh := make(chan providers.StreamChunk, defaultAnthropicStreamBufferSize)
 	anthropicStream := &AnthropicStream{
 		eventCh: eventCh,
 	}
@@ -292,7 +306,7 @@ func (ap *AnthropicProvider) ChatStream(ctx context.Context, req *ConversationRe
 		for stream.Next() {
 			select {
 			case <-ctx.Done():
-				eventCh <- &StreamChunkError{
+				eventCh <- &providers.StreamChunkError{
 					Error: ctx.Err().Error(),
 				}
 				return
@@ -305,20 +319,20 @@ func (ap *AnthropicProvider) ChatStream(ctx context.Context, req *ConversationRe
 				case anthropic.ContentBlockDeltaEvent:
 					delta := event.Delta
 					if delta.Text != "" {
-						eventCh <- &StreamChunkContent{
-							Content: &ContentBlockText{
+						eventCh <- &providers.StreamChunkContent{
+							Content: &providers.ContentBlockText{
 								Value: delta.Text,
 							},
 						}
 					}
 				case anthropic.MessageStopEvent:
-					eventCh <- &StreamChunkStop{
+					eventCh <- &providers.StreamChunkStop{
 						StopReason: convertAnthropicStopReason(string(message.StopReason)),
 					}
 
-					eventCh <- &StreamChunkUsage{
+					eventCh <- &providers.StreamChunkUsage{
 						ModelId: modelId,
-						Usage: &ModelUsage{
+						Usage: &providers.ModelUsage{
 							InputTokens:  int(message.Usage.InputTokens),
 							OutputTokens: int(message.Usage.OutputTokens),
 							TotalTokens:  int(message.Usage.InputTokens + message.Usage.OutputTokens),
@@ -329,7 +343,7 @@ func (ap *AnthropicProvider) ChatStream(ctx context.Context, req *ConversationRe
 		}
 
 		if err := stream.Err(); err != nil {
-			eventCh <- &StreamChunkError{
+			eventCh <- &providers.StreamChunkError{
 				Error: err.Error(),
 			}
 		}
@@ -340,17 +354,17 @@ func (ap *AnthropicProvider) ChatStream(ctx context.Context, req *ConversationRe
 	}, nil
 }
 
-func prepareAnthropicMessages(messages []Message) []anthropic.MessageParam {
+func prepareAnthropicMessages(messages []providers.Message) []anthropic.MessageParam {
 	var anthropicMessages []anthropic.MessageParam
 	for _, msg := range messages {
 		var contentBlocks []anthropic.ContentBlockParamUnion
 		for _, content := range msg.Content {
-			if textBlock, ok := content.(*ContentBlockText); ok {
+			if textBlock, ok := content.(*providers.ContentBlockText); ok {
 				contentBlocks = append(contentBlocks, anthropic.NewTextBlock(textBlock.Value))
 			}
 		}
 
-		if msg.Role == UserRole {
+		if msg.Role == providers.UserRole {
 			anthropicMessages = append(anthropicMessages, anthropic.NewUserMessage(contentBlocks...))
 		} else {
 			anthropicMessages = append(anthropicMessages, anthropic.MessageParam{
@@ -363,15 +377,15 @@ func prepareAnthropicMessages(messages []Message) []anthropic.MessageParam {
 	return anthropicMessages
 }
 
-func convertAnthropicStopReason(reason string) StopReason {
+func convertAnthropicStopReason(reason string) providers.StopReason {
 	switch reason {
 	case "end_turn":
-		return StopReasonStop
+		return providers.StopReasonStop
 	case "max_tokens":
-		return StopReasonLength
+		return providers.StopReasonLength
 	case "tool_use":
-		return StopReasonToolCalls
+		return providers.StopReasonToolCalls
 	default:
-		return StopReasonStop
+		return providers.StopReasonStop
 	}
 }

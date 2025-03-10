@@ -1,4 +1,4 @@
-package providers
+package bedrock
 
 import (
 	"context"
@@ -11,6 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime/document"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime/types"
+	"github.com/centralmind/gateway/providers"
 	"github.com/sirupsen/logrus"
 )
 
@@ -31,13 +32,17 @@ type BedrockProvider struct {
 	RegionName string
 }
 
-var _ ModelProvider = (*BedrockProvider)(nil)
+var _ providers.ModelProvider = (*BedrockProvider)(nil)
+
+func init() {
+	providers.RegisterModelProvider("bedrock", NewBedrockProvider)
+}
 
 func (bp *BedrockProvider) GetName() string {
 	return "Bedrock"
 }
 
-func (ap *BedrockProvider) CostEstimate(modelId string, usage ModelUsage) float64 {
+func (ap *BedrockProvider) CostEstimate(modelId string, usage providers.ModelUsage) float64 {
 	var inputPrice, outputPrice float64
 	const oneMillion = 1_000_000.0
 
@@ -56,7 +61,7 @@ func (ap *BedrockProvider) CostEstimate(modelId string, usage ModelUsage) float6
 	return totalCost
 }
 
-func NewBedrockProvider(providerConfig ModelProviderConfig) (*BedrockProvider, error) {
+func NewBedrockProvider(providerConfig providers.ModelProviderConfig) (providers.ModelProvider, error) {
 	effectiveRegion := providerConfig.BedrockRegion
 	if effectiveRegion == "" {
 		if envRegion := os.Getenv("BEDROCK_REGION"); envRegion != "" {
@@ -81,7 +86,7 @@ func NewBedrockProvider(providerConfig ModelProviderConfig) (*BedrockProvider, e
 	}, nil
 }
 
-func (bp *BedrockProvider) Chat(ctx context.Context, req *ConversationRequest) (*ConversationResponse, error) {
+func (bp *BedrockProvider) Chat(ctx context.Context, req *providers.ConversationRequest) (*providers.ConversationResponse, error) {
 	if bp.Client == nil {
 		return nil, ErrBedrockClientNotInit
 	}
@@ -143,16 +148,16 @@ func (bp *BedrockProvider) Chat(ctx context.Context, req *ConversationRequest) (
 		return nil, ErrUnexpectedResponse
 	}
 
-	var responseContentBlocks []ContentBlock
+	var responseContentBlocks []providers.ContentBlock
 	for _, block := range response.Value.Content {
 		if textBlock, ok := block.(*types.ContentBlockMemberText); ok {
 			if req.JsonResponse {
-				responseContentBlocks = append(responseContentBlocks, &ContentBlockText{
-					Value: ExtractJSON(textBlock.Value),
+				responseContentBlocks = append(responseContentBlocks, &providers.ContentBlockText{
+					Value: providers.ExtractJSON(textBlock.Value),
 				})
 
 			} else {
-				responseContentBlocks = append(responseContentBlocks, &ContentBlockText{
+				responseContentBlocks = append(responseContentBlocks, &providers.ContentBlockText{
 					Value: textBlock.Value,
 				})
 			}
@@ -162,7 +167,7 @@ func (bp *BedrockProvider) Chat(ctx context.Context, req *ConversationRequest) (
 	stopReason := convertBedrockStopReason(output.StopReason)
 	usage := convertBedrockUsage(output.Usage)
 
-	return &ConversationResponse{
+	return &providers.ConversationResponse{
 		ProviderName: "Bedrock",
 		ModelId:      modelId,
 		Content:      responseContentBlocks,
@@ -175,19 +180,19 @@ type BedrockStreamOutput struct {
 	stream *BedrockStream
 }
 
-func (o *BedrockStreamOutput) GetStream() ChatStream {
+func (o *BedrockStreamOutput) GetStream() providers.ChatStream {
 	return o.stream
 }
 
 type BedrockStream struct {
-	eventCh chan StreamChunk
+	eventCh chan providers.StreamChunk
 }
 
-func (s *BedrockStream) Events() <-chan StreamChunk {
+func (s *BedrockStream) Events() <-chan providers.StreamChunk {
 	return s.eventCh
 }
 
-func (bp *BedrockProvider) ChatStream(ctx context.Context, req *ConversationRequest) (ChatStreamOutput, error) {
+func (bp *BedrockProvider) ChatStream(ctx context.Context, req *providers.ConversationRequest) (providers.ChatStreamOutput, error) {
 	if bp.Client == nil {
 		return nil, ErrBedrockClientNotInit
 	}
@@ -244,7 +249,7 @@ func (bp *BedrockProvider) ChatStream(ctx context.Context, req *ConversationRequ
 		return nil, err
 	}
 
-	eventCh := make(chan StreamChunk, defaultBedrockStreamBufferSize)
+	eventCh := make(chan providers.StreamChunk, defaultBedrockStreamBufferSize)
 	bedrockStream := &BedrockStream{
 		eventCh: eventCh,
 	}
@@ -255,12 +260,12 @@ func (bp *BedrockProvider) ChatStream(ctx context.Context, req *ConversationRequ
 		stream := res.GetStream()
 		defer stream.Close()
 
-		var stopReason StopReason = StopReasonStop
+		var stopReason providers.StopReason = providers.StopReasonStop
 
 		for event := range stream.Events() {
 			select {
 			case <-ctx.Done():
-				eventCh <- &StreamChunkError{
+				eventCh <- &providers.StreamChunkError{
 					Error: ctx.Err().Error(),
 				}
 				return
@@ -273,8 +278,8 @@ func (bp *BedrockProvider) ChatStream(ctx context.Context, req *ConversationRequ
 				// Message start event, nothing specific to handle
 			case *types.ConverseStreamOutputMemberContentBlockDelta:
 				if textDelta, ok := v.Value.Delta.(*types.ContentBlockDeltaMemberText); ok {
-					eventCh <- &StreamChunkContent{
-						Content: &ContentBlockText{
+					eventCh <- &providers.StreamChunkContent{
+						Content: &providers.ContentBlockText{
 							Value: textDelta.Value,
 						},
 					}
@@ -283,7 +288,7 @@ func (bp *BedrockProvider) ChatStream(ctx context.Context, req *ConversationRequ
 				if v.Value.StopReason != "" {
 					stopReason = convertBedrockStopReason(v.Value.StopReason)
 				}
-				eventCh <- &StreamChunkStop{
+				eventCh <- &providers.StreamChunkStop{
 					StopReason: stopReason,
 				}
 			case *types.ConverseStreamOutputMemberContentBlockStop:
@@ -291,7 +296,7 @@ func (bp *BedrockProvider) ChatStream(ctx context.Context, req *ConversationRequ
 			case *types.ConverseStreamOutputMemberMetadata:
 				if v.Value.Usage != nil {
 					usage := convertBedrockUsage(v.Value.Usage)
-					eventCh <- &StreamChunkUsage{
+					eventCh <- &providers.StreamChunkUsage{
 						ModelId: modelId,
 						Usage:   usage,
 					}
@@ -310,17 +315,17 @@ func (bp *BedrockProvider) ChatStream(ctx context.Context, req *ConversationRequ
 	}, nil
 }
 
-func prepareBedrockMessages(messages []Message) []types.Message {
+func prepareBedrockMessages(messages []providers.Message) []types.Message {
 	var bedrockMessages []types.Message
 	for _, msg := range messages {
 		role := types.ConversationRoleUser
-		if msg.Role == AssistantRole {
+		if msg.Role == providers.AssistantRole {
 			role = types.ConversationRoleAssistant
 		}
 
 		var contentBlocks []types.ContentBlock
 		for _, content := range msg.Content {
-			if textBlock, ok := content.(*ContentBlockText); ok {
+			if textBlock, ok := content.(*providers.ContentBlockText); ok {
 				contentBlocks = append(contentBlocks, &types.ContentBlockMemberText{
 					Value: textBlock.Value,
 				})
@@ -336,25 +341,25 @@ func prepareBedrockMessages(messages []Message) []types.Message {
 	return bedrockMessages
 }
 
-func convertBedrockStopReason(reason types.StopReason) StopReason {
+func convertBedrockStopReason(reason types.StopReason) providers.StopReason {
 	switch reason {
 	case types.StopReasonEndTurn:
-		return StopReasonStop
+		return providers.StopReasonStop
 	case types.StopReasonToolUse:
-		return StopReasonToolCalls
+		return providers.StopReasonToolCalls
 	case types.StopReasonMaxTokens:
-		return StopReasonLength
+		return providers.StopReasonLength
 	default:
-		return StopReasonStop
+		return providers.StopReasonStop
 	}
 }
 
-func convertBedrockUsage(usage *types.TokenUsage) *ModelUsage {
+func convertBedrockUsage(usage *types.TokenUsage) *providers.ModelUsage {
 	if usage == nil {
 		return nil
 	}
 
-	return &ModelUsage{
+	return &providers.ModelUsage{
 		InputTokens:  int(*usage.InputTokens),
 		OutputTokens: int(*usage.OutputTokens),
 		TotalTokens:  int(*usage.TotalTokens),

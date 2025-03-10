@@ -16,6 +16,9 @@ import (
 	_ "github.com/centralmind/gateway/plugins/oauth"
 	_ "github.com/centralmind/gateway/plugins/otel"
 	_ "github.com/centralmind/gateway/plugins/pii_remover"
+	_ "github.com/centralmind/gateway/providers/anthropic"
+	_ "github.com/centralmind/gateway/providers/bedrock"
+	_ "github.com/centralmind/gateway/providers/openai"
 )
 
 func main() {
