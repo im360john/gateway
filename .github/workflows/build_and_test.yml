@@ -15,6 +15,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Clean old Go modules cache
+        run: rm -rf ~/go/pkg/mod
+      - name: Go Dependencies Cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('go.sum') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-go-${{ hashFiles('go.sum') }}-
+            ${{ runner.os }}-go-
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
@@ -41,19 +53,22 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: 'go.mod'
+      - name: Clean old Go modules cache
+        run: rm -rf ~/go/pkg/mod
       - name: Go Dependencies Cache
         uses: actions/cache@v3
         with:
           path: |
             ~/.cache/go-build
             ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          key: ${{ runner.os }}-go-${{ hashFiles('go.sum') }}-${{ github.sha }}-${{ matrix.suite.group }}-${{ matrix.suite.path }}
           restore-keys: |
+            ${{ runner.os }}-go-${{ hashFiles('go.sum') }}-
             ${{ runner.os }}-go-
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
       - shell: bash
         run: |
           go install gotest.tools/gotestsum@latest
