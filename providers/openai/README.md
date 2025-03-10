@@ -82,7 +82,7 @@ Enable OpenAI's high reasoning effort for complex tasks:
 ```bash
 ./gateway discover \
   --ai-provider openai \
-  --ai-reasoning true \
+  --ai-reasoning=true \
   --config connection.yaml
 ```
 

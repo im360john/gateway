@@ -1,4 +1,6 @@
-# Gateway CLI
+---
+title: 'Gateway CLI'
+---
 
 This document provides information about the available CLI commands and their parameters for the Gateway application.
 

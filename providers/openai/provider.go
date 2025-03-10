@@ -16,6 +16,11 @@ const (
 	defaultOpenAIStreamBufferSize = 100
 )
 
+var openAIModelsWithoutTemperatureSupport = []string{
+	"o3",
+	"o1",
+}
+
 var (
 	ErrNoAPIKey      = errors.New("OpenAI API key not provided")
 	ErrClientNotInit = errors.New("OpenAI client is not initialized")
@@ -116,8 +121,19 @@ func (op *OpenAIProvider) Chat(ctx context.Context, req *providers.ConversationR
 	request := openai.ChatCompletionRequest{
 		Model:               modelId,
 		Messages:            messages,
-		Temperature:         req.Temperature,
 		MaxCompletionTokens: maxTokens,
+	}
+
+	supportsTemperature := true
+	for _, model := range openAIModelsWithoutTemperatureSupport {
+		if strings.HasPrefix(modelId, model) {
+			supportsTemperature = false
+			break
+		}
+	}
+
+	if supportsTemperature {
+		request.Temperature = req.Temperature
 	}
 
 	if req.Reasoning {
@@ -202,19 +218,33 @@ func (op *OpenAIProvider) ChatStream(ctx context.Context, req *providers.Convers
 	request := openai.ChatCompletionRequest{
 		Model:               modelId,
 		Messages:            messages,
-		Temperature:         req.Temperature,
 		MaxCompletionTokens: maxTokens,
 		Stream:              true,
 		StreamOptions: &openai.StreamOptions{
 			IncludeUsage: true,
 		},
-		ResponseFormat: &openai.ChatCompletionResponseFormat{
-			Type: "json_object",
-		},
+	}
+
+	supportsTemperature := true
+	for _, model := range openAIModelsWithoutTemperatureSupport {
+		if strings.HasPrefix(modelId, model) {
+			supportsTemperature = false
+			break
+		}
+	}
+
+	if supportsTemperature {
+		request.Temperature = req.Temperature
 	}
 
 	if req.Reasoning {
 		request.ReasoningEffort = "high"
+	}
+
+	if req.JsonResponse {
+		request.ResponseFormat = &openai.ChatCompletionResponseFormat{
+			Type: "json_object",
+		}
 	}
 
 	stream, err := op.Client.CreateChatCompletionStream(ctx, request)

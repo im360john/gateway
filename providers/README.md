@@ -67,6 +67,6 @@ You can further customize the AI behavior with these optional parameters:
   --ai-model o3-mini \
   --ai-max-tokens 8192 \
   --ai-temperature 1.0 \
-  --ai-reasoning true \
+  --ai-reasoning=true \
   --config connection.yaml
 ```

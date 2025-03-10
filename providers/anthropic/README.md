@@ -82,7 +82,7 @@ Enable Claude's "thinking" mode for complex reasoning tasks:
 ```bash
 ./gateway discover \
   --ai-provider anthropic \
-  --ai-reasoning true \
+  --ai-reasoning=true \
   --config connection.yaml
 ```
 
