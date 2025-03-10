@@ -109,8 +109,8 @@ func isDirectoryWritable(dir string) bool {
 
 	// Close and remove the test file
 	filename := f.Name()
-	f.Close()
-	os.Remove(filename)
+	_ = f.Close()
+	_ = os.Remove(filename)
 
 	logrus.Debugf("Verified directory is writable: %s", dir)
 
