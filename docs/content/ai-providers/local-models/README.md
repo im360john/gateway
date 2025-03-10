@@ -41,7 +41,6 @@ This guide explains how to set up and use locally running models with Gateway us
 ```bash
 gateway discover \
   --ai-endpoint "http://localhost:1234/v1" \
-  --db-type postgres \
   --config connection.yaml \
   --ai-model "llama3-8b" \
   --prompt "Develop an API that enables a chatbot to retrieve information about data. \
@@ -51,9 +50,9 @@ based on that come up with useful API methods for that"
 ```
 
 Where:
+
 - `--ai-endpoint` - The API endpoint URL copied from LM Studio
 - `--ai-model` - The name of the model selected in LM Studio
-- `--db-type` - Your database type
 - `--prompt` - Extra prompt where you can explain additional requirements for API methods
 
 ## 5. Benefits and Considerations
@@ -77,7 +76,7 @@ Where:
 After creation of API configuration you can launch API server. To do this, run:
 
 ```bash
-gateway start rest --config gateway.yaml
+./gateway start rest --config gateway.yaml
 ```
 
 Now you can use Gateway with locally running models through LM Studio!

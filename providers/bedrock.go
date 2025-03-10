@@ -59,7 +59,7 @@ func (ap *BedrockProvider) CostEstimate(modelId string, usage ModelUsage) float6
 func NewBedrockProvider(providerConfig ModelProviderConfig) (*BedrockProvider, error) {
 	effectiveRegion := providerConfig.BedrockRegion
 	if effectiveRegion == "" {
-		if envRegion := os.Getenv("AWS_BEDROCK_REGION"); envRegion != "" {
+		if envRegion := os.Getenv("BEDROCK_REGION"); envRegion != "" {
 			effectiveRegion = envRegion
 		} else if envRegion := os.Getenv("AWS_REGION"); envRegion != "" {
 			effectiveRegion = envRegion
@@ -88,7 +88,7 @@ func (bp *BedrockProvider) Chat(ctx context.Context, req *ConversationRequest) (
 
 	modelId := req.ModelId
 	if modelId == "" {
-		if envModelId := os.Getenv("AWS_BEDROCK_MODEL_ID"); envModelId != "" {
+		if envModelId := os.Getenv("BEDROCK_MODEL_ID"); envModelId != "" {
 			modelId = envModelId
 		} else {
 			modelId = defaultBedrockModelId
@@ -194,7 +194,7 @@ func (bp *BedrockProvider) ChatStream(ctx context.Context, req *ConversationRequ
 
 	modelId := req.ModelId
 	if modelId == "" {
-		if envModelId := os.Getenv("AWS_BEDROCK_MODEL_ID"); envModelId != "" {
+		if envModelId := os.Getenv("BEDROCK_MODEL_ID"); envModelId != "" {
 			modelId = envModelId
 		} else {
 			modelId = defaultBedrockModelId
