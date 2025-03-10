@@ -61,8 +61,7 @@ export GEMINI_API_KEY='yourkey'
 Use the following command to generate an API with AI assistance:
 
 ```bash
-./gateway \
-  discover \
+./gateway discover \
   --ai-provider gemini \
   --config connection.yaml \
   --prompt "Develop an API that enables a chatbot to retrieve information about data. \
