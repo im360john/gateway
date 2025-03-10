@@ -70,8 +70,6 @@ gateway discover [flags]
 
 **Flags:**
 
-Flags:
-
 - `--config` - Path to connection yaml file. Default is "connection.yaml".
 - `--tables` - Comma-separated list of tables to include (e.g. 'table1,table2,table3')
 - `--ai-provider` - AI provider to use. Default is "openai".
