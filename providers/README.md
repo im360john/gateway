@@ -12,9 +12,10 @@ We support the following AI providers:
 - [**OpenAI**](/providers/openai) and all OpenAI-compatible providers
 - [**Anthropic**](/providers/anthropic)
 - [**Amazon Bedrock**](/providers/bedrock)
+- [**Google Gemini**](/providers/gemini)
 - [**Google Vertex AI (Anthropic)**](/providers/anthropic-vertexai)
 
-We've tested with `OpenAI o3-mini` and `Anthropic Claude 3.7`, which we recommend for optimal performance.
+We've tested with `OpenAI o3-mini`, `Anthropic Claude 3.7` and `Gemini 2.0 Flash Thinking`, which we recommend for optimal performance.
 
 ## Recommended Models
 
@@ -22,6 +23,7 @@ For best performance, we recommend using:
 
 - **OpenAI**: o3-mini
 - **Anthropic**: Claude 3.7
+- **Google**: Gemini 2.0 Flash Thinking (Free tier available)
 
 These models provide a good balance of performance, speed, and cost for most use cases.
 
@@ -29,18 +31,18 @@ These models provide a good balance of performance, speed, and cost for most use
 
 Below is the configuration schema for all supported AI providers:
 
-| Field              | Type    | Required | Description                                                                                               |
-| ------------------ | ------- | -------- | --------------------------------------------------------------------------------------------------------- |
-| `ai-provider`      | string  | No       | AI provider to use. Options: `openai`, `anthropic`, `bedrock`, `anthropic-vertexai`. Defaults to `openai` |
-| `ai-endpoint`      | string  | No       | Custom OpenAI-compatible API endpoint URL                                                                 |
-| `ai-api-key`       | string  | No       | AI API token for authentication                                                                           |
-| `bedrock-region`   | string  | No       | AWS region for Amazon Bedrock                                                                             |
-| `vertexai-region`  | string  | No       | Google Cloud region for Vertex AI                                                                         |
-| `vertexai-project` | string  | No       | Google Cloud project ID for Vertex AI                                                                     |
-| `ai-model`         | string  | No       | AI model to use (provider-specific)                                                                       |
-| `ai-max-tokens`    | integer | No       | Maximum tokens to use in the response (0 = provider default)                                              |
-| `ai-temperature`   | float   | No       | Temperature for AI responses (-1.0 = provider default)                                                    |
-| `ai-reasoning`     | boolean | No       | Enable reasoning mode for supported models (default: true)                                                |
+| Field              | Type    | Required | Description                                                                                                         |
+| ------------------ | ------- | -------- | ------------------------------------------------------------------------------------------------------------------- |
+| `ai-provider`      | string  | No       | AI provider to use. Options: `openai`, `anthropic`, `bedrock`, `gemini`, `anthropic-vertexai`. Defaults to `openai` |
+| `ai-endpoint`      | string  | No       | Custom OpenAI-compatible API endpoint URL                                                                           |
+| `ai-api-key`       | string  | No       | AI API token for authentication                                                                                     |
+| `bedrock-region`   | string  | No       | AWS region for Amazon Bedrock                                                                                       |
+| `vertexai-region`  | string  | No       | Google Cloud region for Vertex AI                                                                                   |
+| `vertexai-project` | string  | No       | Google Cloud project ID for Vertex AI                                                                               |
+| `ai-model`         | string  | No       | AI model to use (provider-specific)                                                                                 |
+| `ai-max-tokens`    | integer | No       | Maximum tokens to use in the response (0 = provider default)                                                        |
+| `ai-temperature`   | float   | No       | Temperature for AI responses (-1.0 = provider default)                                                              |
+| `ai-reasoning`     | boolean | No       | Enable reasoning mode for supported models (default: true)                                                          |
 
 ## Example
 
