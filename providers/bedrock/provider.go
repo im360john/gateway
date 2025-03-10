@@ -107,7 +107,7 @@ func (bp *BedrockProvider) Chat(ctx context.Context, req *providers.Conversation
 		})
 	}
 
-	temperature := aws.Float32(req.Temperature)
+	temperature := aws.Float32(max(req.Temperature, 0.0))
 	if req.Reasoning {
 		temperature = aws.Float32(1.0)
 	}
@@ -213,7 +213,7 @@ func (bp *BedrockProvider) ChatStream(ctx context.Context, req *providers.Conver
 		})
 	}
 
-	temperature := aws.Float32(req.Temperature)
+	temperature := aws.Float32(max(req.Temperature, 0.0))
 	if req.Reasoning {
 		temperature = aws.Float32(1.0)
 	}

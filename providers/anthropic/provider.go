@@ -148,6 +148,7 @@ func (ap *AnthropicProvider) Chat(ctx context.Context, req *providers.Conversati
 	}
 
 	temperature := req.Temperature
+	temperature = max(temperature, 0.0)
 	if req.Reasoning {
 		temperature = 1.0
 	}
@@ -258,6 +259,7 @@ func (ap *AnthropicProvider) ChatStream(ctx context.Context, req *providers.Conv
 	}
 
 	temperature := req.Temperature
+	temperature = max(temperature, 0.0)
 	if req.Reasoning {
 		temperature = 1.0
 	}

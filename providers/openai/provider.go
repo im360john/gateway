@@ -133,7 +133,7 @@ func (op *OpenAIProvider) Chat(ctx context.Context, req *providers.ConversationR
 	}
 
 	if supportsTemperature {
-		request.Temperature = req.Temperature
+		request.Temperature = max(req.Temperature, 0.0)
 	}
 
 	if req.Reasoning {
@@ -234,7 +234,7 @@ func (op *OpenAIProvider) ChatStream(ctx context.Context, req *providers.Convers
 	}
 
 	if supportsTemperature {
-		request.Temperature = req.Temperature
+		request.Temperature = max(req.Temperature, 0.0)
 	}
 
 	if req.Reasoning {
