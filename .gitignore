@@ -1,6 +1,7 @@
 .idea
 .trunk
 .centralmind
+.gateway
 gateway.exe
 /gateway
 /connection.yaml
