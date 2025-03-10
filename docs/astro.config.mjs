@@ -60,6 +60,7 @@ export default defineConfig({
             { label: 'OpenAI', slug: 'providers/openai' },
             { label: 'Anthropic', slug: 'providers/anthropic' },
             { label: 'Amazon Bedrock', slug: 'providers/bedrock' },
+            { label: 'Google Gemini', slug: 'providers/gemini' },
             { label: 'Google VertexAI', slug: 'providers/anthropic-vertexai' },
             { label: 'Local Models', slug: 'providers/local-models' },
           ],

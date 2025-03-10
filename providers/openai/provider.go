@@ -12,6 +12,7 @@ import (
 
 const (
 	defaultOpenAIModelId          = "o3-mini"
+	defaultGeminiModelId          = "gemini-2.0-flash-thinking-exp-01-21"
 	defaultOpenAIMaxTokens        = 100_000
 	defaultOpenAIStreamBufferSize = 100
 )
@@ -30,15 +31,21 @@ var (
 type OpenAIProvider struct {
 	Client   *openai.Client
 	Endpoint string
+	Genini   bool
 }
 
 var _ providers.ModelProvider = (*OpenAIProvider)(nil)
 
 func init() {
 	providers.RegisterModelProvider("openai", NewOpenAIProvider)
+	providers.RegisterModelProvider("gemini", NewGeminiProvider)
 }
 
 func (op *OpenAIProvider) GetName() string {
+	if op.Genini {
+		return "Gemini"
+	}
+
 	return "OpenAI"
 }
 
@@ -59,6 +66,9 @@ func (ap *OpenAIProvider) CostEstimate(modelId string, usage providers.ModelUsag
 	case strings.HasPrefix(modelId, "o1"):
 		inputPrice = 15 / oneMillion
 		outputPrice = 60 / oneMillion
+	case strings.HasPrefix(modelId, "gemini"):
+		inputPrice = 0.10 / oneMillion
+		outputPrice = 0.40 / oneMillion
 	default:
 		return 0.0
 	}
@@ -71,18 +81,35 @@ func (ap *OpenAIProvider) CostEstimate(modelId string, usage providers.ModelUsag
 }
 
 func NewOpenAIProvider(providerConfig providers.ModelProviderConfig) (providers.ModelProvider, error) {
+	return NewOpenAIProviderIntl(providerConfig, false)
+}
+
+func NewGeminiProvider(providerConfig providers.ModelProviderConfig) (providers.ModelProvider, error) {
+	return NewOpenAIProviderIntl(providerConfig, true)
+}
+
+func NewOpenAIProviderIntl(providerConfig providers.ModelProviderConfig, gemini bool) (providers.ModelProvider, error) {
 	effectiveAPIKey := providerConfig.APIKey
 	if effectiveAPIKey == "" {
-		effectiveAPIKey = os.Getenv("OPENAI_API_KEY")
+		if gemini {
+			effectiveAPIKey = os.Getenv("GEMINI_API_KEY")
+		} else {
+			effectiveAPIKey = os.Getenv("OPENAI_API_KEY")
+		}
+
 		if effectiveAPIKey == "" {
 			return nil, ErrNoAPIKey
 		}
 	}
 
 	effectiveEndpoint := providerConfig.Endpoint
-	envEndpoint := os.Getenv("OPENAI_ENDPOINT")
-	if effectiveEndpoint == "" && envEndpoint != "" {
-		effectiveEndpoint = envEndpoint
+	if gemini {
+		effectiveEndpoint = "https://generativelanguage.googleapis.com/v1beta/openai/"
+	} else {
+		envEndpoint := os.Getenv("OPENAI_ENDPOINT")
+		if effectiveEndpoint == "" && envEndpoint != "" {
+			effectiveEndpoint = envEndpoint
+		}
 	}
 
 	config := openai.DefaultConfig(effectiveAPIKey)
@@ -94,6 +121,7 @@ func NewOpenAIProvider(providerConfig providers.ModelProviderConfig) (providers.
 	return &OpenAIProvider{
 		Client:   client,
 		Endpoint: effectiveEndpoint,
+		Genini:   gemini,
 	}, nil
 }
 
@@ -104,10 +132,21 @@ func (op *OpenAIProvider) Chat(ctx context.Context, req *providers.ConversationR
 
 	modelId := req.ModelId
 	if modelId == "" {
-		if envModelId := os.Getenv("OPENAI_MODEL_ID"); envModelId != "" {
+		var envModelId string
+		if op.Genini {
+			envModelId = os.Getenv("GEMINI_MODEL_ID")
+		} else {
+			envModelId = os.Getenv("OPENAI_MODEL_ID")
+		}
+
+		if envModelId != "" {
 			modelId = envModelId
 		} else {
-			modelId = defaultOpenAIModelId
+			if op.Genini {
+				modelId = defaultGeminiModelId
+			} else {
+				modelId = defaultOpenAIModelId
+			}
 		}
 	}
 
@@ -136,11 +175,11 @@ func (op *OpenAIProvider) Chat(ctx context.Context, req *providers.ConversationR
 		request.Temperature = max(req.Temperature, 0.0)
 	}
 
-	if req.Reasoning {
+	if req.Reasoning && !op.Genini {
 		request.ReasoningEffort = "high"
 	}
 
-	if req.JsonResponse {
+	if req.JsonResponse && op.Endpoint == "" {
 		request.ResponseFormat = &openai.ChatCompletionResponseFormat{
 			Type: "json_object",
 		}
@@ -201,10 +240,21 @@ func (op *OpenAIProvider) ChatStream(ctx context.Context, req *providers.Convers
 
 	modelId := req.ModelId
 	if modelId == "" {
-		if envModelId := os.Getenv("OPENAI_MODEL_ID"); envModelId != "" {
+		var envModelId string
+		if op.Genini {
+			envModelId = os.Getenv("GEMINI_MODEL_ID")
+		} else {
+			envModelId = os.Getenv("OPENAI_MODEL_ID")
+		}
+
+		if envModelId != "" {
 			modelId = envModelId
 		} else {
-			modelId = defaultOpenAIModelId
+			if op.Genini {
+				modelId = defaultGeminiModelId
+			} else {
+				modelId = defaultOpenAIModelId
+			}
 		}
 	}
 
@@ -237,11 +287,11 @@ func (op *OpenAIProvider) ChatStream(ctx context.Context, req *providers.Convers
 		request.Temperature = max(req.Temperature, 0.0)
 	}
 
-	if req.Reasoning {
+	if req.Reasoning && !op.Genini {
 		request.ReasoningEffort = "high"
 	}
 
-	if req.JsonResponse {
+	if req.JsonResponse && op.Endpoint == "" {
 		request.ResponseFormat = &openai.ChatCompletionResponseFormat{
 			Type: "json_object",
 		}
