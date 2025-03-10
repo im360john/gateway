@@ -113,5 +113,6 @@ func isDirectoryWritable(dir string) bool {
 	os.Remove(filename)
 
 	logrus.Debugf("Verified directory is writable: %s", dir)
+
 	return true
 }

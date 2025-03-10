@@ -58,8 +58,9 @@ func REST(configPath *string, addr *string, servers *string) *cobra.Command {
 			}
 
 			if !disableSwagger {
-				logrus.Infof("docs here: %s/", serverAddresses[0])
+				logrus.Infof("Docs available at: %s/", serverAddresses[0])
 			}
+
 			return http.ListenAndServe(*addr, mux)
 		},
 	}
