@@ -97,6 +97,9 @@ port: 5432' > connection.yaml
 - [Anthropic](/providers/anthropic)
 - [Amazon Bedrock](/providers/bedrock)
 - [Google Vertex AI (Anthropic)](/providers/anthropic-vertexai)
+- [Google Gemini](/providers/gemini)
+
+[Google Gemini](/providers/gemini) provides a generous **free tier**.
 
 Configure AI provider authorization. For OpenAI, set an API key.
 
