@@ -8,7 +8,11 @@
 
 </div>
 
-<a href="https://codespaces.new/centralmind/sample_databases"> 🚀 Interactive Demo via Github CodeSpaces </a>
+🚀 Interactive Demo via GitHub Codespaces
+
+[![Deploy with GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/centralmind/sample_databases)
+
+[![Full Documentation](https://img.shields.io/badge/Full%20Documentation-blue?style=for-the-badge&logo=rocket&logoColor=white)](https://docs.centralmind.ai/)
 
 AI agents and LLM-powered applications need fast, secure access to data, but traditional APIs and databases aren't built for this purpose. We're building an API layer that automatically generates secure, LLM-optimized APIs for your structured data.
 
