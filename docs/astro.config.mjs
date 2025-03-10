@@ -56,12 +56,12 @@ export default defineConfig({
         {
           label: 'AI Providers',
           items: [
-            { label: 'Overview', slug: 'docs/content/ai-providers/overview' },
-            { label: 'OpenAI', slug: 'docs/content/ai-providers/openai' },
-            { label: 'Anthropic', slug: 'docs/content/ai-providers/anthropic' },
-            { label: 'Amazon Bedrock', slug: 'docs/content/ai-providers/bedrock' },
-            { label: 'Google VertexAI', slug: 'docs/content/ai-providers/anthropic-vertexai' },
-            { label: 'Local Models', slug: 'docs/content/ai-providers/local-models' },
+            { label: 'Overview', slug: 'providers' },
+            { label: 'OpenAI', slug: 'providers/openai' },
+            { label: 'Anthropic', slug: 'providers/anthropic' },
+            { label: 'Amazon Bedrock', slug: 'providers/bedrock' },
+            { label: 'Google VertexAI', slug: 'providers/anthropic-vertexai' },
+            { label: 'Local Models', slug: 'providers/local-models' },
           ],
         },
         {

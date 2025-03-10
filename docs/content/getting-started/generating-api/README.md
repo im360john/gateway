@@ -38,10 +38,10 @@ port: 5432
 
 ### Choosing one of our supported AI providers:
 
-- [OpenAI](https://docs.centralmind.ai/docs/content/ai-providers/openai) and all OpenAI-compatible providers
-- [Anthropic](https://docs.centralmind.ai/docs/content/ai-providers/anthropic)
-- [Amazon Bedrock](https://docs.centralmind.ai/docs/content/ai-providers/bedrock)
-- [Google Vertex AI (Anthropic)](https://docs.centralmind.ai/docs/content/ai-providers/anthropic-vertexai)
+- [OpenAI](/providers/openai) and all OpenAI-compatible providers
+- [Anthropic](/providers/anthropic)
+- [Amazon Bedrock](/providers/bedrock)
+- [Google Vertex AI (Anthropic)](/providers/anthropic-vertexai)
 
 Configure AI provider authorization. For OpenAI, set an API key.
 
@@ -67,7 +67,7 @@ based on that come up with useful API methods for that"
 #### Parameter Descriptions:
 
 - `discover`: Activates the discovery mechanism to analyze your database using AI
-- `--ai-provider`: Supported [AI Provider](/docs/content/ai-providers/overview)
+- `--ai-provider`: Supported [AI Provider](/providers)
 - `--config connection.yaml`: Path to the database connection configuration file
 - `--tables`: Specify which tables to include in API generation (can accept comma-separated list, eg "orders,sales,customers")
 - `--prompt "..."`: Customizes the AI's approach to generating the API based on your specific needs

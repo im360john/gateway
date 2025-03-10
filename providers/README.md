@@ -9,10 +9,10 @@ This guide provides an overview of the AI providers supported by CentralMind Gat
 
 We support the following AI providers:
 
-- [**OpenAI**](/docs/content/ai-providers/openai) and all OpenAI-compatible providers
-- [**Anthropic**](/docs/content/ai-providers/anthropic)
-- [**Amazon Bedrock**](/docs/content/ai-providers/bedrock)
-- [**Google Vertex AI (Anthropic)**](/docs/content/ai-providers/anthropic-vertexai)
+- [**OpenAI**](/providers/openai) and all OpenAI-compatible providers
+- [**Anthropic**](/providers/anthropic)
+- [**Amazon Bedrock**](/providers/bedrock)
+- [**Google Vertex AI (Anthropic)**](/providers/anthropic-vertexai)
 
 We've tested with `OpenAI o3-mini` and `Anthropic Claude 3.7`, which we recommend for optimal performance.
 

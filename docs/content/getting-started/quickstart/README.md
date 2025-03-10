@@ -93,10 +93,10 @@ port: 5432' > connection.yaml
 
 ### 3. Choose one of our supported AI providers:
 
-- [OpenAI](https://docs.centralmind.ai/docs/content/ai-providers/openai) and all OpenAI-compatible providers
-- [Anthropic](https://docs.centralmind.ai/docs/content/ai-providers/anthropic)
-- [Amazon Bedrock](https://docs.centralmind.ai/docs/content/ai-providers/bedrock)
-- [Google Vertex AI (Anthropic)](https://docs.centralmind.ai/docs/content/ai-providers/anthropic-vertexai)
+- [OpenAI](/providers/openai) and all OpenAI-compatible providers
+- [Anthropic](/providers/anthropic)
+- [Amazon Bedrock](/providers/bedrock)
+- [Google Vertex AI (Anthropic)](/providers/anthropic-vertexai)
 
 Configure AI provider authorization. For OpenAI, set an API key.
 
