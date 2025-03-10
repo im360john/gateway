@@ -102,6 +102,23 @@ gateway plugins [plugin_name]
 
 If a plugin name is provided, displays detailed documentation for that plugin.
 
+### `verify`
+
+Verifies database connection configuration and displays table schemas and sample data.
+
+**Usage:**
+
+```
+gateway verify [flags]
+```
+
+**Flags:**
+
+- `--config` - Path to connection YAML file (default: "connection.yaml")
+- `--tables` - Comma-separated list of tables to include (e.g. 'table1,table2,table3')
+- `--db-type` - Type of database (default: "postgres")
+- `--llm-log` - Path to save the raw LLM response (default: logs directory)
+
 ## Configuration File
 
 The gateway.yaml configuration file defines:

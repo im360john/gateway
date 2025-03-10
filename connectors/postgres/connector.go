@@ -214,7 +214,23 @@ func (c Connector) LoadsColumns(ctx context.Context, tableName string) ([]model.
 
 	rows, err := c.db.QueryContext(
 		ctx,
-		`SELECT column_name, data_type, is_nullable FROM information_schema.columns WHERE table_name = $1 AND table_schema = $2`,
+		`SELECT 
+			c.column_name, 
+			c.data_type, 
+			c.is_nullable,
+			(SELECT true 
+			 FROM information_schema.table_constraints tc 
+			 JOIN information_schema.key_column_usage kcu 
+				ON tc.constraint_name = kcu.constraint_name 
+				AND tc.table_schema = kcu.table_schema 
+				AND tc.table_name = kcu.table_name 
+			 WHERE tc.constraint_type = 'PRIMARY KEY' 
+				AND tc.table_name = $1 
+				AND tc.table_schema = $2 
+				AND kcu.column_name = c.column_name) is not null as is_primary_key
+		FROM information_schema.columns c 
+		WHERE c.table_name = $1 
+		AND c.table_schema = $2`,
 		tableName, schema,
 	)
 	if err != nil {
@@ -225,12 +241,14 @@ func (c Connector) LoadsColumns(ctx context.Context, tableName string) ([]model.
 	var columns []model.ColumnSchema
 	for rows.Next() {
 		var name, dataType, isNullable string
-		if err := rows.Scan(&name, &dataType, &isNullable); err != nil {
+		var isPrimaryKey bool
+		if err := rows.Scan(&name, &dataType, &isNullable, &isPrimaryKey); err != nil {
 			return nil, err
 		}
 		columns = append(columns, model.ColumnSchema{
-			Name: name,
-			Type: c.GuessColumnType(dataType),
+			Name:       name,
+			Type:       c.GuessColumnType(dataType),
+			PrimaryKey: isPrimaryKey,
 		})
 	}
 	return columns, nil

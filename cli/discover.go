@@ -1,26 +1,32 @@
 package cli
 
 import (
-	"context"
 	_ "embed"
-	"fmt"
-	"github.com/centralmind/gateway/logger"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
+
+	"github.com/centralmind/gateway/logger"
+	"golang.org/x/xerrors"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 
-	"github.com/centralmind/gateway/connectors"
 	gw_model "github.com/centralmind/gateway/model"
 )
 
 var (
 	//go:embed api_config_schema.json
 	apiConfigSchema []byte
+
+	// CLI-colors
+	red    string = "\033[31m"
+	green         = "\033[32m"
+	cyan          = "\033[36m"
+	yellow        = "\033[33m"
+	violet        = "\033[35m"
+	reset         = "\033[0m" // reset color
 )
 
 type TableData struct {
@@ -76,13 +82,6 @@ func Discover() *cobra.Command {
 	var promptFile string
 	var llmLogFile string
 
-	//var red string = "\033[31m"
-	//var green = "\033[32m"
-	var cyan = "\033[36m"
-	var yellow = "\033[33m"
-	var violet = "\033[35m"
-	var reset = "\033[0m" // reset color
-
 	cmd := &cobra.Command{
 		Use:   "discover",
 		Short: "Discover generates gateway config",
@@ -90,99 +89,21 @@ func Discover() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			startTime := time.Now()
 
-			// Parse comma-separated tables list
-			var tablesList []string
-			if tables != "" {
-				tablesList = strings.Split(tables, ",")
-				// Trim spaces from table names
-				for i := range tablesList {
-					tablesList[i] = strings.TrimSpace(tablesList[i])
-				}
-			}
-
-			// Configure header
 			logrus.Info("\r\n")
-			logrus.Info("🚀 API Discovery Process")
+			logrus.Info("🚀 Verify Discovery Process")
 
-			logrus.Info("Step 1: Read configs")
 			configRaw, err := os.ReadFile(configPath)
 			if err != nil {
 				return err
 			}
-			connector, err := connectors.New(databaseType, configRaw)
+
+			resolvedTables, err := loadTablesData(splitTables(tables), configRaw, databaseType)
 			if err != nil {
-				return err
+				return xerrors.Errorf("unable to verify connection: %w", err)
 			}
-			if err := connector.Ping(context.Background()); err != nil {
-				return err
-			}
-			logrus.Info("✅ Step 1 completed. Done.")
-			logrus.Info("\r\n")
-
-			logrus.Info("Step 2: Discover data")
-			allTables, err := connector.Discovery(context.Background())
-			if err != nil {
-				return err
-			}
-
-			tableSet := map[string]bool{}
-			for _, table := range tablesList {
-				tableSet[table] = true
-			}
-			if len(tablesList) == 0 {
-				for _, table := range allTables {
-					tableSet[table.Name] = true
-				}
-			}
-
-			// Show discovered tables
-			logrus.Info("Discovered Tables:")
-			for _, table := range allTables {
-				if tableSet[table.Name] {
-					logrus.Infof("  - "+cyan+"%s"+reset+": "+yellow+"%d"+reset+" columns, "+yellow+"%d"+reset+" rows", table.Name, len(table.Columns), table.RowCount)
-				}
-			}
-
-			// Check if any tables were found after filtering
-			var filteredTablesCount int
-			for range tableSet {
-				filteredTablesCount++
-			}
-			if filteredTablesCount == 0 {
-				return fmt.Errorf("error: no tables found to process. Please verify your database connection and table selection criteria")
-			}
-
-			logrus.Info("✅ Step 2 completed. Done.")
-			logrus.Info("\r\n")
-			// Sample data
-			logrus.Info("Step 3: Sample data from tables")
-			var tablesToGenerate []TableData
-			for _, table := range allTables {
-				if !tableSet[table.Name] {
-					continue
-				}
-				sample, err := connector.Sample(context.Background(), table)
-				if err != nil {
-					return err
-				}
-				tablesToGenerate = append(tablesToGenerate, TableData{
-					Columns:  table.Columns,
-					Name:     table.Name,
-					Sample:   sample,
-					RowCount: table.RowCount,
-				})
-			}
-
-			// Show sampled data
-			logrus.Info("Data Sampling Results:")
-			for _, table := range tablesToGenerate {
-				logrus.Infof("  - "+cyan+"%s"+reset+": "+yellow+"%d"+reset+" rows sampled", table.Name, len(table.Sample))
-			}
-			logrus.Info("✅ Step 3 completed. Done.")
-			logrus.Info("\r\n")
 
 			logrus.Info("Step 4: Prepare the prompt for the AI")
-			discoverPrompt := generateDiscoverPrompt(databaseType, extraPrompt, tablesToGenerate, getSchemaFromConfig(databaseType, configRaw))
+			discoverPrompt := generateDiscoverPrompt(databaseType, extraPrompt, resolvedTables, getSchemaFromConfig(databaseType, configRaw))
 			if err := saveToFile(promptFile, discoverPrompt); err != nil {
 				logrus.Error("failed to save prompt:", err)
 			}
@@ -250,9 +171,12 @@ func Discover() *cobra.Command {
 			logrus.Info("\r\n")
 			logrus.Info("--- Execution Statistics ---")
 			logrus.Infof("Total time taken: "+yellow+"%v"+reset, duration.Round(time.Second))
-			logrus.Infof("Tokens used: "+yellow+"%d"+reset+" (Estimated cost: "+violet+"$%.4f"+reset+")",
-				response.Conversation.Usage.TotalTokens, response.CostEstimate)
-			logrus.Infof("Tables processed: "+yellow+"%d"+reset, len(tablesToGenerate))
+			logrus.Infof(
+				"Tokens used: "+yellow+"%d"+reset+" (Estimated cost: "+violet+"$%.4f"+reset+")",
+				response.Conversation.Usage.TotalTokens,
+				response.CostEstimate,
+			)
+			logrus.Infof("Tables processed: "+yellow+"%d"+reset, len(resolvedTables))
 			logrus.Infof("API methods created: "+yellow+"%d"+reset, apiEndpoints)
 
 			// Count PII columns from the generated config

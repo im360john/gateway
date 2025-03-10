@@ -92,7 +92,7 @@ func ensureDirectoryExists(dir string) bool {
 		return false
 	}
 
-	logrus.WithField("directory", dir).Info("Created log directory")
+	logrus.WithField("directory", dir).Debug("Created log directory")
 
 	// Verify the newly created directory is writable
 	return isDirectoryWritable(dir)
