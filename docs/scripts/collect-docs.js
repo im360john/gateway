@@ -40,7 +40,7 @@ const ignorePatterns = [
 function generateTitle(filePath) {
   // Get the name of the directory containing README
   const dir = dirname(filePath);
-  if (dir === '.') return 'Root Documentation';
+  if (dir === '.') return 'Documentation';
 
   // Split the path into parts and take the last directory
   // Normalize the path first to ensure consistent separator usage
