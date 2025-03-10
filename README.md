@@ -112,7 +112,6 @@ port: 5432
 ```shell
 ./gateway discover \
   --config connection.yaml \
-  --db-type postgres \  
   --ai-api-key $OPENAI_API_KEY \
   --prompt "Generate for me awesome readonly api"
 ```
