@@ -31,7 +31,7 @@ var (
 type OpenAIProvider struct {
 	Client   *openai.Client
 	Endpoint string
-	Genini   bool
+	Gemini   bool
 }
 
 var _ providers.ModelProvider = (*OpenAIProvider)(nil)
@@ -42,7 +42,7 @@ func init() {
 }
 
 func (op *OpenAIProvider) GetName() string {
-	if op.Genini {
+	if op.Gemini {
 		return "Gemini"
 	}
 
@@ -121,7 +121,7 @@ func NewOpenAIProviderIntl(providerConfig providers.ModelProviderConfig, gemini 
 	return &OpenAIProvider{
 		Client:   client,
 		Endpoint: effectiveEndpoint,
-		Genini:   gemini,
+		Gemini:   gemini,
 	}, nil
 }
 
@@ -133,7 +133,7 @@ func (op *OpenAIProvider) Chat(ctx context.Context, req *providers.ConversationR
 	modelId := req.ModelId
 	if modelId == "" {
 		var envModelId string
-		if op.Genini {
+		if op.Gemini {
 			envModelId = os.Getenv("GEMINI_MODEL_ID")
 		} else {
 			envModelId = os.Getenv("OPENAI_MODEL_ID")
@@ -142,7 +142,7 @@ func (op *OpenAIProvider) Chat(ctx context.Context, req *providers.ConversationR
 		if envModelId != "" {
 			modelId = envModelId
 		} else {
-			if op.Genini {
+			if op.Gemini {
 				modelId = defaultGeminiModelId
 			} else {
 				modelId = defaultOpenAIModelId
@@ -175,7 +175,7 @@ func (op *OpenAIProvider) Chat(ctx context.Context, req *providers.ConversationR
 		request.Temperature = max(req.Temperature, 0.0)
 	}
 
-	if req.Reasoning && !op.Genini {
+	if req.Reasoning && !op.Gemini {
 		request.ReasoningEffort = "high"
 	}
 
@@ -241,7 +241,7 @@ func (op *OpenAIProvider) ChatStream(ctx context.Context, req *providers.Convers
 	modelId := req.ModelId
 	if modelId == "" {
 		var envModelId string
-		if op.Genini {
+		if op.Gemini {
 			envModelId = os.Getenv("GEMINI_MODEL_ID")
 		} else {
 			envModelId = os.Getenv("OPENAI_MODEL_ID")
@@ -250,7 +250,7 @@ func (op *OpenAIProvider) ChatStream(ctx context.Context, req *providers.Convers
 		if envModelId != "" {
 			modelId = envModelId
 		} else {
-			if op.Genini {
+			if op.Gemini {
 				modelId = defaultGeminiModelId
 			} else {
 				modelId = defaultOpenAIModelId
@@ -287,7 +287,7 @@ func (op *OpenAIProvider) ChatStream(ctx context.Context, req *providers.Convers
 		request.Temperature = max(req.Temperature, 0.0)
 	}
 
-	if req.Reasoning && !op.Genini {
+	if req.Reasoning && !op.Gemini {
 		request.ReasoningEffort = "high"
 	}
 

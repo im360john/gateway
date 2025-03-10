@@ -1,17 +1,17 @@
 ---
-title: 'Genini'
-description: 'Integration with Genini API for accessing Google language models'
+title: 'Google Gemini'
+description: 'Integration with Gemini API for accessing Google language models'
 ---
 
-The Genini provider enables direct integration with Google's language models through a compatible OpenAI-style API. This guide covers setup, configuration, authentication, and usage options for connecting to the Genini API.
+The Gemini provider enables direct integration with Google's language models through a compatible OpenAI-style API. This guide covers setup, configuration, authentication, and usage options for connecting to the Gemini API.
 
 ## Overview
 
-The Genini provider allows access to Google's language models via an OpenAI-compatible interface. This provider offers streamlined integration with authentication through API keys, flexible configuration options, and support for advanced features.
+The Gemini provider allows access to Google's language models via an OpenAI-compatible interface. This provider offers streamlined integration with authentication through API keys, flexible configuration options, and support for advanced features.
 
 ## Authentication
 
-The provider uses API key authentication to access Genini's services. You'll need to obtain a Genini API key to use this provider:
+The provider uses API key authentication to access Gemini's services. You'll need to obtain a Gemini API key to use this provider:
 
 - **Environment Variable:** Set `GEMINI_API_KEY` to provide your credentials.
 - **Command Line:** Pass your API key using the appropriate flag.
@@ -40,7 +40,7 @@ Below is a basic example of how to use the provider with a connection configurat
 
 ## Model Selection
 
-By default, the Genini provider uses `gemini-2.0-flash-thinking-exp-01-21`. You can specify a different model using one of the following methods:
+By default, the Gemini provider uses `gemini-2.0-flash-thinking-exp-01-21`. You can specify a different model using one of the following methods:
 
 1. **Command-line Flag:** Use the `--ai-model` flag.
 2. **Environment Variable:** Set the `GEMINI_MODEL_ID`.
@@ -91,7 +91,7 @@ Lower values produce more deterministic outputs, while higher values increase cr
 
 ## Usage Costs
 
-Google offers a free tier for Gemini API usage with monthly token limits. For production workloads or higher usage requirements, please refer to Google's documentation for the current pricing for Genini models.
+Google offers a free tier for Gemini API usage with monthly token limits. For production workloads or higher usage requirements, please refer to Google's documentation for the current pricing for Gemini models.
 
 ## Recommended Best Practices
 
