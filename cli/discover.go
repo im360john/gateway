@@ -4,6 +4,7 @@ import (
 	"context"
 	_ "embed"
 	"fmt"
+	"github.com/centralmind/gateway/logger"
 	"os"
 	"path/filepath"
 	"strings"
@@ -289,8 +290,8 @@ func Discover() *cobra.Command {
 
 	cmd.Flags().StringVar(&output, "output", "gateway.yaml", "Resulted YAML path")
 	cmd.Flags().StringVar(&extraPrompt, "prompt", "generate reasonable set of APIs for this data", "Custom input to generate APIs")
-	cmd.Flags().StringVar(&promptFile, "prompt-file", filepath.Join(getDefaultLogDir(), "prompt_default.txt"), "Path to save the generated prompt")
-	cmd.Flags().StringVar(&llmLogFile, "llm-log", filepath.Join(getDefaultLogDir(), "llm_raw_response.log"), "Path to save the raw LLM response")
+	cmd.Flags().StringVar(&promptFile, "prompt-file", filepath.Join(logger.DefaultLogDir(), "prompt_default.txt"), "Path to save the generated prompt")
+	cmd.Flags().StringVar(&llmLogFile, "llm-log", filepath.Join(logger.DefaultLogDir(), "llm_raw_response.log"), "Path to save the raw LLM response")
 
 	return cmd
 }

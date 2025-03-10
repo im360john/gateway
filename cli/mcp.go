@@ -3,6 +3,7 @@ package cli
 import (
 	"context"
 	"fmt"
+	"github.com/centralmind/gateway/logger"
 	"os"
 	"path/filepath"
 	"strings"
@@ -81,6 +82,6 @@ func MCPStdio(configPath *string) *cobra.Command {
 			return srv.ServeStdio().Listen(context.Background(), os.Stdin, os.Stdout)
 		},
 	}
-	res.Flags().StringVar(&logFile, "log-file", filepath.Join(getDefaultLogDir(), "mcp.log"), "path to log file")
+	res.Flags().StringVar(&logFile, "log-file", filepath.Join(logger.DefaultLogDir(), "mcp.log"), "path to log file")
 	return res
 }

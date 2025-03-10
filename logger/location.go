@@ -17,7 +17,7 @@ var (
 	cachedLogDirOnce sync.Once
 )
 
-func getDefaultLogDir() string {
+func DefaultLogDir() string {
 	cachedLogDirOnce.Do(func() {
 		cachedLogDir = evaluateDefaultLogDir()
 	})
