@@ -41,9 +41,3 @@ func TestConnector_GuessColumnType(t *testing.T) {
 		})
 	}
 }
-
-// Note: Integration tests would require actual BigQuery credentials and connection
-// They should be implemented separately and run in a controlled environment
-func TestConnector_Integration_Disabled(t *testing.T) {
-	t.Skip("Integration tests are disabled")
-}
