@@ -9,6 +9,7 @@ ClickHouse connector allows querying ClickHouse databases.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
+| type | string | yes | constant: `clickhouse`  |
 | host | string | no | Single host address |
 | hosts | string[] | no | Multiple hosts for cluster setup |
 | database | string | yes | Database name |

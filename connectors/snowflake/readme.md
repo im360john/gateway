@@ -6,15 +6,16 @@ Snowflake connector allows querying Snowflake data warehouse.
 
 ## Config Schema
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
+| Field | Type | Required | Description                  |
+|-------|------|----------|------------------------------|
+| type | string | yes | constant: `snowflake`  |
 | account | string | yes | Snowflake account identifier |
-| database | string | yes | Database name |
-| user | string | yes | Username |
-| password | string | yes | Password |
+| database | string | yes | Database name                |
+| user | string | yes | Username                     |
+| password | string | yes | Password                     |
 | warehouse | string | yes | Warehouse to use for queries |
-| schema | string | yes | Schema name |
-| role | string | yes | Role to assume |
+| schema | string | yes | Schema name                  |
+| role | string | yes | Role to assume               |
 
 ## Config example:
 

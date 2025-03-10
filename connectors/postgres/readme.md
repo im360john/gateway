@@ -8,6 +8,7 @@ PostgreSQL connector allows querying PostgreSQL databases.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
+| type | string | yes | constant: `postgres`  |
 | hosts | string[] | yes | List of database hosts |
 | database | string | yes | Database name |
 | user | string | yes | Username |

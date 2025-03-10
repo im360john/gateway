@@ -8,6 +8,7 @@ MySQL connector allows querying MySQL/MariaDB databases.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
+| type | string | yes | constant: `mysql`  |
 | host | string | yes | Database host address |
 | database | string | yes | Database name |
 | user | string | yes | Username |
