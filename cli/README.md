@@ -70,13 +70,24 @@ gateway discover [flags]
 
 **Flags:**
 
-- `--database-type` - Type of database to connect to
-- `--tables` - Specific tables to include in the discovery, you can specify comma-separated list eg "sales,orders,customers"
-- `--ai-api-key` - API key for AI service, for instance OpenAI key
-- `--ai-endpoint` - Endpoint for AI service, compatible with OpenAI api schema
-- `--ai-model` - Model name for AI service, eg o3-mini
-- `--output` - Output file path for generated configuration
-- `--extra-prompt` - Additional instructions for the AI model
+Flags:
+
+- `--config` - Path to connection yaml file. Default is "connection.yaml".
+- `--tables` - Comma-separated list of tables to include (e.g. 'table1,table2,table3')
+- `--ai-provider` - AI provider to use. Default is "openai".
+- `--ai-endpoint` - Custom OpenAI-compatible API endpoint URL
+- `--ai-api-key` - AI API token
+- `--bedrock-region` - Bedrock region
+- `--vertexai-region` - Vertex AI region
+- `--vertexai-project` - Vertex AI project
+- `--ai-model` - AI model to use
+- `--ai-max-tokens` - Maximum tokens to use. Default is 0.
+- `--ai-temperature` - AI temperature. Default is -1.0.
+- `--ai-reasoning` - Enable reasoning. Default is true.
+- `--output` - Resulted YAML path. Default is "gateway.yaml".
+- `--prompt` - Custom input to generate APIs. Default is "generate reasonable set of APIs for this data".
+- `--prompt-file` - Path to save the generated prompt.
+- `--llm-log` - Path to save the raw LLM response.
 
 ### `connectors`
 

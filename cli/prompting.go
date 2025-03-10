@@ -108,7 +108,10 @@ func makeDiscoverQuery(params DiscoverQueryParams, prompt string) (DiscoverQuery
 	go startSpinner("Thinking. The process can take a few minutes to finish", done)
 
 	request := &providers.ConversationRequest{
+		ModelId:      params.Model,
 		Reasoning:    params.Reasoning,
+		MaxTokens:    params.MaxTokens,
+		Temperature:  params.Temperature,
 		JsonResponse: true,
 		System:       "You must always respond in pure JSON. No markdown, no comments, no explanations.",
 		Messages: []providers.Message{
@@ -121,8 +124,6 @@ func makeDiscoverQuery(params DiscoverQueryParams, prompt string) (DiscoverQuery
 				},
 			},
 		},
-		ModelId:   params.Model,
-		MaxTokens: params.MaxTokens,
 	}
 
 	llmResponse, err := provider.Chat(context.Background(), request)
