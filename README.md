@@ -13,6 +13,7 @@
 AI agents and LLM-powered applications need fast, secure access to data, but traditional APIs and databases aren't built for this purpose. We're building an API layer that automatically generates secure, LLM-optimized APIs for your structured data.
 
 Our solution:
+
 - Filters out PII and sensitive data to ensure compliance with GDPR, CPRA, SOC 2, and other regulations
 - Adds traceability and auditing capabilities, ensuring AI applications aren't black boxes and security teams maintain control
 - Optimizes for AI workloads, supporting Model Context Protocol (MCP) with enhanced meta information to help AI agents understand APIs, along with built-in caching and security features
@@ -47,33 +48,35 @@ Our primary users are companies deploying AI agents for customer support, analyt
 ### 1. Connect & Discover
 
 Gateway connects to your structured databases like PostgreSQL and automatically analyzes the schema and data samples
- to generate an optimized API structure based on your prompt. LLM is used only on discovery stage to produce API configuration.
-  The tool uses AI services (OpenAI or compatible providers) to generate the API configuration while ensuring security
-   through PII detection.
+to generate an optimized API structure based on your prompt. LLM is used only on discovery stage to produce API configuration.
+The tool uses AI services ([OpenAI or compatible providers](https://docs.centralmind.ai/docs/content/ai-providers/overview)) to generate the API configuration while ensuring security
+through PII detection.
 
 ### 2. Deploy
 
 Gateway supports multiple deployment options from standalone binary, docker or <a href="https://docs.centralmind.ai/example/k8s/">Kubernetes</a>.
- Check our <a href="https://docs.centralmind.ai/docs/content/getting-started/launching-api/">launching guide</a> for detailed
-  instructions. The system uses YAML configuration and plugins for easy customization.
+Check our <a href="https://docs.centralmind.ai/docs/content/getting-started/launching-api/">launching guide</a> for detailed
+instructions. The system uses YAML configuration and plugins for easy customization.
 
 ### 3. Use & Integrate
 
 Access your data through REST APIs or Model Context Protocol (MCP) with built-in security features.
- Gateway seamlessly integrates with AI models and applications like <a href="https://docs.centralmind.ai/docs/content/integration/langchain/">LangChain</a>,
-  <a href="https://docs.centralmind.ai/docs/content/integration/chatgpt/">OpenAI</a> and 
-  <a href="https://docs.centralmind.ai/docs/content/integration/claude-desktop/">Claude Desktop</a> using function calling 
-  or <a href="https://docs.centralmind.ai/docs/content/integration/cursor/">Cursor</a> through MCP. You can also <a href="https://docs.centralmind.ai/plugins/otel/">setup telemetry</a> to local or remote destination in otel format. 
+Gateway seamlessly integrates with AI models and applications like <a href="https://docs.centralmind.ai/docs/content/integration/langchain/">LangChain</a>,
+<a href="https://docs.centralmind.ai/docs/content/integration/chatgpt/">OpenAI</a> and
+<a href="https://docs.centralmind.ai/docs/content/integration/claude-desktop/">Claude Desktop</a> using function calling
+or <a href="https://docs.centralmind.ai/docs/content/integration/cursor/">Cursor</a> through MCP. You can also <a href="https://docs.centralmind.ai/plugins/otel/">setup telemetry</a> to local or remote destination in otel format.
 
 ## Documentation
 
 ### Getting Started
+
 - <a href="https://docs.centralmind.ai/docs/content/getting-started/quickstart/">Quickstart Guide</a>
 - <a href="https://docs.centralmind.ai/docs/content/getting-started/installation/">Installation Instructions</a>
 - <a href="https://docs.centralmind.ai/docs/content/getting-started/generating-api/">API Generation Guide</a>
 - <a href="https://docs.centralmind.ai/docs/content/getting-started/launching-api/">API Launch Guide</a>
 
 ### Additional Resources
+
 - <a href="https://docs.centralmind.ai/docs/content/integration/chatgpt/">ChatGPT Integration Guide</a>
 - <a href="https://docs.centralmind.ai/connectors/">Database Connector Documentation</a>
 - <a href="https://docs.centralmind.ai/plugins/">Plugin Documentation</a>
@@ -99,24 +102,41 @@ go build .
 Gateway uses LLM models to generate your API configuration. Follow these steps:
 
 1. Create a database connection configuration file (`connection.yaml`):
+
 ```yaml
+type: postgres
 hosts:
   - localhost
-user: "your-database-user"
-password: "your-database-password"
-database: "your-database-name"
+user: 'your-database-user'
+password: 'your-database-password'
+database: 'your-database-name'
 port: 5432
 ```
 
-2. Run the discovery command:
-```shell
-./gateway discover \
-  --config connection.yaml \
-  --ai-api-key $OPENAI_API_KEY \
-  --prompt "Generate for me awesome readonly api"
+2. Choose one of our supported AI providers:
+
+- [OpenAI](https://docs.centralmind.ai/docs/content/ai-providers/openai) and all OpenAI-compatible providers
+- [Anthropic](https://docs.centralmind.ai/docs/content/ai-providers/anthropic)
+- [Amazon Bedrock](https://docs.centralmind.ai/docs/content/ai-providers/bedrock)
+- [Google Vertex AI (Anthropic)](https://docs.centralmind.ai/docs/content/ai-providers/anthropic-vertexai)
+
+Configure AI provider authorization. For OpenAI, set an API key.
+
+```bash
+export OPENAI_API_KEY='yourkey'
 ```
 
-3. Monitor the generation process:
+3. Run the discovery command:
+
+```shell
+./gateway discover \
+  --ai-provider openai \
+  --config connection.yaml \
+  --prompt "Generate for me awesome readonly API"
+```
+
+4. Monitor the generation process:
+
 ```shell
 INFO 🚀 API Discovery Process
 INFO Step 1: Read configs
@@ -124,8 +144,8 @@ INFO ✅ Step 1 completed. Done.
 
 INFO Step 2: Discover data
 INFO Discovered Tables:
-INFO   - payment_dim: 3 columns, 39 rows 
-INFO   - fact_table: 9 columns, 1000000 rows 
+INFO   - payment_dim: 3 columns, 39 rows
+INFO   - fact_table: 9 columns, 1000000 rows
 INFO ✅ Step 2 completed. Done.
 
 # Additional steps and output...
@@ -140,7 +160,8 @@ INFO API methods created: 18
 INFO Total number of columns with PII data: 2
 ```
 
-4. Review the generated configuration in `gateway.yaml`:
+5. Review the generated configuration in `gateway.yaml`:
+
 ```yaml
 api:
   name: Awesome Readonly API
@@ -164,12 +185,14 @@ database:
 
 ## Running the API
 
-### Binary Mode
+### Run locally
+
 ```shell
 ./gateway start --config gateway.yaml rest
 ```
 
 ### Docker Compose
+
 ```shell
 docker compose -f ./example/simple/docker-compose.yml up
 ```
@@ -179,11 +202,13 @@ docker compose -f ./example/simple/docker-compose.yml up
 Gateway implements the MCP protocol for seamless integration with Claude and other tools. For detailed setup instructions, see our <a href="https://docs.centralmind.ai/docs/content/integration/claude-desktop/">Claude integration guide</a>.
 
 1. Build the gateway binary:
+
 ```shell
 go build .
 ```
 
 2. Configure Claude Desktop tool configuration:
+
 ```json
 {
   "mcpServers": {
@@ -196,19 +221,22 @@ go build .
 ```
 
 ## Roadmap
+
 It is always subject to change, and the roadmap will highly depend on user feedback. At this moment,
- we are planning the following features: 
+we are planning the following features:
 
 #### Database and Connectivity
+
 - 🗄️ **Extended Database Integrations** - Redshift, S3 (Iceberg and Parquet), Oracle DB, Microsoft SQL Server, Elasticsearch
-- 🔑 **SSH tunneling** - ability to use jumphost or ssh bastion to tunnel connections 
+- 🔑 **SSH tunneling** - ability to use jumphost or ssh bastion to tunnel connections
 
 #### Enhanced Functionality
-- 🔍 **Advanced Query Capabilities** - Complex filtering syntax and Aggregation functions as parameters  
+
+- 🔍 **Advanced Query Capabilities** - Complex filtering syntax and Aggregation functions as parameters
 - 🔐 **Enhanced MCP Security** - API key and OAuth authentication
 
 #### Platform Improvements
+
 - 📦 **Schema Management** - Automated schema evolution and API versioning
 - 🚦 **Advanced Traffic Management** - Intelligent rate limiting, Request throttling
 - ✍️ **Write Operations Support** - Insert, Update operations
-

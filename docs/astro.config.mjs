@@ -38,17 +38,6 @@ export default defineConfig({
           ],
         },
         {
-          label: 'AI Providers',
-          items: [
-            { label: 'Overview', slug: 'docs/content/ai-providers/overview' },
-            { label: 'OpenAI', slug: 'docs/content/ai-providers/openai' },
-            { label: 'Anthropic', slug: 'docs/content/ai-providers/anthropic' },
-            { label: 'Amazon Bedrock', slug: 'docs/content/ai-providers/bedrock' },
-            { label: 'Google VertexAI', slug: 'docs/content/ai-providers/anthropic-vertexai' },
-            { label: 'Local Models', slug: 'docs/content/ai-providers/local-models' },
-          ],
-        },
-        {
           label: 'Integration',
           items: [
             { label: 'ChatGPT', slug: 'docs/content/integration/chatgpt' },
@@ -63,6 +52,17 @@ export default defineConfig({
           autogenerate: {
             directory: 'connectors',
           },
+        },
+        {
+          label: 'AI Providers',
+          items: [
+            { label: 'Overview', slug: 'docs/content/ai-providers/overview' },
+            { label: 'OpenAI', slug: 'docs/content/ai-providers/openai' },
+            { label: 'Anthropic', slug: 'docs/content/ai-providers/anthropic' },
+            { label: 'Amazon Bedrock', slug: 'docs/content/ai-providers/bedrock' },
+            { label: 'Google VertexAI', slug: 'docs/content/ai-providers/anthropic-vertexai' },
+            { label: 'Local Models', slug: 'docs/content/ai-providers/local-models' },
+          ],
         },
         {
           label: 'Plugins',

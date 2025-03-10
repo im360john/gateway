@@ -27,12 +27,26 @@ First, create a connection configuration file (e.g., `connection.yaml`) with you
 
 ```yaml
 # Example connection.yaml
+type: postgres
 hosts:
   - localhost
 user: postgres
 password: mysecretpassword
 database: sampledb
 port: 5432
+```
+
+### Choosing one of our supported AI providers:
+
+- [OpenAI](https://docs.centralmind.ai/docs/content/ai-providers/openai) and all OpenAI-compatible providers
+- [Anthropic](https://docs.centralmind.ai/docs/content/ai-providers/anthropic)
+- [Amazon Bedrock](https://docs.centralmind.ai/docs/content/ai-providers/bedrock)
+- [Google Vertex AI (Anthropic)](https://docs.centralmind.ai/docs/content/ai-providers/anthropic-vertexai)
+
+Configure AI provider authorization. For OpenAI, set an API key.
+
+```bash
+export OPENAI_API_KEY='yourkey'
 ```
 
 ### Running the Discovery Command with AI Assistance
@@ -42,10 +56,9 @@ Use the following command to generate an API with AI assistance:
 ```bash
 ./gateway \
   discover \
+  --ai-provider openai \
   --config connection.yaml \
-  --db-type postgres \
   --tables "table_name_1,table_name_2" \
-  --ai-api-key $OPENAI_KEY \
   --prompt "Develop an API that enables a chatbot to retrieve information about data. \
 Try to place yourself as analyst and think what kind of data you will require, \
 based on that come up with useful API methods for that"
@@ -54,10 +67,9 @@ based on that come up with useful API methods for that"
 #### Parameter Descriptions:
 
 - `discover`: Activates the discovery mechanism to analyze your database using AI
+- `--ai-provider`: Supported [AI Provider](/docs/content/ai-providers/overview)
 - `--config connection.yaml`: Path to the database connection configuration file
-- `--db-type postgres`: Specifies the database type (in this case, postgres)
 - `--tables`: Specify which tables to include in API generation (can accept comma-separated list, eg "orders,sales,customers")
-- `--ai-api-key $OPENAI_KEY`: Your OpenAI API key for AI-assisted API generation
 - `--prompt "..."`: Customizes the AI's approach to generating the API based on your specific needs
 
 After running this command, Gateway will generate a `gateway.yaml` configuration file. This file contains the complete API definition, including:

@@ -1,12 +1,11 @@
-
 This guide will help you get started with Gateway using Docker, discover your database and launch API on top of it.
 
 ## Prerequisites
 
 - <a href="https://platform.openai.com/api-keys">OpenAI API key</a> for AI-powered API generation
 - Your PostgreSQL Database or any other db that gateway supports. You can also take our example databases:
-    - <a href="/example/postgresql-dvdstore-sample/">PostgreSQL DVD Store Sample Database</a>. 
-    - <a href="/example/postgresql-ecommerce-sample/">PostgreSQL Ecommerce Sample Database</a>. 
+  - <a href="/example/postgresql-dvdstore-sample/">PostgreSQL DVD Store Sample Database</a>.
+  - <a href="/example/postgresql-ecommerce-sample/">PostgreSQL Ecommerce Sample Database</a>.
 
 ## Installation and Launching Steps
 
@@ -40,6 +39,7 @@ Expand-Archive -Path gateway-windows.zip -DestinationPath .
 Rename-Item -Path "gateway-windows-amd64.exe" -NewName "gateway.exe"
 
 ```
+
 </details>
 
 <details>
@@ -57,6 +57,7 @@ mv gateway-darwin-amd64 gateway
 chmod +x gateway
 
 ```
+
 </details>
 
 <details>
@@ -67,38 +68,55 @@ chmod +x gateway
 curl -LO https://github.com/centralmind/gateway/releases/latest/download/gateway-darwin-arm64.tar.gz
 
 # Extract the archive
+
 tar -xzf gateway-darwin-arm64.tar.gz
 mv gateway-darwin-arm64 gateway
 
 # Make the binary executable
+
 chmod +x gateway
 
-```
+````
 </details>
 
 
 ### 2. Create a `connection.yaml` configuration file:
 ```bash
-echo 'hosts:
+echo 'type: postgres
+hosts:
   - localhost
 user: "your-database-user"
 password: "your-database-password"
 database: "your-database-name"
 port: 5432' > connection.yaml
+````
+
+### 3. Choose one of our supported AI providers:
+
+- [OpenAI](https://docs.centralmind.ai/docs/content/ai-providers/openai) and all OpenAI-compatible providers
+- [Anthropic](https://docs.centralmind.ai/docs/content/ai-providers/anthropic)
+- [Amazon Bedrock](https://docs.centralmind.ai/docs/content/ai-providers/bedrock)
+- [Google Vertex AI (Anthropic)](https://docs.centralmind.ai/docs/content/ai-providers/anthropic-vertexai)
+
+Configure AI provider authorization. For OpenAI, set an API key.
+
+```bash
+export OPENAI_API_KEY='yourkey'
 ```
 
-### 3. Run the discovery process with AI-powered API generation:
+### 4. Run the discovery process with AI-powered API generation:
+
 ```bash
 ./gateway discover \
+  --ai-provider openai \
   --config connection.yaml \
-  --db-type postgres \
-  --ai-api-key $OPENAI_KEY \
   --prompt "Develop an API that enables a chatbot to retrieve information about data. \
 Try to place yourself as analyst and think what kind of data you will require, \
 based on that come up with useful API methods for that"
 ```
 
 ### 4. Start the REST server:
+
 ```bash
 ./gateway --config gateway.yaml start rest
 ```
@@ -106,7 +124,7 @@ based on that come up with useful API methods for that"
 ## Verification
 
 After starting the REST server, you can verify the installation by accessing the Swagger UI:
+
 ```
 http://localhost:9090/swagger/
 ```
-
