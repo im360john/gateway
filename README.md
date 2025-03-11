@@ -9,7 +9,6 @@
 </div>
 
 🚀 Interactive Demo via GitHub Codespaces
-
 [![Deploy with GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/centralmind/sample_databases)
 
 [![Full Documentation](https://img.shields.io/badge/Full%20Documentation-blue?style=for-the-badge&logo=rocket&logoColor=white)](https://docs.centralmind.ai/)
@@ -128,7 +127,7 @@ port: 5432
 
 [Google Gemini](https://docs.centralmind.ai/providers/gemini) provides a generous **free tier**. You can obtain an API key by visiting Google AI Studio:
 
-- [Google AI Studio](https://aistudio.google.com/prompts/new_chat)
+- [Google AI Studio](https://aistudio.google.com/apikey)
 
 Once logged in, you can create an API key in the API section of AI Studio. The free tier includes a generous monthly token allocation, making it accessible for development and testing purposes.
 
