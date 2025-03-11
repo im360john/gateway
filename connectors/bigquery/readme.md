@@ -1,4 +1,6 @@
-# BigQuery Connector
+---
+title: 'BigQuery'
+---
 
 This connector allows you to connect to Google BigQuery and execute queries against your datasets.
 

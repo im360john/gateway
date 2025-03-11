@@ -9,6 +9,7 @@
 </div>
 
 🚀 Interactive Demo via GitHub Codespaces
+
 [![Deploy with GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/centralmind/sample_databases)
 
 [![Full Documentation](https://img.shields.io/badge/Full%20Documentation-blue?style=for-the-badge&logo=rocket&logoColor=white)](https://docs.centralmind.ai/)

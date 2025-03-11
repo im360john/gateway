@@ -4,6 +4,8 @@ import (
 	"context"
 	_ "embed"
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/centralmind/gateway/castx"
@@ -19,14 +21,33 @@ var docString string
 
 func init() {
 	connectors.Register(func(cfg Config) (connectors.Connector, error) {
+		// Add debug prints
+		fmt.Printf("Debug - Loaded config: ProjectID=%s, Dataset=%s\n", cfg.ProjectID, cfg.Dataset)
+
+		// Create temporary credentials file
+		tmpDir := os.TempDir()
+		credentialsFile := filepath.Join(tmpDir, "bigquery-credentials.json")
+
+		// Write credentials to file
+		if err := os.WriteFile(credentialsFile, []byte(cfg.Credentials), 0600); err != nil {
+			return nil, xerrors.Errorf("unable to write credentials file: %w", err)
+		}
+		//defer os.Remove(credentialsFile) // Clean up file after we're done
+
+		// Set environment variable
+		if err := os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", credentialsFile); err != nil {
+			return nil, xerrors.Errorf("unable to set GOOGLE_APPLICATION_CREDENTIALS: %w", err)
+		}
+
 		// Format: bigquery://project/location/dataset?credentials=base64_credentials
-		dsn := fmt.Sprintf("bigquery://%s/%s?1=1&credentials=%s",
+		dsn := fmt.Sprintf("bigquery://%s/%s",
 			cfg.ProjectID,
 			cfg.Dataset,
-			cfg.Credentials,
 		)
+
+		print(dsn)
 		if cfg.Endpoint != "" {
-			dsn = fmt.Sprintf("%s&endpoint=%s&disable_auth=true", dsn, cfg.Endpoint)
+			dsn = fmt.Sprintf("%s&endpoint=%s", dsn, cfg.Endpoint)
 		}
 
 		db, err := sqlx.Open("bigquery", dsn)
@@ -43,9 +64,9 @@ func init() {
 }
 
 type Config struct {
-	ProjectID   string `json:"project_id"`
-	Dataset     string `json:"dataset"`
-	Credentials string `json:"credentials"`
+	ProjectID   string `json:"project_id" yaml:"project_id"`
+	Dataset     string `json:"dataset" yaml:"dataset"`
+	Credentials string `json:"credentials" yaml:"credentials"`
 	Endpoint    string `yaml:"endpoint"`
 }
 

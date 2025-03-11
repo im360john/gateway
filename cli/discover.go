@@ -238,21 +238,30 @@ func yamlify(sample any) string {
 func getSchemaFromConfig(databaseType string, configRaw []byte) string {
 	// Default schema is empty
 	schema := ""
+	dataset := ""
 
 	// Try to parse the config to get the schema for any database type
 	var generalConfig struct {
-		Schema string `yaml:"schema"`
+		Schema  string `yaml:"schema"`
+		Dataset string `yaml:"dataset"`
 	}
 
 	if err := yaml.Unmarshal(configRaw, &generalConfig); err == nil {
 		if generalConfig.Schema != "" {
 			schema = generalConfig.Schema
 		}
+		if generalConfig.Dataset != "" {
+			dataset = generalConfig.Dataset
+		}
 	}
 
 	// Handle special case for PostgreSQL where public is the default schema
 	if databaseType == "postgres" && schema == "" {
 		schema = "public"
+	}
+
+	if databaseType == "bigquery" {
+		schema = dataset
 	}
 
 	return schema
