@@ -48,7 +48,7 @@ func init() {
 		)
 
 		if cfg.Endpoint != "" {
-			dsn = fmt.Sprintf("%s?endpoint=%s&disable_auth=true", dsn, cfg.Endpoint)
+			dsn = fmt.Sprintf("%s?endpoint=%s&disable_auth=true", dsn, cfg.Endpoint) // this is only for tests
 		}
 
 		db, err := sqlx.Open("bigquery", dsn)
