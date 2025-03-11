@@ -12,7 +12,7 @@ import (
 
 const (
 	defaultOpenAIModelId          = "o3-mini"
-	defaultGeminiModelId          = "gemini-2.0-flash-thinking-exp-01-21"
+	defaultGeminiModelId          = "gemini-2.0-flash-thinking-exp"
 	defaultOpenAIMaxTokens        = 100_000
 	defaultOpenAIStreamBufferSize = 100
 )

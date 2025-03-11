@@ -20,7 +20,7 @@ The provider uses API key authentication to access Gemini's services. You'll nee
 
 Google offers a **free tier** for Gemini API access. You can obtain an API key by visiting Google AI Studio:
 
-- [Google AI Studio](https://aistudio.google.com/prompts/new_chat)
+- [Google AI Studio](https://aistudio.google.com/apikey)
 
 Once logged in, you can create an API key in the API section of AI Studio. The free tier includes a generous monthly token allocation, making it accessible for development and testing purposes.
 
@@ -40,7 +40,7 @@ Below is a basic example of how to use the provider with a connection configurat
 
 ## Model Selection
 
-By default, the Gemini provider uses `gemini-2.0-flash-thinking-exp-01-21`. You can specify a different model using one of the following methods:
+By default, the Gemini provider uses `gemini-2.0-flash-thinking-exp`. You can specify a different model using one of the following methods:
 
 1. **Command-line Flag:** Use the `--ai-model` flag.
 2. **Environment Variable:** Set the `GEMINI_MODEL_ID`.
@@ -51,11 +51,11 @@ Examples:
 # Specify model via command line
 ./gateway discover \
   --ai-provider gemini \
-  --ai-model gemini-2.0-flash-thinking-exp-01-21 \
+  --ai-model gemini-2.0-flash-thinking-exp \
   --config connection.yaml
 
 # Or via environment variable
-export GEMINI_MODEL_ID=gemini-2.0-flash-thinking-exp-01-21
+export GEMINI_MODEL_ID=gemini-2.0-flash-thinking-exp
 ./gateway discover \
   --ai-provider gemini \
   --config connection.yaml
