@@ -22,7 +22,7 @@ var docString string
 func init() {
 	connectors.Register(func(cfg Config) (connectors.Connector, error) {
 		// Add debug prints
-		fmt.Printf("Debug - Loaded config: ProjectID=%s, Dataset=%s\n", cfg.ProjectID, cfg.Dataset)
+		//fmt.Printf("Debug - Loaded config: ProjectID=%s, Dataset=%s\n", cfg.ProjectID, cfg.Dataset)
 
 		// Create temporary credentials file
 		tmpDir := os.TempDir()
