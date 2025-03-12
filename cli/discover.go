@@ -2,6 +2,7 @@ package cli
 
 import (
 	_ "embed"
+	"fmt"
 	"os"
 	"path/filepath"
 	"time"
@@ -236,22 +237,18 @@ func yamlify(sample any) string {
 
 // Get schema from database config if it exists
 func getSchemaFromConfig(databaseType string, configRaw []byte) string {
-	// Default schema is empty
 	schema := ""
-	dataset := ""
 
 	// Try to parse the config to get the schema for any database type
 	var generalConfig struct {
-		Schema  string `yaml:"schema"`
-		Dataset string `yaml:"dataset"`
+		Schema    string `yaml:"schema"`
+		ProjectID string `json:"project_id" yaml:"project_id"`
+		Dataset   string `json:"dataset" yaml:"dataset"`
 	}
 
 	if err := yaml.Unmarshal(configRaw, &generalConfig); err == nil {
 		if generalConfig.Schema != "" {
 			schema = generalConfig.Schema
-		}
-		if generalConfig.Dataset != "" {
-			dataset = generalConfig.Dataset
 		}
 	}
 
@@ -261,7 +258,7 @@ func getSchemaFromConfig(databaseType string, configRaw []byte) string {
 	}
 
 	if databaseType == "bigquery" {
-		schema = dataset
+		schema = fmt.Sprintf("%s.%s", generalConfig.ProjectID, generalConfig.Dataset)
 	}
 
 	return schema
