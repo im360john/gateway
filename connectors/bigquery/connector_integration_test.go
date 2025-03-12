@@ -119,4 +119,43 @@ func TestConnector_Integration(t *testing.T) {
 		require.NoError(t, err)
 		assert.Len(t, samples, 2) // should have 2 users
 	})
+
+	t.Run("limit and offset", func(t *testing.T) {
+		selectQuery := fmt.Sprintf(`
+			SELECT id, name
+			FROM %s.%s.users
+			ORDER BY id
+			LIMIT @limit
+			OFFSET @offset
+		`, projectID, datasetID)
+
+		params := map[string]any{
+			"limit":  1,
+			"offset": 1,
+		}
+
+		results, err := connector.Query(
+			ctx,
+			model.Endpoint{
+				Query: selectQuery,
+				Params: []model.EndpointParams{
+					{
+						Name: "limit",
+						Type: string(model.TypeInteger),
+					},
+					{
+						Name: "offset",
+						Type: string(model.TypeInteger),
+					},
+				},
+			},
+			params,
+		)
+		require.NoError(t, err)
+		require.Len(t, results, 1)
+
+		// Should get second user due to OFFSET 1
+		row := results[0]
+		assert.Equal(t, int64(30), row["id"])
+	})
 }
