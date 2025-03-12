@@ -4,10 +4,10 @@ import (
 	"context"
 	_ "embed"
 	"fmt"
+	"github.com/centralmind/gateway/connectors"
 	"strings"
 
 	"github.com/centralmind/gateway/castx"
-	"github.com/centralmind/gateway/connectors"
 	"github.com/centralmind/gateway/model"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/snowflakedb/gosnowflake"
@@ -45,6 +45,10 @@ type Config struct {
 	Role      string
 }
 
+func (c Config) ExtraPrompt() []string {
+	return []string{}
+}
+
 func (c Config) MakeDSN() (string, error) {
 
 	dsn := fmt.Sprintf("%s:%s@%s/%s/%s?warehouse=%s&role=%s", c.User, c.Password, c.Account, c.Database, c.Schema, c.Warehouse, c.Role)
@@ -64,6 +68,10 @@ type Connector struct {
 	config Config
 	db     *sqlx.DB
 	base   *connectors.BaseConnector
+}
+
+func (c Connector) Config() connectors.Config {
+	return c.config
 }
 
 func (c Connector) Sample(ctx context.Context, table model.Table) ([]map[string]any, error) {

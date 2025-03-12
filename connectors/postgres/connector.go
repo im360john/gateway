@@ -3,10 +3,10 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"github.com/centralmind/gateway/connectors"
 	"strings"
 
 	"github.com/centralmind/gateway/castx"
-	"github.com/centralmind/gateway/connectors"
 	"github.com/centralmind/gateway/model"
 	"github.com/jackc/pgx/v4/stdlib"
 	"github.com/jmoiron/sqlx"
@@ -33,6 +33,10 @@ type Connector struct {
 	config Config
 	db     *sqlx.DB
 	base   *connectors.BaseConnector
+}
+
+func (c Connector) Config() connectors.Config {
+	return c.config
 }
 
 // GuessColumnType implements TypeGuesser interface for PostgreSQL

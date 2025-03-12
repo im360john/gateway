@@ -3,10 +3,10 @@ package otel
 import (
 	"context"
 	"fmt"
+	"github.com/centralmind/gateway/connectors"
 	"github.com/centralmind/gateway/xcontext"
 	"time"
 
-	"github.com/centralmind/gateway/connectors"
 	"github.com/centralmind/gateway/model"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
@@ -18,6 +18,10 @@ type Connector struct {
 	inner  connectors.Connector
 	config Config
 	tp     *trace_provider.TracerProvider
+}
+
+func (c Connector) Config() connectors.Config {
+	return c.inner.Config()
 }
 
 func (c Connector) InferQuery(ctx context.Context, query string) ([]model.ColumnSchema, error) {

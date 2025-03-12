@@ -38,7 +38,7 @@ func Connection() *cobra.Command {
 				return err
 			}
 
-			tablesData, err := loadTablesData(splitTables(tables), configRaw)
+			tablesData, _, err := loadTablesData(splitTables(tables), configRaw)
 			if err != nil {
 				return xerrors.Errorf("unable to verify connection: %w", err)
 			}
@@ -80,14 +80,14 @@ type dbType struct {
 	Type string `yaml:"type" json:"type"`
 }
 
-func loadTablesData(tablesList []string, configRaw any) ([]TableData, error) {
+func loadTablesData(tablesList []string, configRaw any) ([]TableData, connectors.Connector, error) {
 	logrus.Info("Step 1: Read configs")
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
 	connector, err := connectors.New(inferType(configRaw), configRaw)
 	if err != nil {
-		return nil, xerrors.Errorf("unable to create connector: %s: %w", inferType(configRaw), err)
+		return nil, nil, xerrors.Errorf("unable to create connector: %s: %w", inferType(configRaw), err)
 	}
 	logrus.Info("✅ Step 1 completed. Done.")
 	logrus.Info("\r\n")
@@ -95,7 +95,7 @@ func loadTablesData(tablesList []string, configRaw any) ([]TableData, error) {
 	logrus.Info("Step 2: Discover data")
 	allTables, err := connector.Discovery(ctx)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	tableSet := map[string]bool{}
@@ -123,7 +123,7 @@ func loadTablesData(tablesList []string, configRaw any) ([]TableData, error) {
 		filteredTablesCount++
 	}
 	if filteredTablesCount == 0 {
-		return nil, xerrors.Errorf("error: no tables found to process. Please verify your database connection and table selection criteria")
+		return nil, nil, xerrors.Errorf("error: no tables found to process. Please verify your database connection and table selection criteria")
 	}
 
 	logrus.Info("✅ Step 2 completed. Done.")
@@ -137,7 +137,7 @@ func loadTablesData(tablesList []string, configRaw any) ([]TableData, error) {
 		}
 		sample, err := connector.Sample(ctx, table)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		tablesToGenerate = append(tablesToGenerate, TableData{
 			Columns:  table.Columns,
@@ -154,7 +154,7 @@ func loadTablesData(tablesList []string, configRaw any) ([]TableData, error) {
 	}
 	logrus.Info("✅ Step 3 completed. Done.")
 	logrus.Info("\r\n")
-	return tablesToGenerate, nil
+	return tablesToGenerate, connector, nil
 }
 
 func inferType(configRaw any) string {

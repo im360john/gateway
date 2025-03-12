@@ -3,6 +3,7 @@ package cli
 import (
 	"context"
 	"fmt"
+	"github.com/centralmind/gateway/connectors"
 	"log"
 	"strings"
 
@@ -56,10 +57,13 @@ type DiscoverQueryResponse struct {
 	CostEstimate float64
 }
 
-func generateDiscoverPrompt(databaseType, extraPrompt string, tables []TableData, schema string) string {
+func generateDiscoverPrompt(connector connectors.Connector, extraPrompt string, tables []TableData, schema string) string {
 	res := "I need a config for an automatic API that will be used by another AI bot or LLMs..."
 	res += "\n"
-	res += strings.ReplaceAll(discoverBasePrompt, "{database_type}", databaseType)
+	res += strings.ReplaceAll(discoverBasePrompt, "{database_type}", connector.Config().Type())
+	for _, extraPrompt := range connector.Config().ExtraPrompt() {
+		res += res + "	-" + extraPrompt + "\n"
+	}
 	res += "\n" + string(apiConfigSchema) + "\n" + extraPrompt + "\n\n"
 	for _, table := range tables {
 		// Apply schema to table name if schema is provided and not empty

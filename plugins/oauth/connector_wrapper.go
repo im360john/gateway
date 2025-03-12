@@ -3,11 +3,11 @@ package oauth
 import (
 	"context"
 	"encoding/json"
+	"github.com/centralmind/gateway/connectors"
 	"net/http"
 	"net/url"
 	"strings"
 
-	"github.com/centralmind/gateway/connectors"
 	"github.com/centralmind/gateway/errors"
 	"github.com/centralmind/gateway/model"
 	"github.com/centralmind/gateway/xcontext"

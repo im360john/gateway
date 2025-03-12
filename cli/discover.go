@@ -97,7 +97,7 @@ func Discover() *cobra.Command {
 				return err
 			}
 
-			resolvedTables, err := loadTablesData(splitTables(tables), configRaw)
+			resolvedTables, connector, err := loadTablesData(splitTables(tables), configRaw)
 			if err != nil {
 				return xerrors.Errorf("unable to verify connection: %w", err)
 			}
@@ -105,7 +105,7 @@ func Discover() *cobra.Command {
 			databaseType := inferType(configRaw)
 
 			logrus.Info("Step 4: Prepare the prompt for the AI")
-			discoverPrompt := generateDiscoverPrompt(databaseType, extraPrompt, resolvedTables, getSchemaFromConfig(databaseType, configRaw))
+			discoverPrompt := generateDiscoverPrompt(connector, extraPrompt, resolvedTables, getSchemaFromConfig(databaseType, configRaw))
 			if err := saveToFile(promptFile, discoverPrompt); err != nil {
 				logrus.Error("failed to save prompt:", err)
 			}

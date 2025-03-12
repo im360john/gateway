@@ -25,6 +25,10 @@ type Config struct {
 	Schema     string // Database schema name for table access (format: schema.table_name)
 }
 
+func (c Config) ExtraPrompt() []string {
+	return []string{}
+}
+
 // UnmarshalYAML implements the yaml.Unmarshaler interface to allow for both
 // direct connection string or full configuration objects in YAML
 func (c *Config) UnmarshalYAML(value *yaml.Node) error {

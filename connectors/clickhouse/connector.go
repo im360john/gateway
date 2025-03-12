@@ -4,11 +4,11 @@ import (
 	"context"
 	_ "embed"
 	"fmt"
+	"github.com/centralmind/gateway/connectors"
 	"strings"
 
 	_ "github.com/ClickHouse/clickhouse-go/v2"
 	"github.com/centralmind/gateway/castx"
-	"github.com/centralmind/gateway/connectors"
 	"github.com/centralmind/gateway/model"
 	"github.com/jmoiron/sqlx"
 	"golang.org/x/xerrors"
@@ -42,6 +42,10 @@ type Config struct {
 	Secure   bool
 }
 
+func (c Config) ExtraPrompt() []string {
+	return []string{}
+}
+
 func (c Config) MakeDSN() string {
 	protocol := "http"
 	if c.Secure {
@@ -70,6 +74,10 @@ type Connector struct {
 	config Config
 	db     *sqlx.DB
 	base   *connectors.BaseConnector
+}
+
+func (c Connector) Config() connectors.Config {
+	return c.config
 }
 
 func (c Connector) Sample(ctx context.Context, table model.Table) ([]map[string]any, error) {

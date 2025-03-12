@@ -4,10 +4,10 @@ import (
 	"context"
 	_ "embed"
 	"fmt"
+	"github.com/centralmind/gateway/connectors"
 	"strings"
 
 	"github.com/centralmind/gateway/castx"
-	"github.com/centralmind/gateway/connectors"
 	"github.com/centralmind/gateway/model"
 	"github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -44,6 +44,10 @@ type Config struct {
 	TLSConfig string
 }
 
+func (c Config) ExtraPrompt() []string {
+	return []string{}
+}
+
 func (c Config) MakeDSN() (string, error) {
 	cfg := mysql.Config{
 		User:                 c.User,
@@ -70,6 +74,10 @@ type Connector struct {
 	config Config
 	db     *sqlx.DB
 	base   *connectors.BaseConnector
+}
+
+func (c Connector) Config() connectors.Config {
+	return c.config
 }
 
 func (c Connector) Sample(ctx context.Context, table model.Table) ([]map[string]any, error) {

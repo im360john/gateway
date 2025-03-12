@@ -4,12 +4,12 @@ import (
 	"context"
 	_ "embed"
 	"fmt"
+	"github.com/centralmind/gateway/connectors"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/centralmind/gateway/castx"
-	"github.com/centralmind/gateway/connectors"
 	"github.com/centralmind/gateway/logger"
 	"github.com/centralmind/gateway/model"
 	"github.com/jmoiron/sqlx"
@@ -71,6 +71,12 @@ type Config struct {
 	Endpoint    string `yaml:"endpoint"`
 }
 
+func (c Config) ExtraPrompt() []string {
+	return []string{
+		"Do not include limit / offset as parameters",
+	}
+}
+
 func (c Config) Type() string {
 	return "bigquery"
 }
@@ -83,6 +89,10 @@ type Connector struct {
 	config Config
 	db     *sqlx.DB
 	base   *connectors.BaseConnector
+}
+
+func (c *Connector) Config() connectors.Config {
+	return c.config
 }
 
 func (c *Connector) Sample(ctx context.Context, table model.Table) ([]map[string]any, error) {

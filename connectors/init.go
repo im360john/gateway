@@ -13,6 +13,7 @@ import (
 type Config interface {
 	Type() string
 	Doc() string
+	ExtraPrompt() []string
 }
 
 type Connector interface {
@@ -21,6 +22,7 @@ type Connector interface {
 	Discovery(ctx context.Context) ([]model.Table, error)
 	Sample(ctx context.Context, table model.Table) ([]map[string]any, error)
 	InferQuery(ctx context.Context, query string) ([]model.ColumnSchema, error)
+	Config() Config
 }
 
 var interceptors = map[string]func(any) (Connector, error){}
