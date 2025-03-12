@@ -149,7 +149,9 @@ func Schema(schema model.Config, addresses ...string) (*huma.OpenAPI, error) {
 					},
 				},
 			}
-			api.Paths[endpoint.HTTPPath] = &huma.PathItem{}
+			if _, ok := api.Paths[endpoint.HTTPPath]; !ok {
+				api.Paths[endpoint.HTTPPath] = &huma.PathItem{}
+			}
 			switch endpoint.HTTPMethod {
 			case "GET":
 				api.Paths[endpoint.HTTPPath].Get = operation
