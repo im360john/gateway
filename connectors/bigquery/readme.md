@@ -4,16 +4,17 @@ title: 'BigQuery'
 
 This connector allows you to connect to Google BigQuery and execute queries against your datasets.
 
-## Configuration
+## Config Schema
 
-The connector requires the following configuration parameters:
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| type | string | yes | constant: `bigquery` |
+| project_id | string | yes | Your Google Cloud Project ID |
+| dataset | string | yes | The BigQuery dataset name |
+| credentials | string | yes | Google Cloud service account credentials JSON |
+| endpoint | string | no | Custom BigQuery API endpoint (for testing) |
 
-- `type` (string): Constant - `bigquery`
-- `project_id` (string): Your Google Cloud Project ID
-- `dataset` (string): The BigQuery dataset name
-- `credentials` (string): Google Cloud service account credentials JSON as a string
-
-## Example Configuration
+## Config example:
 
 ```yaml
 type: bigquery
@@ -33,7 +34,9 @@ credentials: |
 - Schema inference
 - Row sampling
 
-## Service Account Credentials JSON for BigQuery
+## Service Account Setup
+
+To use this connector, you'll need to set up a Google Cloud service account with appropriate permissions:
 
 #### 1. Go to Google Cloud Console  
 - Open [Google Cloud Console](https://console.cloud.google.com/).  
@@ -62,4 +65,4 @@ credentials: |
 
 - BigQuery doesn't support traditional primary keys
 - Credentials must be provided as a JSON string
-- Some BigQuery-specific features like clustering and partitioning are not exposed through this connector 
+- Some BigQuery-specific features like clustering and partitioning are not exposed through this connector
