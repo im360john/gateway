@@ -253,6 +253,11 @@ func (c *Connector) GuessColumnType(sqlType string) model.ColumnType {
 
 func (c *Connector) InferResultColumns(ctx context.Context, query string) ([]model.ColumnSchema, error) {
 	// Create a dry run job to get schema without executing the query
+	query = strings.ReplaceAll(query, "@limit", "1")
+	query = strings.ReplaceAll(query, "@offset", "0")
+	if !strings.HasPrefix(strings.ToLower(query), "select") {
+		return nil, nil
+	}
 	q := c.client.Query(query)
 	q.DryRun = true
 
