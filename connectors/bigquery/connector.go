@@ -4,17 +4,18 @@ import (
 	"context"
 	_ "embed"
 	"fmt"
-	"github.com/centralmind/gateway/connectors"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"cloud.google.com/go/bigquery"
 	"github.com/centralmind/gateway/castx"
+	"github.com/centralmind/gateway/connectors"
 	"github.com/centralmind/gateway/logger"
 	"github.com/centralmind/gateway/model"
-	"github.com/jmoiron/sqlx"
 	"golang.org/x/xerrors"
-	_ "gorm.io/driver/bigquery/driver"
+	"google.golang.org/api/iterator"
+	"google.golang.org/api/option"
 )
 
 //go:embed readme.md
@@ -22,44 +23,33 @@ var docString string
 
 func init() {
 	connectors.Register(func(cfg Config) (connectors.Connector, error) {
-		// Add debug prints
-		//fmt.Printf("Debug - Loaded config: ProjectID=%s, Dataset=%s\n", cfg.ProjectID, cfg.Dataset)
+		var opts []option.ClientOption
 
 		if cfg.Credentials != "" && cfg.Credentials != "{}" {
-			// Create temporary credentials file
 			credentialsFile := filepath.Join(logger.DefaultLogDir(), "bigquery-credentials.json")
-
-			// Write credentials to file
 			if err := os.WriteFile(credentialsFile, []byte(cfg.Credentials), 0600); err != nil {
 				return nil, xerrors.Errorf("unable to write credentials file: %w", err)
 			}
-			//defer os.Remove(credentialsFile) // Clean up file after we're done
-
-			// Set environment variable
-			if err := os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", credentialsFile); err != nil {
-				return nil, xerrors.Errorf("unable to set GOOGLE_APPLICATION_CREDENTIALS: %w", err)
-			}
+			opts = append(opts, option.WithCredentialsFile(credentialsFile))
 		}
-
-		// Format: bigquery://project/location/dataset?credentials=base64_credentials
-		dsn := fmt.Sprintf("bigquery://%s/%s",
-			cfg.ProjectID,
-			cfg.Dataset,
-		)
 
 		if cfg.Endpoint != "" {
-			dsn = fmt.Sprintf("%s?endpoint=%s&disable_auth=true", dsn, cfg.Endpoint) // this is only for tests
+			opts = append(
+				opts,
+				option.WithEndpoint(cfg.Endpoint),
+				option.WithoutAuthentication(),
+			)
 		}
 
-		db, err := sqlx.Open("bigquery", dsn)
+		ctx := context.Background()
+		client, err := bigquery.NewClient(ctx, cfg.ProjectID, opts...)
 		if err != nil {
-			return nil, xerrors.Errorf("unable to create BigQuery connection: %w", err)
+			return nil, xerrors.Errorf("failed to create client: %w", err)
 		}
 
 		return &Connector{
 			config: cfg,
-			db:     db,
-			base:   &connectors.BaseConnector{DB: db},
+			client: client,
 		}, nil
 	})
 }
@@ -87,8 +77,7 @@ func (c Config) Doc() string {
 
 type Connector struct {
 	config Config
-	db     *sqlx.DB
-	base   *connectors.BaseConnector
+	client *bigquery.Client
 }
 
 func (c *Connector) Config() connectors.Config {
@@ -96,92 +85,96 @@ func (c *Connector) Config() connectors.Config {
 }
 
 func (c *Connector) Sample(ctx context.Context, table model.Table) ([]map[string]any, error) {
-	query := fmt.Sprintf("SELECT * FROM `%s.%s.%s` LIMIT 5", c.config.ProjectID, c.config.Dataset, table.Name)
-	rows, err := c.db.QueryxContext(ctx, query)
+	q := c.client.Query(fmt.Sprintf("SELECT * FROM `%s.%s.%s` LIMIT 5",
+		c.config.ProjectID, c.config.Dataset, table.Name))
+
+	it, err := q.Read(ctx)
 	if err != nil {
-		return nil, xerrors.Errorf("unable to execute query: %w", err)
+		return nil, xerrors.Errorf("error executing query: %w", err)
 	}
-	defer rows.Close()
 
 	var results []map[string]any
-	for rows.Next() {
-		row := make(map[string]interface{})
-		if err := rows.MapScan(row); err != nil {
-			return nil, xerrors.Errorf("error scanning row: %w", err)
+	for {
+		var row map[string]bigquery.Value
+		err := it.Next(&row)
+		if err == iterator.Done {
+			break
 		}
-		results = append(results, row)
-	}
+		if err != nil {
+			return nil, xerrors.Errorf("error reading row: %w", err)
+		}
 
-	if err = rows.Err(); err != nil {
-		return nil, xerrors.Errorf("error iterating rows: %w", err)
+		// Convert bigquery.Value to regular interface{}
+		converted := make(map[string]interface{})
+		for k, v := range row {
+			converted[k] = v
+		}
+		results = append(results, converted)
 	}
 
 	return results, nil
 }
 
 func (c *Connector) Discovery(ctx context.Context) ([]model.Table, error) {
-	query := fmt.Sprintf(`
-		SELECT 
-			table_name,
-			column_name,
-			data_type,
-			is_nullable
-		FROM %s.INFORMATION_SCHEMA.COLUMNS
-		ORDER BY table_name, ordinal_position`,
-		c.config.Dataset)
+	ds := c.client.Dataset(c.config.Dataset)
 
-	rows, err := c.db.QueryxContext(ctx, query)
-	if err != nil {
-		return nil, xerrors.Errorf("unable to query schema: %w", err)
-	}
-	defer rows.Close()
+	// Get list of tables
+	it := ds.Tables(ctx)
 
-	tables := make(map[string]*model.Table)
-	for rows.Next() {
-		var tableName, columnName, dataType, isNullable string
-		if err := rows.Scan(&tableName, &columnName, &dataType, &isNullable); err != nil {
-			return nil, xerrors.Errorf("error scanning row: %w", err)
+	var tables []model.Table
+	for {
+		tbl, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return nil, xerrors.Errorf("error iterating tables: %w", err)
 		}
 
-		table, ok := tables[tableName]
-		if !ok {
-			table = &model.Table{
-				Name:    tableName,
-				Columns: []model.ColumnSchema{},
+		// Get table metadata
+		md, err := tbl.Metadata(ctx)
+		if err != nil {
+			return nil, xerrors.Errorf("error getting table metadata: %w", err)
+		}
+
+		columns := make([]model.ColumnSchema, len(md.Schema))
+		for i, field := range md.Schema {
+			columns[i] = model.ColumnSchema{
+				Name:       field.Name,
+				Type:       c.GuessColumnType(string(field.Type)),
+				PrimaryKey: false,
 			}
-			tables[tableName] = table
 		}
 
-		table.Columns = append(table.Columns, model.ColumnSchema{
-			Name:       columnName,
-			Type:       c.GuessColumnType(dataType),
-			PrimaryKey: false, // BigQuery doesn't have traditional primary keys
+		// Get row count
+		q := c.client.Query(fmt.Sprintf("SELECT COUNT(*) as count FROM `%s.%s.%s`",
+			c.config.ProjectID, c.config.Dataset, tbl.TableID))
+
+		it, err := q.Read(ctx)
+		if err != nil {
+			return nil, xerrors.Errorf("error executing query: %w", err)
+		}
+
+		var row struct{ Count int64 }
+		err = it.Next(&row)
+		if err != nil {
+			return nil, xerrors.Errorf("error getting row count: %w", err)
+		}
+
+		tables = append(tables, model.Table{
+			Name:     tbl.TableID,
+			Columns:  columns,
+			RowCount: int(row.Count),
 		})
 	}
 
-	if err = rows.Err(); err != nil {
-		return nil, xerrors.Errorf("error iterating rows: %w", err)
-	}
-
-	// Convert map to slice
-	result := make([]model.Table, 0, len(tables))
-	for _, table := range tables {
-		// Get row count for the table
-		var count int
-		countQuery := fmt.Sprintf("SELECT COUNT(*) FROM `%s.%s.%s`", c.config.ProjectID, c.config.Dataset, table.Name)
-		err := c.db.QueryRowxContext(ctx, countQuery).Scan(&count)
-		if err != nil {
-			return nil, xerrors.Errorf("unable to get row count for table %s: %w", table.Name, err)
-		}
-		table.RowCount = count
-		result = append(result, *table)
-	}
-
-	return result, nil
+	return tables, nil
 }
 
 func (c *Connector) Ping(ctx context.Context) error {
-	return c.db.PingContext(ctx)
+	// Simple metadata call to check connection
+	_, err := c.client.Dataset(c.config.Dataset).Metadata(ctx)
+	return err
 }
 
 func (c *Connector) Query(ctx context.Context, endpoint model.Endpoint, params map[string]any) ([]map[string]any, error) {
@@ -189,37 +182,56 @@ func (c *Connector) Query(ctx context.Context, endpoint model.Endpoint, params m
 	if err != nil {
 		return nil, xerrors.Errorf("unable to process params: %w", err)
 	}
-
-	// Convert params to []interface{} for sql.DB
-	args := make([]interface{}, 0, len(processed))
-	for _, v := range processed {
-		args = append(args, v)
+	for name, value := range processed {
+		if name == "offset" || name == "limit" { // these 2 are special
+			endpoint.Query = strings.ReplaceAll(endpoint.Query, "@"+name, fmt.Sprintf("%v", value))
+		}
 	}
 
-	rows, err := c.db.QueryxContext(ctx, endpoint.Query, args...)
+	// Create query with parameters
+	q := c.client.Query(endpoint.Query)
+
+	// Set query parameters
+	for name, value := range processed {
+		if name == "offset" || name == "limit" { // these 2 are special
+			continue
+		}
+		q.Parameters = append(q.Parameters, bigquery.QueryParameter{
+			Name:  name,
+			Value: value,
+		})
+	}
+
+	// Run query
+	it, err := q.Read(ctx)
 	if err != nil {
-		return nil, xerrors.Errorf("unable to execute query: %w", err)
+		return nil, xerrors.Errorf("error executing query: %w", err)
 	}
-	defer rows.Close()
 
 	var results []map[string]any
-	for rows.Next() {
-		row := make(map[string]interface{})
-		if err := rows.MapScan(row); err != nil {
-			return nil, xerrors.Errorf("error scanning row: %w", err)
+	for {
+		var row map[string]bigquery.Value
+		err := it.Next(&row)
+		if err == iterator.Done {
+			break
 		}
-		results = append(results, row)
-	}
+		if err != nil {
+			return nil, xerrors.Errorf("error reading row: %w", err)
+		}
 
-	if err = rows.Err(); err != nil {
-		return nil, xerrors.Errorf("error iterating rows: %w", err)
+		// Convert bigquery.Value to regular interface{}
+		converted := make(map[string]interface{})
+		for k, v := range row {
+			converted[k] = v
+		}
+		results = append(results, converted)
 	}
 
 	return results, nil
 }
 
 func (c *Connector) GuessColumnType(sqlType string) model.ColumnType {
-	switch strings.ToUpper(sqlType) {
+	switch sqlType {
 	case "STRING", "BYTES":
 		return model.TypeString
 	case "INTEGER", "INT64":
@@ -240,24 +252,35 @@ func (c *Connector) GuessColumnType(sqlType string) model.ColumnType {
 }
 
 func (c *Connector) InferResultColumns(ctx context.Context, query string) ([]model.ColumnSchema, error) {
-	// Execute the query with LIMIT 0 to get column information without fetching data
-	rows, err := c.db.QueryxContext(ctx, fmt.Sprintf("SELECT * FROM (%s) LIMIT 0", query))
-	if err != nil {
-		return nil, xerrors.Errorf("unable to execute query: %w", err)
-	}
-	defer rows.Close()
+	// Create a dry run job to get schema without executing the query
+	q := c.client.Query(query)
+	q.DryRun = true
 
-	types, err := rows.ColumnTypes()
+	job, err := q.Run(ctx)
 	if err != nil {
-		return nil, xerrors.Errorf("unable to get column types: %w", err)
+		return nil, xerrors.Errorf("error in dry run: %w", err)
 	}
 
-	columns := make([]model.ColumnSchema, len(types))
-	for i, t := range types {
-		columns[i] = model.ColumnSchema{
-			Name: t.Name(),
-			Type: c.GuessColumnType(t.DatabaseTypeName()),
-		}
+	status := job.LastStatus()
+	if status.Statistics == nil || status.Statistics.Details == nil {
+		return nil, xerrors.New("no schema information available")
+	}
+
+	details, ok := status.Statistics.Details.(*bigquery.QueryStatistics)
+	if !ok {
+		return nil, xerrors.New("unexpected statistics type")
+	}
+
+	if details.Schema == nil {
+		return nil, xerrors.New("no schema information available")
+	}
+
+	columns := make([]model.ColumnSchema, 0)
+	for _, field := range details.Schema {
+		columns = append(columns, model.ColumnSchema{
+			Name: field.Name,
+			Type: c.GuessColumnType(string(field.Type)),
+		})
 	}
 
 	return columns, nil
@@ -265,4 +288,9 @@ func (c *Connector) InferResultColumns(ctx context.Context, query string) ([]mod
 
 func (c *Connector) InferQuery(ctx context.Context, query string) ([]model.ColumnSchema, error) {
 	return c.InferResultColumns(ctx, query)
+}
+
+// Close releases any resources held by the connector
+func (c *Connector) Close() error {
+	return c.client.Close()
 }
