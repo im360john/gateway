@@ -10,6 +10,7 @@ import (
 
 	"github.com/centralmind/gateway/castx"
 	"github.com/centralmind/gateway/connectors"
+	"github.com/centralmind/gateway/logger"
 	"github.com/centralmind/gateway/model"
 	"github.com/jmoiron/sqlx"
 	"golang.org/x/xerrors"
@@ -26,8 +27,7 @@ func init() {
 
 		if cfg.Credentials != "" && cfg.Credentials != "{}" {
 			// Create temporary credentials file
-			tmpDir := os.TempDir()
-			credentialsFile := filepath.Join(tmpDir, "bigquery-credentials.json")
+			credentialsFile := filepath.Join(logger.DefaultLogDir(), "bigquery-credentials.json")
 
 			// Write credentials to file
 			if err := os.WriteFile(credentialsFile, []byte(cfg.Credentials), 0600); err != nil {
