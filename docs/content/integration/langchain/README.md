@@ -57,6 +57,9 @@ agent = initialize_agent(toolkit.get_tools(), llm, agent="zero-shot-react-descri
 result = agent.run(f"Find specs and pricing for instance c6g.large, use {BASE_API_URL}")
 print("API response:", result)
 ```
+As a result you should see a chain of thougth like this:
+
+![img](../../../../assets/langchain-execution.jpg)
 
 ## Code Explanation
 
