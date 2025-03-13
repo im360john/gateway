@@ -43,7 +43,7 @@ Starts the MCP (Message-Coupling Protocol) Gateway service.
 **Usage:**
 
 ```
-gateway start mcp
+gateway start mcp [flags]
 ```
 
 This mode is particularly useful for:
@@ -52,7 +52,7 @@ This mode is particularly useful for:
 - Script-based automation and pipeline processing
 
 
-### `start mcp raw`
+### `start mcp-raw`
 
 For scenarios where you need direct access to raw SQL queries through MCP protocol:
 
@@ -92,27 +92,6 @@ This mode is particularly useful for:
 - Testing and debugging MCP communication
 - Integration with systems that require direct stdin/stdout communication and local launching applications
 - Script-based automation and pipeline processing
-
-## Using MCP Raw Mode
-
-For scenarios where you need direct access to raw SQL queries through MCP protocol:
-
-```bash
-# Launch the API in MCP Raw mode
-./gateway start --config gateway.yaml mcp-raw
-```
-
-### MCP Raw Parameters:
-
-- `start`: Initiates the Gateway service
-- `--addr`: Address for gateway server (default: ":9090")
-- `--config gateway.yaml`: Path to your generated API configuration file
-- `mcp-raw`: Specifies that you want to use MCP with raw SQL query access
-
-This mode is particularly useful for:
-- Direct database access through MCP protocol
-- Advanced data querying and exploration
-- Development and debugging of database queries
 
 ### `discover`
 
