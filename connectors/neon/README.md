@@ -20,7 +20,7 @@ Create `connection.yaml` with your Neon database credentials:
 ```bash
 echo "
 type: postgres
-connection_string: \"postgresql://user:password@ep-example-123456.us-east-2.aws.neon.tech/dbname?sslmode=require\"" > connection.yaml
+conn_string: \"postgresql://user:password@ep-example-123456.us-east-2.aws.neon.tech/dbname?sslmode=require\"" > connection.yaml
 ```
 
 ## Discovery
