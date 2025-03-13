@@ -14,15 +14,15 @@ import (
 var docString string
 
 type Config struct {
-	Hosts      []string
-	Database   string
-	User       string
-	Password   string
-	Port       int
-	TLSFile    string
-	EnableTLS  bool
-	ConnString string // Connection string in format: postgresql://user:password@host:port/database
-	Schema     string // Database schema name for table access (format: schema.table_name)
+	Hosts      []string `yaml:"hosts"`
+	Database   string   `yaml:"database"`
+	User       string   `yaml:"user"`
+	Password   string   `yaml:"password"`
+	Port       int      `yaml:"port"`
+	TLSFile    string   `yaml:"tls_file"`
+	EnableTLS  bool     `yaml:"enable_tls"`
+	ConnString string   `yaml:"conn_string"` // Connection string in format: postgresql://user:password@host:port/database
+	Schema     string   `yaml:"schema"`      // Database schema name for table access (format: schema.table_name)
 }
 
 func (c Config) ExtraPrompt() []string {
