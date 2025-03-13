@@ -73,6 +73,7 @@ type MCPServer struct {
 	promptHandlers       map[string]PromptHandlerFunc
 	tools                map[string]ServerTool
 	notificationHandlers map[string]NotificationHandlerFunc
+	instructions         string
 	capabilities         serverCapabilities
 	notifications        chan ServerNotification
 	clientMu             sync.Mutex // Separate mutex for client context
@@ -177,6 +178,12 @@ func WithPromptCapabilities(listChanged bool) ServerOption {
 func WithLogging() ServerOption {
 	return func(s *MCPServer) {
 		s.capabilities.logging = true
+	}
+}
+
+func WithInstructions(instructions string) ServerOption {
+	return func(s *MCPServer) {
+		s.instructions = instructions
 	}
 }
 
@@ -529,6 +536,7 @@ func (s *MCPServer) handleInitialize(
 			Version: s.version,
 		},
 		Capabilities: capabilities,
+		Instructions: s.instructions,
 	}
 
 	s.initialized.Store(true)

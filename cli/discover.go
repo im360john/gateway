@@ -1,10 +1,14 @@
 package cli
 
 import (
+	"context"
 	_ "embed"
-	"fmt"
+	"github.com/centralmind/gateway/prompter"
+	"github.com/centralmind/gateway/providers"
+	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/centralmind/gateway/logger"
@@ -18,9 +22,6 @@ import (
 )
 
 var (
-	//go:embed api_config_schema.json
-	apiConfigSchema []byte
-
 	// CLI-colors
 	red    string = "\033[31m"
 	green         = "\033[32m"
@@ -29,29 +30,6 @@ var (
 	violet        = "\033[35m"
 	reset         = "\033[0m" // reset color
 )
-
-type TableData struct {
-	Columns  []gw_model.ColumnSchema
-	Name     string
-	Sample   []map[string]any
-	RowCount int
-}
-
-// PromptColumnSchema is used specifically for generating prompts,
-// omitting sensitive fields like PII flag
-type PromptColumnSchema struct {
-	Name       string `yaml:"name"`
-	Type       string `yaml:"type"`
-	PrimaryKey bool   `yaml:"primary_key,omitempty"`
-}
-
-func columnToPromptSchema(col gw_model.ColumnSchema) PromptColumnSchema {
-	return PromptColumnSchema{
-		Name:       col.Name,
-		Type:       string(col.Type),
-		PrimaryKey: col.PrimaryKey,
-	}
-}
 
 func init() {
 	// Configure logrus for nicer output
@@ -97,7 +75,7 @@ func Discover() *cobra.Command {
 				return err
 			}
 
-			resolvedTables, connector, err := loadTablesData(splitTables(tables), configRaw)
+			resolvedTables, connector, err := TablesData(splitTables(tables), configRaw)
 			if err != nil {
 				return xerrors.Errorf("unable to verify connection: %w", err)
 			}
@@ -105,7 +83,7 @@ func Discover() *cobra.Command {
 			databaseType := inferType(configRaw)
 
 			logrus.Info("Step 4: Prepare the prompt for the AI")
-			discoverPrompt := generateDiscoverPrompt(connector, extraPrompt, resolvedTables, getSchemaFromConfig(databaseType, configRaw))
+			discoverPrompt := prompter.DiscoverPrompt(connector, extraPrompt, resolvedTables, prompter.SchemaFromConfig(connector.Config()))
 			if err := saveToFile(promptFile, discoverPrompt); err != nil {
 				logrus.Error("failed to save prompt:", err)
 			}
@@ -222,44 +200,108 @@ func Discover() *cobra.Command {
 	return cmd
 }
 
-func yamlify(sample any) string {
-	// Convert ColumnSchema to PromptColumnSchema if needed
-	if columns, ok := sample.([]gw_model.ColumnSchema); ok {
-		promptColumns := make([]PromptColumnSchema, len(columns))
-		for i, col := range columns {
-			promptColumns[i] = columnToPromptSchema(col)
-		}
-		sample = promptColumns
-	}
-	raw, _ := yaml.Marshal(sample)
-	return string(raw)
+type DiscoverQueryParams struct {
+	LLMLogFile    string
+	Provider      string
+	Endpoint      string
+	APIKey        string
+	Model         string
+	MaxTokens     int
+	Temperature   float32
+	Reasoning     bool
+	BedrockRegion string
+	VertexRegion  string
+	VertexProject string
 }
 
-// Get schema from database config if it exists
-func getSchemaFromConfig(databaseType string, configRaw []byte) string {
-	schema := ""
+type DiscoverQueryResponse struct {
+	Config       *gw_model.Config
+	Conversation *providers.ConversationResponse
+	RawContent   string
+	CostEstimate float64
+}
 
-	// Try to parse the config to get the schema for any database type
-	var generalConfig struct {
-		Schema    string `yaml:"schema"`
-		ProjectID string `json:"project_id" yaml:"project_id"`
-		Dataset   string `json:"dataset" yaml:"dataset"`
+func makeDiscoverQuery(params DiscoverQueryParams, prompt string) (DiscoverQueryResponse, error) {
+	provider, err := providers.NewModelProvider(providers.ModelProviderConfig{
+		Name:            params.Provider,
+		APIKey:          params.APIKey,
+		Endpoint:        params.Endpoint,
+		BedrockRegion:   params.BedrockRegion,
+		VertexAIRegion:  params.VertexRegion,
+		VertexAIProject: params.VertexProject,
+	})
+
+	if err != nil {
+		logrus.Fatalf("Failed to initialize provider: %v", err)
 	}
 
-	if err := yaml.Unmarshal(configRaw, &generalConfig); err == nil {
-		if generalConfig.Schema != "" {
-			schema = generalConfig.Schema
+	logrus.Infof("Calling provider: %s", provider.GetName())
+
+	done := make(chan bool)
+	go startSpinner("Thinking. The process can take a few minutes to finish", done)
+
+	request := &providers.ConversationRequest{
+		ModelId:      params.Model,
+		Reasoning:    params.Reasoning,
+		MaxTokens:    params.MaxTokens,
+		Temperature:  params.Temperature,
+		JsonResponse: true,
+		System:       "You must always respond in pure JSON. No markdown, no comments, no explanations.",
+		Messages: []providers.Message{
+			{
+				Role: providers.UserRole,
+				Content: []providers.ContentBlock{
+					&providers.ContentBlockText{
+						Value: prompt,
+					},
+				},
+			},
+		},
+	}
+
+	llmResponse, err := provider.Chat(context.Background(), request)
+	if err != nil {
+		log.Fatalf("Failed to call LLM: %v", err)
+	}
+
+	done <- true
+
+	var responseContentBuilder strings.Builder
+	for _, contentBlock := range llmResponse.Content {
+		if textBlock, ok := contentBlock.(*providers.ContentBlockText); ok {
+			responseContentBuilder.WriteString(textBlock.Value)
 		}
 	}
 
-	// Handle special case for PostgreSQL where public is the default schema
-	if databaseType == "postgres" && schema == "" {
-		schema = "public"
+	rawContent := strings.TrimSpace(responseContentBuilder.String())
+
+	if err := os.WriteFile(params.LLMLogFile, []byte(rawContent), 0644); err != nil {
+		logrus.Error("Failed to save LLM response:", err)
 	}
 
-	if databaseType == "bigquery" {
-		schema = fmt.Sprintf("%s.%s", generalConfig.ProjectID, generalConfig.Dataset)
+	costEstimate := provider.CostEstimate(llmResponse.ModelId, *llmResponse.Usage)
+
+	logrus.WithFields(logrus.Fields{
+		"Total tokens":  llmResponse.Usage.TotalTokens,
+		"Input tokens":  llmResponse.Usage.InputTokens,
+		"Output tokens": llmResponse.Usage.OutputTokens,
+	}).Info("LLM usage:")
+
+	var response gw_model.Config
+	if err := yaml.Unmarshal([]byte(rawContent), &response); err != nil {
+		return DiscoverQueryResponse{
+			Config:       nil,
+			Conversation: llmResponse,
+			RawContent:   rawContent,
+			CostEstimate: costEstimate,
+		}, xerrors.Errorf("unable to unmarshal response: %w", err)
 	}
 
-	return schema
+	return DiscoverQueryResponse{
+		Config:       &response,
+		Conversation: llmResponse,
+		RawContent:   rawContent,
+		CostEstimate: costEstimate,
+	}, nil
+
 }

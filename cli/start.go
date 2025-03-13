@@ -19,6 +19,7 @@ func StartCommand() *cobra.Command {
 	cmd.PersistentFlags().StringVar(&servers, "servers", "", "comma-separated list of additional server URLs for Swagger UI (e.g., https://dev1.example.com,https://dev2.example.com)")
 	RegisterCommand(cmd, REST(&gatewayParams, &addr, &servers))
 	RegisterCommand(cmd, MCP(&gatewayParams, &addr))
+	RegisterCommand(cmd, MCPRaw(&gatewayParams, &addr))
 	RegisterCommand(cmd, MCPStdio(&gatewayParams))
 	return cmd
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/centralmind/gateway/logger"
+	"github.com/centralmind/gateway/rawmcp"
 	"os"
 	"path/filepath"
 	"strings"
@@ -84,4 +85,49 @@ func MCPStdio(configPath *string) *cobra.Command {
 	}
 	res.Flags().StringVar(&logFile, "log-file", filepath.Join(logger.DefaultLogDir(), "mcp.log"), "path to log file")
 	return res
+}
+
+func MCPRaw(configPath *string, addr *string) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "mcp-raw",
+		Short: "Auto MCP gateway, exposed via raw query",
+		Args:  cobra.MatchAll(cobra.ExactArgs(0)),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			gwRaw, err := os.ReadFile(*configPath)
+			if err != nil {
+				return xerrors.Errorf("unable to read yaml config file: %w", err)
+			}
+			gw, err := gw_model.FromYaml(gwRaw)
+			if err != nil {
+				return xerrors.Errorf("unable to parse config file: %w", err)
+			}
+
+			servers, _ := cmd.Flags().GetString("servers")
+			serverAddresses := []string{}
+
+			// Add additional servers from the --servers flag if provided
+			if servers != "" {
+				additionalServers := strings.Split(servers, ",")
+				for _, server := range additionalServers {
+					serverAddresses = append(serverAddresses, strings.TrimSpace(server))
+				}
+			}
+
+			if len(serverAddresses) == 0 {
+				serverAddresses = append(serverAddresses, fmt.Sprintf("http://localhost%s", *addr))
+			}
+
+			srv, err := rawmcp.New(*gw)
+			if err != nil {
+				return xerrors.Errorf("unable to init mcp generator: %w", err)
+			}
+
+			logrus.Infof("MCP server is running at: %s/sse", serverAddresses[0])
+			return srv.ServeSSE(serverAddresses[0]).Start(*addr)
+		},
+	}
+
+	cmd.Flags().String("servers", "", "comma-separated list of server addresses")
+
+	return cmd
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/centralmind/gateway/logger"
 	"github.com/centralmind/gateway/model"
+	"github.com/centralmind/gateway/prompter"
 	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
@@ -38,7 +39,7 @@ func Connection() *cobra.Command {
 				return err
 			}
 
-			tablesData, _, err := loadTablesData(splitTables(tables), configRaw)
+			tablesData, _, err := TablesData(splitTables(tables), configRaw)
 			if err != nil {
 				return xerrors.Errorf("unable to verify connection: %w", err)
 			}
@@ -49,7 +50,7 @@ func Connection() *cobra.Command {
 				printTableSample(t.Columns, t.Sample)
 			}
 
-			if err := saveToFile(samplePath, yamlify(tablesData)); err != nil {
+			if err := saveToFile(samplePath, prompter.Yamlify(tablesData)); err != nil {
 				logrus.Error("Failed to save tables sample data", err)
 			}
 
@@ -80,7 +81,7 @@ type dbType struct {
 	Type string `yaml:"type" json:"type"`
 }
 
-func loadTablesData(tablesList []string, configRaw any) ([]TableData, connectors.Connector, error) {
+func TablesData(tablesList []string, configRaw any) ([]prompter.TableData, connectors.Connector, error) {
 	logrus.Info("Step 1: Read configs")
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
@@ -130,7 +131,7 @@ func loadTablesData(tablesList []string, configRaw any) ([]TableData, connectors
 	logrus.Info("\r\n")
 	// Sample data
 	logrus.Info("Step 3: Sample data from tables")
-	var tablesToGenerate []TableData
+	var tablesToGenerate []prompter.TableData
 	for _, table := range allTables {
 		if !tableSet[table.Name] {
 			continue
@@ -139,7 +140,7 @@ func loadTablesData(tablesList []string, configRaw any) ([]TableData, connectors
 		if err != nil {
 			return nil, nil, err
 		}
-		tablesToGenerate = append(tablesToGenerate, TableData{
+		tablesToGenerate = append(tablesToGenerate, prompter.TableData{
 			Columns:  table.Columns,
 			Name:     table.Name,
 			Sample:   sample,
@@ -172,7 +173,7 @@ func inferType(configRaw any) string {
 	return typ.Type
 }
 
-func printTableSchema(table TableData) {
+func printTableSchema(table prompter.TableData) {
 	tw := tablewriter.NewWriter(os.Stdout)
 	tw.SetHeader([]string{"Name", "Type", "Key"})
 	tw.SetBorders(tablewriter.Border{Left: true, Top: true, Right: true, Bottom: true})
