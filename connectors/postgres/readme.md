@@ -34,7 +34,7 @@ tls_file: ""        # Optional PEM-encoded certificate
 enable_tls: false   # Enable TLS/SSL connection 
 ```
 
-Or as alternative with plan DSN:
+Or as alternative with plain DSN:
 
 ```yaml
 type: postgres
