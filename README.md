@@ -1,4 +1,4 @@
-![Build Binaries](https://github.com/centralmind/gateway/actions/workflows/build-binaries.yml/badge.svg) <img src="https://dcbadge.limes.pink/api/server/https://discord.gg/XFhaUG4F5x" height="20"> <a href="https://t.me/+TM3T1SikjzA4ZWVi"><img src="https://img.shields.io/badge/telegram-%E2%9D%A4%EF%B8%8F-252850?style=plastic&logo=telegram" height=20></a>
+![Build Binaries](https://github.com/centralmind/gateway/actions/workflows/build-binaries.yml/badge.svg) &nbsp; <img src="https://dcbadge.limes.pink/api/server/https://discord.gg/XFhaUG4F5x" height="20"> &nbsp;&nbsp;<a href="https://t.me/+TM3T1SikjzA4ZWVi"><img src="https://img.shields.io/badge/telegram-%E2%9D%A4%EF%B8%8F-252850?style=plastic&logo=telegram" height=20></a>
 
 
 
