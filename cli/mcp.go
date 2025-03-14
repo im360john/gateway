@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/centralmind/gateway/logger"
-	"github.com/centralmind/gateway/rawmcp"
 	"os"
 	"path/filepath"
 	"strings"
@@ -48,19 +47,15 @@ func MCP(configPath *string, addr *string) *cobra.Command {
 				serverAddresses = append(serverAddresses, fmt.Sprintf("http://localhost%s", *addr))
 			}
 
-			if rawMode {
-				srv, err := rawmcp.New(*gw)
-				if err != nil {
-					return xerrors.Errorf("unable to init mcp generator: %w", err)
-				}
-
-				logrus.Infof("MCP server is running at: %s/sse", serverAddresses[0])
-				return srv.ServeSSE(serverAddresses[0]).Start(*addr)
-			}
-
 			srv, err := mcpgenerator.New(*gw)
 			if err != nil {
 				return xerrors.Errorf("unable to init mcp generator: %w", err)
+			}
+
+			if rawMode {
+				if err := mcpgenerator.AddRawProtocol(*gw, srv.Server()); err != nil {
+					return xerrors.Errorf("unable to add raw mcp protocol: %w", err)
+				}
 			}
 
 			logrus.Infof("MCP server is running at: %s/sse", serverAddresses[0])
@@ -90,18 +85,17 @@ func MCPStdio(configPath *string) *cobra.Command {
 			if err != nil {
 				return xerrors.Errorf("unable to parse config file: %w", err)
 			}
-			if rawMode {
-				srv, err := rawmcp.New(*gw)
-				if err != nil {
-					return xerrors.Errorf("unable to init mcp generator: %w", err)
-				}
 
-				return srv.ServeStdio().Listen(context.Background(), os.Stdin, os.Stdout)
-			}
 			srv, err := mcpgenerator.New(*gw)
 			if err != nil {
 				return xerrors.Errorf("unable to init mcp generator: %w", err)
 			}
+			if rawMode {
+				if err := mcpgenerator.AddRawProtocol(*gw, srv.Server()); err != nil {
+					return xerrors.Errorf("unable to add raw mcp protocol: %w", err)
+				}
+			}
+
 			return srv.ServeStdio().Listen(context.Background(), os.Stdin, os.Stdout)
 		},
 	}

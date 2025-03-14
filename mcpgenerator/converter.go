@@ -112,6 +112,10 @@ func (s *MCPServer) ServeStdio() *server.StdioServer {
 	return server.NewStdioServer(s.server)
 }
 
+func (s *MCPServer) Server() *server.MCPServer {
+	return s.server
+}
+
 func ArgumentOption(col model.EndpointParams, opts ...mcp.PropertyOption) mcp.ToolOption {
 	opts = append(opts, mcp.Title(fmt.Sprintf("Column %s", col.Name)))
 	opts = append(opts, func(m map[string]interface{}) {

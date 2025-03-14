@@ -1,47 +1,24 @@
-package rawmcp
+package mcpgenerator
 
 import (
 	"context"
 	"fmt"
-	"github.com/centralmind/gateway/prompter"
-	"golang.org/x/xerrors"
-	"strings"
-
 	"github.com/centralmind/gateway/connectors"
 	"github.com/centralmind/gateway/mcp"
 	"github.com/centralmind/gateway/model"
 	"github.com/centralmind/gateway/plugins"
+	"github.com/centralmind/gateway/prompter"
 	"github.com/centralmind/gateway/server"
+	"golang.org/x/xerrors"
+	"strings"
 )
 
-type Server struct {
-	server *server.MCPServer
-}
-
-func New(
-	schema model.Config,
-) (*Server, error) {
-	srv := server.NewMCPServer(
-		"mcp-data-gateway",
-		"0.0.1",
-		server.WithInstructions(fmt.Sprintf(`Server for data gateway
-
-Tools actions flow if follows:
-0. (optional) - take a look on tables to check what data shall be discovered
-1. discover_data, this will return a description of data available along side with data samples
-2. prepare_query, this will return wheather a query is working or not, if not working - need to fix according to error mesasge
-3. query, this will return an actual data set for a SQL query
-
-!Important rules:
-	- SQL queries must be Pure SQL that will be used in golang SQLx on top of database - %[1]s and be fully parameterized (using named parameters) to prevent SQL injection.
-`, schema.Database.Type)),
-	)
-
+func AddRawProtocol(schema model.Config, srv *server.MCPServer) error {
 	var interceptors []plugins.Interceptor
 	for k, v := range schema.Plugins {
 		plugin, err := plugins.New(k, v)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		interceptor, ok := plugin.(plugins.Interceptor)
 		if !ok {
@@ -51,11 +28,11 @@ Tools actions flow if follows:
 	}
 	connector, err := connectors.New(schema.Database.Type, schema.Database.Connection)
 	if err != nil {
-		return nil, xerrors.Errorf("unable to init connector: %w", err)
+		return xerrors.Errorf("unable to init connector: %w", err)
 	}
 	connector, err = plugins.Wrap(schema.Plugins, connector)
 	if err != nil {
-		return nil, xerrors.Errorf("unable to init connector plugins: %w", err)
+		return xerrors.Errorf("unable to init connector plugins: %w", err)
 	}
 
 	srv.AddTool(mcp.NewTool(
@@ -199,16 +176,5 @@ This tool shall be executed before query, to examine output structure and verify
 			Content: content,
 		}, nil
 	})
-
-	return &Server{
-		server: srv,
-	}, nil
-}
-
-func (s *Server) ServeSSE(addr string) *server.SSEServer {
-	return server.NewSSEServer(s.server, addr)
-}
-
-func (s *Server) ServeStdio() *server.StdioServer {
-	return server.NewStdioServer(s.server)
+	return nil
 }
