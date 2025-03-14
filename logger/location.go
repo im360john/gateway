@@ -72,7 +72,7 @@ func evaluateDefaultLogDir() string {
 		defaultDir = "."
 	}
 
-	logrus.Infof("Using log directory: %s", defaultDir)
+	logrus.Debugf("Using log directory: %s", defaultDir)
 	return defaultDir
 }
 
