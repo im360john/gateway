@@ -91,7 +91,7 @@ func MCPStdio(configPath *string) *cobra.Command {
 				return xerrors.Errorf("unable to parse config file: %w", err)
 			}
 			if rawMode {
-				srv, err := mcpgenerator.New(*gw)
+				srv, err := rawmcp.New(*gw)
 				if err != nil {
 					return xerrors.Errorf("unable to init mcp generator: %w", err)
 				}
