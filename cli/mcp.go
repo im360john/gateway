@@ -17,6 +17,8 @@ import (
 )
 
 func MCP(configPath *string, addr *string) *cobra.Command {
+	var rawMode bool
+
 	cmd := &cobra.Command{
 		Use:   "mcp",
 		Short: "MCP gateway",
@@ -46,6 +48,16 @@ func MCP(configPath *string, addr *string) *cobra.Command {
 				serverAddresses = append(serverAddresses, fmt.Sprintf("http://localhost%s", *addr))
 			}
 
+			if rawMode {
+				srv, err := rawmcp.New(*gw)
+				if err != nil {
+					return xerrors.Errorf("unable to init mcp generator: %w", err)
+				}
+
+				logrus.Infof("MCP server is running at: %s/sse", serverAddresses[0])
+				return srv.ServeSSE(serverAddresses[0]).Start(*addr)
+			}
+
 			srv, err := mcpgenerator.New(*gw)
 			if err != nil {
 				return xerrors.Errorf("unable to init mcp generator: %w", err)
@@ -56,6 +68,7 @@ func MCP(configPath *string, addr *string) *cobra.Command {
 		},
 	}
 
+	cmd.Flags().BoolVar(&rawMode, "raw", false, "enable as raw protocol")
 	cmd.Flags().String("servers", "", "comma-separated list of server addresses")
 
 	return cmd
@@ -63,6 +76,7 @@ func MCP(configPath *string, addr *string) *cobra.Command {
 
 func MCPStdio(configPath *string) *cobra.Command {
 	var logFile string
+	var rawMode bool
 	res := &cobra.Command{
 		Use:   "mcp-stdio",
 		Short: "MCP gateway via std-io",
@@ -76,6 +90,14 @@ func MCPStdio(configPath *string) *cobra.Command {
 			if err != nil {
 				return xerrors.Errorf("unable to parse config file: %w", err)
 			}
+			if rawMode {
+				srv, err := mcpgenerator.New(*gw)
+				if err != nil {
+					return xerrors.Errorf("unable to init mcp generator: %w", err)
+				}
+
+				return srv.ServeStdio().Listen(context.Background(), os.Stdin, os.Stdout)
+			}
 			srv, err := mcpgenerator.New(*gw)
 			if err != nil {
 				return xerrors.Errorf("unable to init mcp generator: %w", err)
@@ -83,51 +105,8 @@ func MCPStdio(configPath *string) *cobra.Command {
 			return srv.ServeStdio().Listen(context.Background(), os.Stdin, os.Stdout)
 		},
 	}
+
+	res.Flags().BoolVar(&rawMode, "raw", false, "enable as raw protocol")
 	res.Flags().StringVar(&logFile, "log-file", filepath.Join(logger.DefaultLogDir(), "mcp.log"), "path to log file")
 	return res
-}
-
-func MCPRaw(configPath *string, addr *string) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "mcp-raw",
-		Short: "Auto MCP gateway, exposed via raw query",
-		Args:  cobra.MatchAll(cobra.ExactArgs(0)),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			gwRaw, err := os.ReadFile(*configPath)
-			if err != nil {
-				return xerrors.Errorf("unable to read yaml config file: %w", err)
-			}
-			gw, err := gw_model.FromYaml(gwRaw)
-			if err != nil {
-				return xerrors.Errorf("unable to parse config file: %w", err)
-			}
-
-			servers, _ := cmd.Flags().GetString("servers")
-			serverAddresses := []string{}
-
-			// Add additional servers from the --servers flag if provided
-			if servers != "" {
-				additionalServers := strings.Split(servers, ",")
-				for _, server := range additionalServers {
-					serverAddresses = append(serverAddresses, strings.TrimSpace(server))
-				}
-			}
-
-			if len(serverAddresses) == 0 {
-				serverAddresses = append(serverAddresses, fmt.Sprintf("http://localhost%s", *addr))
-			}
-
-			srv, err := rawmcp.New(*gw)
-			if err != nil {
-				return xerrors.Errorf("unable to init mcp generator: %w", err)
-			}
-
-			logrus.Infof("MCP server is running at: %s/sse", serverAddresses[0])
-			return srv.ServeSSE(serverAddresses[0]).Start(*addr)
-		},
-	}
-
-	cmd.Flags().String("servers", "", "comma-separated list of server addresses")
-
-	return cmd
 }
