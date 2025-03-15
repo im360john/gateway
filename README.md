@@ -1,20 +1,17 @@
-![Build Binaries](https://github.com/centralmind/gateway/actions/workflows/build-binaries.yml/badge.svg) &nbsp; <a href=https://discord.gg/XFhaUG4F5x><img src="https://dcbadge.limes.pink/api/server/https://discord.gg/XFhaUG4F5x" height="20"></a> &nbsp;&nbsp;<a href="https://t.me/+TM3T1SikjzA4ZWVi"><img src="https://img.shields.io/badge/telegram-%E2%9D%A4%EF%B8%8F-252850?style=plastic&logo=telegram" height=20></a>
-
-
-
-<h1 align="center">CentralMind Gateway: AI-First Data Gateway</h1>
-
 <div align="center">
 
-## 🛸 Introduction
+![Build Binaries](https://github.com/centralmind/gateway/actions/workflows/build-binaries.yml/badge.svg) &nbsp; <a href="https://discord.gg/XFhaUG4F5x"><img src="https://dcbadge.limes.pink/api/server/https://discord.gg/XFhaUG4F5x" height="20"></a> &nbsp;&nbsp;<a href="https://t.me/+TM3T1SikjzA4ZWVi"><img src="https://img.shields.io/badge/telegram-%E2%9D%A4%EF%B8%8F-252850?style=plastic&logo=telegram" height=20></a> &nbsp;&nbsp; <a href="https://docs.centralmind.ai"><img src="https://img.shields.io/badge/Full%20Documentation-blue?style=for-the-badge&logo=rocket&logoColor=white" height="20"></a>
 
 </div>
+
+
+<h2 align="center">CentralMind Gateway: Create API or MCP Server in Minutes</h2>
+
 
 🚀 Interactive Demo via GitHub Codespaces
 
 [![Deploy with GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/centralmind/sample_databases)
 
-[![Full Documentation](https://img.shields.io/badge/Full%20Documentation-blue?style=for-the-badge&logo=rocket&logoColor=white)](https://docs.centralmind.ai/)
 
 AI agents and LLM-powered applications need fast, secure access to data, but traditional APIs and databases aren't built for this purpose. We're building an API layer that automatically generates secure, LLM-optimized APIs for your structured data.
 
