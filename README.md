@@ -28,7 +28,7 @@ Our primary users are companies deploying AI agents for customer support, analyt
 ## Features
 
 - ⚡ **Automatic API Generation** – Creates APIs automatically using LLM based on table schema and sampled data
-- 🗄️ **Structured Database Support** – Supports <a href="https://docs.centralmind.ai/connectors/postgres/">PostgreSQL</a>, <a href="https://docs.centralmind.ai/connectors/mysql/">MySQL</a>, <a href="https://docs.centralmind.ai/connectors/clickhouse/">ClickHouse</a>, and <a href="https://docs.centralmind.ai/connectors/snowflake/">Snowflake</a>
+- 🗄️ **Structured Database Support** – Supports <a href="https://docs.centralmind.ai/connectors/postgres/">PostgreSQL</a>, <a href="https://docs.centralmind.ai/connectors/mysql/">MySQL</a>, <a href="https://docs.centralmind.ai/connectors/clickhouse/">ClickHouse</a>, <a href="https://docs.centralmind.ai/connectors/snowflake/">Snowflake</a>,<a href="https://docs.centralmind.ai/connectors/mssql/">MSSQL</a>, <a href="https://docs.centralmind.ai/connectors/bigquery/">BigQuery</a>
 - 🌍 **Multiple Protocol Support** – Provides APIs as REST or MCP Server including SSE mode
 - 📜 **API Documentation** – Auto-generated Swagger documentation and OpenAPI 3.1.0 specification
 - 🔒 **PII Protection** – Implements <a href="https://docs.centralmind.ai/plugins/pii_remover/">regex plugin</a> or <a href="https://docs.centralmind.ai/plugins/presidio_anonymizer/">Microsoft Presidio plugin</a> for PII and sensitive data redaction
