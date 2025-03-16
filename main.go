@@ -10,6 +10,7 @@ import (
 	_ "github.com/centralmind/gateway/connectors/clickhouse"
 	_ "github.com/centralmind/gateway/connectors/mssql"
 	_ "github.com/centralmind/gateway/connectors/mysql"
+	_ "github.com/centralmind/gateway/connectors/oracle"
 	_ "github.com/centralmind/gateway/connectors/postgres"
 	_ "github.com/centralmind/gateway/connectors/snowflake"
 	_ "github.com/centralmind/gateway/plugins/api_keys"
