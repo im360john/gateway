@@ -22,11 +22,13 @@ type Rest struct {
 	Schema       gw_model.Config
 	interceptors []plugins.Interceptor
 	connector    connectors.Connector
+	prefix       string
 }
 
 // New initializes a new Rest instance.
 func New(
 	schema gw_model.Config,
+	prefix string,
 ) (*Rest, error) {
 	var interceptors []plugins.Interceptor
 	for k, v := range schema.Plugins {
@@ -55,6 +57,7 @@ func New(
 		Schema:       schema,
 		interceptors: interceptors,
 		connector:    connector,
+		prefix:       prefix,
 	}, nil
 }
 
@@ -65,7 +68,7 @@ func (r *Rest) RegisterRoutes(mux *http.ServeMux, disableSwagger bool, addresses
 	}
 
 	// Pass all addresses to swaggerator.Schema
-	swagger, err := swaggerator.Schema(r.Schema, addresses...)
+	swagger, err := swaggerator.Schema(r.Schema, r.prefix, addresses...)
 	if err != nil {
 		return xerrors.Errorf("unable to build swagger doc: %w", err)
 	}
@@ -75,28 +78,28 @@ func (r *Rest) RegisterRoutes(mux *http.ServeMux, disableSwagger bool, addresses
 	}
 
 	if !disableSwagger {
-		mux.Handle("/swagger/", http.StripPrefix("/swagger", swaggerator.Handler(raw)))
+		mux.Handle("/"+r.prefix+"/swagger/", http.StripPrefix("/"+r.prefix+"/swagger", swaggerator.Handler(raw)))
 	}
-	
+
 	d := gin.Default()
 	for _, table := range r.Schema.Database.Tables {
 		for _, endpoint := range table.Endpoints {
-			d.Handle(endpoint.HTTPMethod, convertSwaggerToGin(endpoint.HTTPPath), r.Handler(endpoint))
+			d.Handle(endpoint.HTTPMethod, convertSwaggerToGin(r.prefix+endpoint.HTTPPath), r.Handler(endpoint))
 		}
 	}
 
 	// Add redirect from root to swagger UI only if swagger is enabled
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "" || r.URL.Path == "/" {
+	mux.HandleFunc("/"+r.prefix+"/", func(w http.ResponseWriter, req *http.Request) {
+		if req.URL.Path == "/"+r.prefix || req.URL.Path == "/"+r.prefix+"/" {
 			if !disableSwagger {
-				http.Redirect(w, r, "/swagger/", http.StatusFound)
+				http.Redirect(w, req, "/"+r.prefix+"/swagger/", http.StatusFound)
 				return
 			}
 			// If swagger is disabled, return 404 for root path
-			http.NotFound(w, r)
+			http.NotFound(w, req)
 			return
 		}
-		d.Handler().ServeHTTP(w, r)
+		d.Handler().ServeHTTP(w, req)
 	})
 
 	return nil

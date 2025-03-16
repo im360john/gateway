@@ -20,6 +20,7 @@ func REST(configPath *string, addr *string, servers *string) *cobra.Command {
 		Args:  cobra.MatchAll(cobra.ExactArgs(0)),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			disableSwagger, _ := cmd.Flags().GetBool("disable-swagger")
+			prefix, _ := cmd.Flags().GetString("prefix")
 
 			gwRaw, err := os.ReadFile(*configPath)
 			if err != nil {
@@ -30,7 +31,7 @@ func REST(configPath *string, addr *string, servers *string) *cobra.Command {
 				return xerrors.Errorf("unable to parse config file: %w", err)
 			}
 			mux := http.NewServeMux()
-			a, err := restgenerator.New(*gw)
+			a, err := restgenerator.New(*gw, prefix)
 
 			if err != nil {
 				return xerrors.Errorf("unable to init api: %w", err)
@@ -58,7 +59,7 @@ func REST(configPath *string, addr *string, servers *string) *cobra.Command {
 			}
 
 			if !disableSwagger {
-				logrus.Infof("Docs available at: %s/", serverAddresses[0])
+				logrus.Infof("Docs available at: %s/%s", serverAddresses[0], prefix)
 			}
 
 			return http.ListenAndServe(*addr, mux)
@@ -66,6 +67,7 @@ func REST(configPath *string, addr *string, servers *string) *cobra.Command {
 	}
 
 	cmd.Flags().Bool("disable-swagger", false, "disable Swagger UI")
+	cmd.Flags().String("prefix", "", "prefix for API endpoints")
 
 	return cmd
 }

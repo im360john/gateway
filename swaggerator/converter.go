@@ -8,6 +8,7 @@ import (
 	"golang.org/x/xerrors"
 	"io/fs"
 	"net/http"
+	"path"
 	"strings"
 
 	"github.com/centralmind/gateway/model"
@@ -19,7 +20,7 @@ import (
 var swagfs embed.FS
 
 // Schema dynamically generates an OpenAPI 3.1 schema based on the given table schema.
-func Schema(schema model.Config, addresses ...string) (*huma.OpenAPI, error) {
+func Schema(schema model.Config, prefix string, addresses ...string) (*huma.OpenAPI, error) {
 	api := huma.DefaultConfig(schema.API.Name, "3.1.0").OpenAPI
 	api.Info.Title = schema.API.Name
 	api.Info.Description = "Config that dynamically generates accessor for data"
@@ -149,20 +150,24 @@ func Schema(schema model.Config, addresses ...string) (*huma.OpenAPI, error) {
 					},
 				},
 			}
-			if _, ok := api.Paths[endpoint.HTTPPath]; !ok {
-				api.Paths[endpoint.HTTPPath] = &huma.PathItem{}
+			httpPath := endpoint.HTTPPath
+			if prefix != "" {
+				httpPath = "/" + path.Join(prefix, httpPath)
+			}
+			if _, ok := api.Paths[httpPath]; !ok {
+				api.Paths[httpPath] = &huma.PathItem{}
 			}
 			switch endpoint.HTTPMethod {
 			case "GET":
-				api.Paths[endpoint.HTTPPath].Get = operation
+				api.Paths[httpPath].Get = operation
 			case "DELETE":
-				api.Paths[endpoint.HTTPPath].Delete = operation
+				api.Paths[httpPath].Delete = operation
 			case "POST":
-				api.Paths[endpoint.HTTPPath].Post = operation
+				api.Paths[httpPath].Post = operation
 			case "PATCH":
-				api.Paths[endpoint.HTTPPath].Patch = operation
+				api.Paths[httpPath].Patch = operation
 			case "PUT":
-				api.Paths[endpoint.HTTPPath].Put = operation
+				api.Paths[httpPath].Put = operation
 			}
 		}
 	}
@@ -185,7 +190,7 @@ func Handler(spec []byte) http.Handler {
 	// render the index template with the proper spec name inserted
 	static, _ := fs.Sub(swagfs, "dist")
 	mux := http.NewServeMux()
-	mux.HandleFunc("/swagger_spec", byteHandler(spec))
+	mux.HandleFunc("/open_api.json", byteHandler(spec))
 	mux.Handle("/", http.FileServer(http.FS(static)))
 	return mux
 }
