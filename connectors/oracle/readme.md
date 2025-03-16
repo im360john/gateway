@@ -34,6 +34,6 @@ port: 1521
 - The connector uses the first host in the list by default. Additional hosts can be specified for future failover implementation.
 - The schema parameter is required and specifies the default schema for queries.
 - The database parameter should be your Oracle service name or SID.
-- The connector uses go-ora driver which is a pure Go implementation, no Oracle Instant Client required.
+- The connector uses <a href="https://github.com/sijms/go-ora">go-ora driver</a> which is a pure Go implementation, no Oracle Instant Client required.
 - When using named parameters in queries, they will be automatically converted to numbered parameters (`:1`, `:2`, etc.) as required by Oracle.
 - For pagination, use Oracle's `OFFSET ... ROWS FETCH NEXT ... ROWS ONLY` syntax. 
