@@ -35,7 +35,7 @@ func StartCommand() *cobra.Command {
 	cmd.PersistentFlags().StringVar(&addr, "addr", ":9090", "addr for gateway")
 	cmd.PersistentFlags().StringVar(&servers, "servers", "", "comma-separated list of additional server URLs for Swagger UI (e.g., https://dev1.example.com,https://dev2.example.com)")
 
-	cmd.Flags().StringVar(&dbDSN, "dsn", "", "database DSN")
+	cmd.Flags().StringVarP(&dbDSN, "connection-string", "C", "", "Database connection string (DSN)")
 	cmd.Flags().StringVar(&dbType, "type", "postgres", "type of database to use")
 	cmd.Flags().BoolVar(&disableSwagger, "disable-swagger", false, "disable Swagger UI")
 	cmd.Flags().StringVar(&prefix, "prefix", "", "prefix for protocol path")
