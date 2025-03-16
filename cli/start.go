@@ -39,11 +39,14 @@ func StartCommand() *cobra.Command {
 	cmd.Flags().StringVar(&dbType, "type", "postgres", "type of database to use")
 	cmd.Flags().BoolVar(&disableSwagger, "disable-swagger", false, "disable Swagger UI")
 	cmd.Flags().StringVar(&prefix, "prefix", "", "prefix for protocol path")
-	cmd.Flags().BoolVar(&rawMode, "raw", false, "enable as raw protocol")
+	cmd.Flags().BoolVar(&rawMode, "raw", true, "enable as raw protocol")
 	cmd.RunE = func(cmd *cobra.Command, args []string) error {
 		var err error
 		var gw *gw_model.Config
 		if dbDSN != "" {
+			if dbType == "" {
+				dbType = strings.Split(dbDSN, ":")[0]
+			}
 			gw = &gw_model.Config{
 				API: gw_model.APIParams{
 					Name:        "Auto API",
