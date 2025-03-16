@@ -34,7 +34,7 @@ func StartCommand() *cobra.Command {
 	cmd.PersistentFlags().StringVar(&servers, "servers", "", "comma-separated list of additional server URLs for Swagger UI (e.g., https://dev1.example.com,https://dev2.example.com)")
 
 	cmd.Flags().BoolVar(&disableSwagger, "disable-swagger", false, "disable Swagger UI")
-	cmd.Flags().StringVar(&prefix, "prefix", "", "prefix for protocol path")
+	cmd.Flags().StringVar(&prefix, "prefix", "asd", "prefix for protocol path")
 	cmd.Flags().BoolVar(&rawMode, "raw", false, "enable as raw protocol")
 	cmd.RunE = func(cmd *cobra.Command, args []string) error {
 		gwRaw, err := os.ReadFile(gatewayParams)

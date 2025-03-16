@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"path"
 	"regexp"
 
 	"github.com/centralmind/gateway/connectors"
@@ -88,11 +89,12 @@ func (r *Rest) RegisterRoutes(mux *http.ServeMux, disableSwagger bool, addresses
 		}
 	}
 
+	rootPath := path.Join("/", r.prefix)
 	// Add redirect from root to swagger UI only if swagger is enabled
-	mux.HandleFunc("/"+r.prefix+"/", func(w http.ResponseWriter, req *http.Request) {
-		if req.URL.Path == "/"+r.prefix || req.URL.Path == "/"+r.prefix+"/" {
+	mux.HandleFunc(rootPath, func(w http.ResponseWriter, req *http.Request) {
+		if req.URL.Path == rootPath || req.URL.Path == rootPath+"/" {
 			if !disableSwagger {
-				http.Redirect(w, req, "/"+r.prefix+"/swagger/", http.StatusFound)
+				http.Redirect(w, req, path.Join(rootPath, "swagger"), http.StatusFound)
 				return
 			}
 			// If swagger is disabled, return 404 for root path

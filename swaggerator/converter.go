@@ -3,13 +3,14 @@ package swaggerator
 import (
 	"context"
 	"embed"
-	"github.com/centralmind/gateway/connectors"
-	"github.com/sirupsen/logrus"
-	"golang.org/x/xerrors"
 	"io/fs"
 	"net/http"
 	"path"
 	"strings"
+
+	"github.com/centralmind/gateway/connectors"
+	"github.com/sirupsen/logrus"
+	"golang.org/x/xerrors"
 
 	"github.com/centralmind/gateway/model"
 	"github.com/centralmind/gateway/plugins"
@@ -187,7 +188,35 @@ func byteHandler(b []byte) http.HandlerFunc {
 
 func RegisterRoute(mux *http.ServeMux, prefix string, spec []byte) {
 	// render the index template with the proper spec name inserted
-	static, _ := fs.Sub(swagfs, "dist")
-	mux.HandleFunc(path.Join("/", prefix, "swagger", "open_api.json"), byteHandler(spec))
-	mux.Handle(path.Join("/", prefix, "swagger"), http.StripPrefix(path.Join("/", prefix, "swagger"), http.FileServer(http.FS(static))))
+	static, err := fs.Sub(swagfs, "dist")
+	if err != nil {
+		logrus.Errorf("Failed to access embedded swagger files: %v", err)
+		return
+	}
+
+	// Handle empty prefix properly
+	var swaggerPath string
+	if prefix == "" {
+		swaggerPath = "/swagger"
+	} else {
+		swaggerPath = path.Join("/", prefix, "swagger")
+	}
+
+	apiJsonPath := path.Join(swaggerPath, "open_api.json")
+
+	// Register the API JSON endpoint
+	mux.HandleFunc(apiJsonPath, byteHandler(spec))
+
+	// Create a simple handler that redirects /swagger to /swagger/
+	rootHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == swaggerPath {
+			http.Redirect(w, r, swaggerPath+"/", http.StatusMovedPermanently)
+			return
+		}
+		http.StripPrefix(swaggerPath, http.FileServer(http.FS(static))).ServeHTTP(w, r)
+	})
+
+	// Register handlers
+	mux.Handle(swaggerPath, rootHandler)
+	mux.Handle(swaggerPath+"/", http.StripPrefix(swaggerPath, http.FileServer(http.FS(static))))
 }
