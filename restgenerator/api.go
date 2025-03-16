@@ -78,7 +78,7 @@ func (r *Rest) RegisterRoutes(mux *http.ServeMux, disableSwagger bool, addresses
 	}
 
 	if !disableSwagger {
-		mux.Handle("/"+r.prefix+"/swagger/", http.StripPrefix("/"+r.prefix+"/swagger", swaggerator.Handler(raw)))
+		swaggerator.RegisterRoute(mux, r.prefix, raw)
 	}
 
 	d := gin.Default()

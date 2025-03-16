@@ -180,17 +180,14 @@ func Schema(schema model.Config, prefix string, addresses ...string) (*huma.Open
 }
 
 func byteHandler(b []byte) http.HandlerFunc {
-	return func(w http.ResponseWriter, _ *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
 		w.Write(b)
 	}
 }
 
-// Handler returns a handler that will serve a self-hosted Swagger UI with your spec embedded
-func Handler(spec []byte) http.Handler {
+func RegisterRoute(mux *http.ServeMux, prefix string, spec []byte) {
 	// render the index template with the proper spec name inserted
 	static, _ := fs.Sub(swagfs, "dist")
-	mux := http.NewServeMux()
-	mux.HandleFunc("/open_api.json", byteHandler(spec))
-	mux.Handle("/", http.FileServer(http.FS(static)))
-	return mux
+	mux.HandleFunc(path.Join("/", prefix, "swagger", "open_api.json"), byteHandler(spec))
+	mux.Handle(path.Join("/", prefix, "swagger"), http.StripPrefix(path.Join("/", prefix, "swagger"), http.FileServer(http.FS(static))))
 }
