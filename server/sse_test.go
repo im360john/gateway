@@ -16,7 +16,7 @@ import (
 func TestSSEServer(t *testing.T) {
 	t.Run("Can instantiate", func(t *testing.T) {
 		mcpServer := NewMCPServer("test", "1.0.0")
-		sseServer := NewSSEServer(mcpServer, "http://localhost:8080")
+		sseServer := NewSSEServer(mcpServer, "http://localhost:8080", "")
 
 		if sseServer == nil {
 			t.Error("SSEServer should not be nil")
@@ -234,7 +234,7 @@ func TestSSEServer(t *testing.T) {
 
 	t.Run("Can be used as http.Handler", func(t *testing.T) {
 		mcpServer := NewMCPServer("test", "1.0.0")
-		sseServer := NewSSEServer(mcpServer, "http://localhost:8080")
+		sseServer := NewSSEServer(mcpServer, "http://localhost:8080", "")
 
 		ts := httptest.NewServer(sseServer)
 		defer ts.Close()
@@ -287,7 +287,7 @@ func TestSSEServer(t *testing.T) {
 
 	t.Run("Works with middleware", func(t *testing.T) {
 		mcpServer := NewMCPServer("test", "1.0.0")
-		sseServer := NewSSEServer(mcpServer, "http://localhost:8080")
+		sseServer := NewSSEServer(mcpServer, "http://localhost:8080", "")
 
 		middleware := func(next http.Handler) http.Handler {
 			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -336,7 +336,7 @@ func TestSSEServer(t *testing.T) {
 
 	t.Run("Works with custom mux", func(t *testing.T) {
 		mcpServer := NewMCPServer("test", "1.0.0")
-		sseServer := NewSSEServer(mcpServer, "")
+		sseServer := NewSSEServer(mcpServer, "", "")
 
 		mux := http.NewServeMux()
 		mux.Handle("/mcp/", http.StripPrefix("/mcp", sseServer))

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/centralmind/gateway/logger"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -17,6 +18,7 @@ import (
 
 func MCP(configPath *string, addr *string) *cobra.Command {
 	var rawMode bool
+	var prefix string
 
 	cmd := &cobra.Command{
 		Use:   "mcp",
@@ -58,11 +60,13 @@ func MCP(configPath *string, addr *string) *cobra.Command {
 				}
 			}
 
-			logrus.Infof("MCP server is running at: %s/sse", serverAddresses[0])
-			return srv.ServeSSE(serverAddresses[0]).Start(*addr)
+			resURL, _ := url.JoinPath(serverAddresses[0], "/", prefix, "sse")
+			logrus.Infof("MCP server is running at: %s", resURL)
+			return srv.ServeSSE(serverAddresses[0], prefix).Start(*addr)
 		},
 	}
 
+	cmd.Flags().StringVar(&prefix, "prefix", "", "prefix for mcp protocol")
 	cmd.Flags().BoolVar(&rawMode, "raw", false, "enable as raw protocol")
 	cmd.Flags().String("servers", "", "comma-separated list of server addresses")
 

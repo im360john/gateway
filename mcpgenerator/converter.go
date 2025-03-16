@@ -104,8 +104,8 @@ func jsonify(data any) string {
 	return string(res)
 }
 
-func (s *MCPServer) ServeSSE(addr string) *server.SSEServer {
-	return server.NewSSEServer(s.server, addr)
+func (s *MCPServer) ServeSSE(addr string, prefix string) *server.SSEServer {
+	return server.NewSSEServer(s.server, addr, prefix)
 }
 
 func (s *MCPServer) ServeStdio() *server.StdioServer {

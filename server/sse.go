@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"path"
 	"sync"
 
 	"github.com/centralmind/gateway/mcp"
@@ -19,6 +20,7 @@ type SSEServer struct {
 	baseURL  string
 	sessions sync.Map
 	srv      *http.Server
+	prefix   string
 }
 
 // sseSession represents an active SSE connection.
@@ -30,10 +32,11 @@ type sseSession struct {
 }
 
 // NewSSEServer creates a new SSE server instance with the given MCP server and base URL.
-func NewSSEServer(server *MCPServer, baseURL string) *SSEServer {
+func NewSSEServer(server *MCPServer, baseURL string, prefix string) *SSEServer {
 	return &SSEServer{
 		server:  server,
 		baseURL: baseURL,
+		prefix:  prefix,
 	}
 }
 
@@ -132,8 +135,8 @@ func (s *SSEServer) handleSSE(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	messageEndpoint := fmt.Sprintf(
-		"%s/message?sessionId=%s",
-		s.baseURL,
+		"%s?sessionId=%s",
+		s.baseURL+path.Join("/", s.prefix, "message"),
 		sessionID,
 	)
 
@@ -260,9 +263,9 @@ func (s *SSEServer) SendEventToSession(
 // ServeHTTP implements the http.Handler interface.
 func (s *SSEServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.URL.Path {
-	case "/sse":
+	case "/" + path.Join(s.prefix, "sse"):
 		s.handleSSE(w, r)
-	case "/message":
+	case "/" + path.Join(s.prefix, "message"):
 		s.handleMessage(w, r)
 	default:
 		http.NotFound(w, r)
