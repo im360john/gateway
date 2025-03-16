@@ -34,7 +34,7 @@ func StartCommand() *cobra.Command {
 	cmd.PersistentFlags().StringVar(&servers, "servers", "", "comma-separated list of additional server URLs for Swagger UI (e.g., https://dev1.example.com,https://dev2.example.com)")
 
 	cmd.Flags().BoolVar(&disableSwagger, "disable-swagger", false, "disable Swagger UI")
-	cmd.Flags().StringVar(&prefix, "prefix", "", "prefix for protocol path")
+	cmd.Flags().StringVar(&prefix, "prefix", "/", "prefix for protocol path")
 	cmd.Flags().BoolVar(&rawMode, "raw", false, "enable as raw protocol")
 	cmd.RunE = func(cmd *cobra.Command, args []string) error {
 		gwRaw, err := os.ReadFile(gatewayParams)
@@ -67,8 +67,6 @@ func StartCommand() *cobra.Command {
 			serverAddresses = append(serverAddresses, fmt.Sprintf("http://localhost%s", addr))
 		}
 
-		// Use the disable-swagger flag value passed from parent command
-		// Register routes with all server addresses and disable-swagger flag
 		if err := a.RegisterRoutes(mux, disableSwagger, serverAddresses...); err != nil {
 			return err
 		}
@@ -91,7 +89,7 @@ func StartCommand() *cobra.Command {
 
 		logrus.Infof("MCP server is running at: %s", resURL)
 		if !disableSwagger {
-			logrus.Infof("Docs available at: %s/%s", serverAddresses[0], prefix)
+			logrus.Infof("Open API is running at: %s/%s", serverAddresses[0], prefix)
 		}
 
 		return http.ListenAndServe(addr, mux)

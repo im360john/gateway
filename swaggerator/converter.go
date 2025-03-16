@@ -152,7 +152,7 @@ func Schema(schema model.Config, prefix string, addresses ...string) (*huma.Open
 			}
 			httpPath := endpoint.HTTPPath
 			if prefix != "" {
-				httpPath = "/" + path.Join(prefix, httpPath)
+				httpPath = path.Join("/", prefix, httpPath)
 			}
 			if _, ok := api.Paths[httpPath]; !ok {
 				api.Paths[httpPath] = &huma.PathItem{}
