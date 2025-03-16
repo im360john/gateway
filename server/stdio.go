@@ -132,7 +132,7 @@ func (s *StdioServer) processMessage(
 	// Parse the message as raw JSON
 	var rawMessage json.RawMessage
 	if err := json.Unmarshal([]byte(line), &rawMessage); err != nil {
-		response := createErrorResponse(nil, mcp.PARSE_ERROR, "Parse error")
+		response := CreateErrorResponse(nil, mcp.PARSE_ERROR, "Parse error")
 		return s.writeResponse(response, writer)
 	}
 

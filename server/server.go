@@ -103,6 +103,10 @@ func (s *MCPServer) WithContext(
 	return ctx
 }
 
+func (s *MCPServer) Notifications() <-chan ServerNotification {
+	return s.notifications
+}
+
 // SendNotificationToClient sends a notification to the current client
 func (s *MCPServer) SendNotificationToClient(
 	method string,
@@ -226,7 +230,7 @@ func (s *MCPServer) HandleMessage(
 	}
 
 	if err := json.Unmarshal(message, &baseMessage); err != nil {
-		return createErrorResponse(
+		return CreateErrorResponse(
 			nil,
 			mcp.PARSE_ERROR,
 			"Failed to parse message",
@@ -235,7 +239,7 @@ func (s *MCPServer) HandleMessage(
 
 	// Check for valid JSONRPC version
 	if baseMessage.JSONRPC != mcp.JSONRPC_VERSION {
-		return createErrorResponse(
+		return CreateErrorResponse(
 			baseMessage.ID,
 			mcp.INVALID_REQUEST,
 			"Invalid JSON-RPC version",
@@ -245,7 +249,7 @@ func (s *MCPServer) HandleMessage(
 	if baseMessage.ID == nil {
 		var notification mcp.JSONRPCNotification
 		if err := json.Unmarshal(message, &notification); err != nil {
-			return createErrorResponse(
+			return CreateErrorResponse(
 				nil,
 				mcp.PARSE_ERROR,
 				"Failed to parse notification",
@@ -259,7 +263,7 @@ func (s *MCPServer) HandleMessage(
 	case "initialize":
 		var request mcp.InitializeRequest
 		if err := json.Unmarshal(message, &request); err != nil {
-			return createErrorResponse(
+			return CreateErrorResponse(
 				baseMessage.ID,
 				mcp.INVALID_REQUEST,
 				"Invalid initialize request",
@@ -269,7 +273,7 @@ func (s *MCPServer) HandleMessage(
 	case "ping":
 		var request mcp.PingRequest
 		if err := json.Unmarshal(message, &request); err != nil {
-			return createErrorResponse(
+			return CreateErrorResponse(
 				baseMessage.ID,
 				mcp.INVALID_REQUEST,
 				"Invalid ping request",
@@ -278,7 +282,7 @@ func (s *MCPServer) HandleMessage(
 		return s.handlePing(ctx, baseMessage.ID, request)
 	case "resources/list":
 		if s.capabilities.resources == nil {
-			return createErrorResponse(
+			return CreateErrorResponse(
 				baseMessage.ID,
 				mcp.METHOD_NOT_FOUND,
 				"Resources not supported",
@@ -286,7 +290,7 @@ func (s *MCPServer) HandleMessage(
 		}
 		var request mcp.ListResourcesRequest
 		if err := json.Unmarshal(message, &request); err != nil {
-			return createErrorResponse(
+			return CreateErrorResponse(
 				baseMessage.ID,
 				mcp.INVALID_REQUEST,
 				"Invalid list resources request",
@@ -295,7 +299,7 @@ func (s *MCPServer) HandleMessage(
 		return s.handleListResources(ctx, baseMessage.ID, request)
 	case "resources/templates/list":
 		if s.capabilities.resources == nil {
-			return createErrorResponse(
+			return CreateErrorResponse(
 				baseMessage.ID,
 				mcp.METHOD_NOT_FOUND,
 				"Resources not supported",
@@ -303,7 +307,7 @@ func (s *MCPServer) HandleMessage(
 		}
 		var request mcp.ListResourceTemplatesRequest
 		if err := json.Unmarshal(message, &request); err != nil {
-			return createErrorResponse(
+			return CreateErrorResponse(
 				baseMessage.ID,
 				mcp.INVALID_REQUEST,
 				"Invalid list resource templates request",
@@ -312,7 +316,7 @@ func (s *MCPServer) HandleMessage(
 		return s.handleListResourceTemplates(ctx, baseMessage.ID, request)
 	case "resources/read":
 		if s.capabilities.resources == nil {
-			return createErrorResponse(
+			return CreateErrorResponse(
 				baseMessage.ID,
 				mcp.METHOD_NOT_FOUND,
 				"Resources not supported",
@@ -320,7 +324,7 @@ func (s *MCPServer) HandleMessage(
 		}
 		var request mcp.ReadResourceRequest
 		if err := json.Unmarshal(message, &request); err != nil {
-			return createErrorResponse(
+			return CreateErrorResponse(
 				baseMessage.ID,
 				mcp.INVALID_REQUEST,
 				"Invalid read resource request",
@@ -329,7 +333,7 @@ func (s *MCPServer) HandleMessage(
 		return s.handleReadResource(ctx, baseMessage.ID, request)
 	case "prompts/list":
 		if s.capabilities.prompts == nil {
-			return createErrorResponse(
+			return CreateErrorResponse(
 				baseMessage.ID,
 				mcp.METHOD_NOT_FOUND,
 				"Prompts not supported",
@@ -337,7 +341,7 @@ func (s *MCPServer) HandleMessage(
 		}
 		var request mcp.ListPromptsRequest
 		if err := json.Unmarshal(message, &request); err != nil {
-			return createErrorResponse(
+			return CreateErrorResponse(
 				baseMessage.ID,
 				mcp.INVALID_REQUEST,
 				"Invalid list prompts request",
@@ -346,7 +350,7 @@ func (s *MCPServer) HandleMessage(
 		return s.handleListPrompts(ctx, baseMessage.ID, request)
 	case "prompts/get":
 		if s.capabilities.prompts == nil {
-			return createErrorResponse(
+			return CreateErrorResponse(
 				baseMessage.ID,
 				mcp.METHOD_NOT_FOUND,
 				"Prompts not supported",
@@ -354,7 +358,7 @@ func (s *MCPServer) HandleMessage(
 		}
 		var request mcp.GetPromptRequest
 		if err := json.Unmarshal(message, &request); err != nil {
-			return createErrorResponse(
+			return CreateErrorResponse(
 				baseMessage.ID,
 				mcp.INVALID_REQUEST,
 				"Invalid get prompt request",
@@ -363,7 +367,7 @@ func (s *MCPServer) HandleMessage(
 		return s.handleGetPrompt(ctx, baseMessage.ID, request)
 	case "tools/list":
 		if len(s.tools) == 0 {
-			return createErrorResponse(
+			return CreateErrorResponse(
 				baseMessage.ID,
 				mcp.METHOD_NOT_FOUND,
 				"Tools not supported",
@@ -371,7 +375,7 @@ func (s *MCPServer) HandleMessage(
 		}
 		var request mcp.ListToolsRequest
 		if err := json.Unmarshal(message, &request); err != nil {
-			return createErrorResponse(
+			return CreateErrorResponse(
 				baseMessage.ID,
 				mcp.INVALID_REQUEST,
 				"Invalid list tools request",
@@ -380,7 +384,7 @@ func (s *MCPServer) HandleMessage(
 		return s.handleListTools(ctx, baseMessage.ID, request)
 	case "tools/call":
 		if len(s.tools) == 0 {
-			return createErrorResponse(
+			return CreateErrorResponse(
 				baseMessage.ID,
 				mcp.METHOD_NOT_FOUND,
 				"Tools not supported",
@@ -388,7 +392,7 @@ func (s *MCPServer) HandleMessage(
 		}
 		var request mcp.CallToolRequest
 		if err := json.Unmarshal(message, &request); err != nil {
-			return createErrorResponse(
+			return CreateErrorResponse(
 				baseMessage.ID,
 				mcp.INVALID_REQUEST,
 				"Invalid call tool request",
@@ -396,7 +400,7 @@ func (s *MCPServer) HandleMessage(
 		}
 		return s.handleToolCall(ctx, baseMessage.ID, request)
 	default:
-		return createErrorResponse(
+		return CreateErrorResponse(
 			baseMessage.ID,
 			mcp.METHOD_NOT_FOUND,
 			fmt.Sprintf("Method %s not found", baseMessage.Method),
@@ -605,7 +609,7 @@ func (s *MCPServer) handleReadResource(
 		s.mu.RUnlock()
 		contents, err := handler(ctx, request)
 		if err != nil {
-			return createErrorResponse(id, mcp.INTERNAL_ERROR, err.Error())
+			return CreateErrorResponse(id, mcp.INTERNAL_ERROR, err.Error())
 		}
 		return createResponse(id, mcp.ReadResourceResult{Contents: contents})
 	}
@@ -625,7 +629,7 @@ func (s *MCPServer) handleReadResource(
 	if matched {
 		contents, err := matchedHandler(ctx, request)
 		if err != nil {
-			return createErrorResponse(id, mcp.INTERNAL_ERROR, err.Error())
+			return CreateErrorResponse(id, mcp.INTERNAL_ERROR, err.Error())
 		}
 		return createResponse(
 			id,
@@ -633,7 +637,7 @@ func (s *MCPServer) handleReadResource(
 		)
 	}
 
-	return createErrorResponse(
+	return CreateErrorResponse(
 		id,
 		mcp.INVALID_PARAMS,
 		fmt.Sprintf(
@@ -688,7 +692,7 @@ func (s *MCPServer) handleGetPrompt(
 	s.mu.RUnlock()
 
 	if !ok {
-		return createErrorResponse(
+		return CreateErrorResponse(
 			id,
 			mcp.INVALID_PARAMS,
 			fmt.Sprintf("Prompt not found: %s", request.Params.Name),
@@ -697,7 +701,7 @@ func (s *MCPServer) handleGetPrompt(
 
 	result, err := handler(ctx, request)
 	if err != nil {
-		return createErrorResponse(id, mcp.INTERNAL_ERROR, err.Error())
+		return CreateErrorResponse(id, mcp.INTERNAL_ERROR, err.Error())
 	}
 
 	return createResponse(id, result)
@@ -745,7 +749,7 @@ func (s *MCPServer) handleToolCall(
 	s.mu.RUnlock()
 
 	if !ok {
-		return createErrorResponse(
+		return CreateErrorResponse(
 			id,
 			mcp.INVALID_PARAMS,
 			fmt.Sprintf("Tool not found: %s", request.Params.Name),
@@ -754,7 +758,7 @@ func (s *MCPServer) handleToolCall(
 
 	result, err := tool.Handler(ctx, request)
 	if err != nil {
-		return createErrorResponse(id, mcp.INTERNAL_ERROR, err.Error())
+		return CreateErrorResponse(id, mcp.INTERNAL_ERROR, err.Error())
 	}
 
 	return createResponse(id, result)
@@ -782,7 +786,7 @@ func createResponse(id interface{}, result interface{}) mcp.JSONRPCMessage {
 	}
 }
 
-func createErrorResponse(
+func CreateErrorResponse(
 	id interface{},
 	code int,
 	message string,
