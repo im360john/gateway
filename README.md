@@ -13,6 +13,15 @@
 [![Deploy with GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/centralmind/sample_databases)
 
 
+Simple way to expose your db to LLM-Agent with OpenAPI and MCP-SSE protocols.
+
+```bash
+docker run -p 9090:9090 ghcr.io/centralmind/gateway:v0.1.0 start \
+  --type postgres \
+  --dsn "postgresql://db-user:db-password@db-host/db-name?sslmode=require" \
+  --raw
+```
+
 AI agents and LLM-powered applications need fast, secure access to data, but traditional APIs and databases aren't built for this purpose. We're building an API layer that automatically generates secure, LLM-optimized APIs for your structured data.
 
 Our solution:
