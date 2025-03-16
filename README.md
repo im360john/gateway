@@ -14,7 +14,7 @@
 
 ## What is Centralmind/Gateway
 
-Simple way to expose your db to AI-Agent via OpenAPI or MCP-SSE protocols.
+Simple way to expose your database to AI-Agent via MCP or OpenAPI 3.1 protocols.
 
 ```bash
 docker run -p 9090:9090 ghcr.io/centralmind/gateway:v0.1.0 start \
