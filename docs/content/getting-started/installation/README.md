@@ -11,7 +11,7 @@ Choose your operating system below for specific installation instructions for Li
 
 ```bash
 # Download the latest binary for Linux
-wget https://github.com/centralmind/gateway/releases/latest/download/gateway-linux-amd64.tar.gz
+wget https://github.com/centralmind/gateway/releases/download/v0.1.1/gateway-linux-amd64.tar.gz
 
 # Extract the archive
 tar -xzf gateway-linux-amd64.tar.gz
@@ -27,7 +27,7 @@ chmod +x gateway
 
 ```powershell
 # Download the latest binary for Windows
-Invoke-WebRequest -Uri https://github.com/centralmind/gateway/releases/latest/download/gateway-windows-amd64.zip -OutFile gateway-windows.zip
+Invoke-WebRequest -Uri https://github.com/centralmind/gateway/releases/download/v0.1.1/gateway-windows-amd64.zip -OutFile gateway-windows.zip
 
 # Extract the archive
 Expand-Archive -Path gateway-windows.zip -DestinationPath .
@@ -43,7 +43,7 @@ Rename-Item -Path "gateway-windows-amd64.exe" -NewName "gateway.exe"
 
 ```bash
 # Download the latest binary for macOS (Intel)
-curl -LO https://github.com/centralmind/gateway/releases/latest/download/gateway-darwin-amd64.tar.gz
+curl -LO https://github.com/centralmind/gateway/releases/download/v0.1.1/gateway-darwin-amd64.tar.gz
 
 # Extract the archive
 tar -xzf gateway-darwin-amd64.tar.gz
@@ -60,7 +60,7 @@ chmod +x gateway
  
 ```bash
 # Download the latest binary for macOS (Apple Silicon)
-curl -LO https://github.com/centralmind/gateway/releases/latest/download/gateway-darwin-arm64.tar.gz
+curl -LO https://github.com/centralmind/gateway/releases/download/v0.1.1/gateway-darwin-arm64.tar.gz
 
 # Extract the archive
 tar -xzf gateway-darwin-arm64.tar.gz
@@ -80,10 +80,10 @@ chmod +x gateway
 
 ```bash
 # Pull the latest image
-docker pull ghcr.io/centralmind/gateway:latest
+docker pull ghcr.io/centralmind/gateway:v0.1.1
 
 # Run the container
-docker run -p 8080:8080 ghcr.io/centralmind/gateway:latest
+docker run -p 8080:8080 ghcr.io/centralmind/gateway:v0.1.1
 ```
 
 ### Option B: Build your own Docker image
