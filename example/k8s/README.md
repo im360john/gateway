@@ -2,8 +2,6 @@
 title: Deploy Gateway on Kubernetes
 ---
 
-# Deploy Gateway on Kubernetes
-
 On this page, you will find instructions for installing and running the Gateway demo application in Kubernetes using Kubernetes manifests.
 
 ## Before you begin
