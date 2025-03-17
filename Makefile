@@ -1,4 +1,3 @@
-
 # removes static build artifacts
 .PHONY: clean
 clean:
@@ -11,10 +10,19 @@ GATEWAY ?= gateway
 
 .PHONY: build
 build:
-	go build -o  binaries/$(GATEWAY) .
+	@echo "--------------> Building gateway"
+	go build -o binaries/$(GATEWAY) .
+	@echo "--------------> Generating CLI documentation"
+	./binaries/$(GATEWAY) generate-docs
 
 docker: build
 	cp binaries/$(GATEWAY) . && docker build -t gateway
+
+# Generate CLI documentation
+.PHONY: docs
+docs:
+	@echo "--------------> Generating CLI documentation"
+	./binaries/$(GATEWAY) generate-docs
 
 .PHONY: test
 test:

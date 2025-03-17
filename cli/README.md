@@ -6,81 +6,22 @@ This document provides information about the available CLI commands and their pa
 
 ## Available Commands
 
-### `start`
+### `gateway connectors`
 
-Starts the Gateway with the specified configuration.
-
-**Usage:**
-
-```
-gateway start [flags]
-```
-
-**Flags:**
-
-- `--config` - Path to YAML file with gateway configuration (default: "./gateway.yaml")
-- `--addr` - Address for gateway server (default: ":9090")
-- `--servers` - Comma-separated list of additional server URLs for Swagger UI (e.g., "https://dev1.example.com,https://dev2.example.com")
-
-### `start rest`
-
-Starts the REST Gateway service.
+List all available database connectors
 
 **Usage:**
 
 ```
-gateway start rest [flags]
+gateway connectors
 ```
 
-**Flags:**
 
-- `--disable-swagger` - Disable Swagger UI (default: false)
 
-### `start mcp`
 
-Starts the MCP (Message-Coupling Protocol) Gateway service.
+### `gateway discover`
 
-**Usage:**
-
-```
-gateway start mcp [flags]
-```
-
-**Flags:**
-
-- `--raw` - Enable raw protocol mode for direct SQL query access (default: false)
-- `--servers` - Comma-separated list of server addresses
-
-This mode is particularly useful for:
-- Testing and debugging MCP communication
-- Integration with systems that have well known queries to execute
-- Script-based automation and pipeline processing
-- When using `--raw` flag: direct database access and advanced data querying
-
-### `start mcp-stdio`
-
-Starts the MCP Gateway service using stdin/stdout for communication.
-
-**Usage:**
-
-```
-gateway start mcp-stdio [flags]
-```
-
-**Flags:**
-
-- `--log-file` - Path to log file (default: "mcp.log")
-- `--raw` - Enable raw protocol mode for direct SQL query access (default: false)
-
-This mode is particularly useful for:
-- Testing and debugging MCP communication
-- Integration with systems that require direct stdin/stdout communication and local launching applications
-- Script-based automation and pipeline processing
-- When using `--raw` flag: direct database access and advanced data querying
-
-### `discover`
-
-Discovers and generates a gateway configuration based on database schema.
+Discover generates gateway config
 
 **Usage:**
 
@@ -90,50 +31,98 @@ gateway discover [flags]
 
 **Flags:**
 
-- `--config` - Path to connection yaml file. Default is "connection.yaml".
-- `--tables` - Comma-separated list of tables to include (e.g. 'table1,table2,table3')
-- `--ai-provider` - AI provider to use. Default is "openai".
-- `--ai-endpoint` - Custom OpenAI-compatible API endpoint URL
-- `--ai-api-key` - AI API token
-- `--bedrock-region` - Bedrock region
-- `--vertexai-region` - Vertex AI region
-- `--vertexai-project` - Vertex AI project
-- `--ai-model` - AI model to use
-- `--ai-max-tokens` - Maximum tokens to use. Default is 0.
-- `--ai-temperature` - AI temperature. Default is -1.0.
-- `--ai-reasoning` - Enable reasoning. Default is true.
-- `--output` - Resulted YAML path. Default is "gateway.yaml".
-- `--prompt` - Custom input to generate APIs. Default is "generate reasonable set of APIs for this data".
-- `--prompt-file` - Path to save the generated prompt.
-- `--llm-log` - Path to save the raw LLM response.
+- `ai-api-key` - AI API token
+- `ai-endpoint` - Custom OpenAI-compatible API endpoint URL
+- `ai-max-tokens` - Maximum tokens to use (default: "0")
+- `ai-model` - AI model to use
+- `ai-provider` - AI provider to use (default: "openai")
+- `ai-reasoning` - Enable reasoning (default: "true")
+- `ai-temperature` - AI temperature (default: "-1")
+- `bedrock-region` - Bedrock region
+- `config` - Path to connection yaml file (default: "connection.yaml")
+- `llm-log` - Path to save the raw LLM response (default: "/Users/tserakhau/go/src/github.com/gateway/binaries/.gateway/llm_raw_response.log")
+- `output` - Resulted YAML path (default: "gateway.yaml")
+- `prompt` - Custom input to generate APIs (default: "generate reasonable set of APIs for this data")
+- `prompt-file` - Path to save the generated prompt (default: "/Users/tserakhau/go/src/github.com/gateway/binaries/.gateway/prompt_default.txt")
+- `tables` - Comma-separated list of tables to include (e.g. 'table1,table2,table3')
+- `vertexai-project` - Vertex AI project
+- `vertexai-region` - Vertex AI region
 
-### `connectors`
 
-Lists all available database connectors.
 
-**Usage:**
 
-```
-gateway connectors [connector_name]
-```
+### `gateway generate-docs`
 
-If a connector name is provided, displays detailed documentation for that connector.
-
-### `plugins`
-
-Lists all available plugins.
+Generate CLI documentation
 
 **Usage:**
 
 ```
-gateway plugins [plugin_name]
+gateway generate-docs [flags]
 ```
 
-If a plugin name is provided, displays detailed documentation for that plugin.
+**Flags:**
 
-### `verify`
+- `output` - Path to output README.md file (default: "cli/README.md")
 
-Verifies database connection configuration and displays table schemas and sample data.
+
+
+
+### `gateway plugins`
+
+List all available plugins
+
+**Usage:**
+
+```
+gateway plugins
+```
+
+
+
+
+### `gateway start`
+
+Start gateway
+
+**Usage:**
+
+```
+gateway start [flags]
+```
+
+**Flags:**
+
+- `connection-string` - Database connection string (DSN)
+- `disable-swagger` - disable Swagger UI (default: "false")
+- `prefix` - prefix for protocol path
+- `raw` - enable as raw protocol (default: "true")
+- `type` - type of database to use (default: "postgres")
+
+
+
+
+### `gateway start stdio`
+
+MCP gateway via std-io
+
+**Usage:**
+
+```
+gateway start stdio [flags]
+```
+
+**Flags:**
+
+- `log-file` - path to log file (default: "/Users/tserakhau/go/src/github.com/gateway/binaries/.gateway/mcp.log")
+- `raw` - enable as raw protocol (default: "false")
+
+
+
+
+### `gateway verify`
+
+Verify connection config
 
 **Usage:**
 
@@ -143,9 +132,14 @@ gateway verify [flags]
 
 **Flags:**
 
-- `--config` - Path to connection YAML file (default: "connection.yaml")
-- `--tables` - Comma-separated list of tables to include (e.g. 'table1,table2,table3')
-- `--llm-log` - Path to save the raw LLM response (default: logs directory)
+- `config` - Path to connection yaml file (default: "connection.yaml")
+- `llm-log` - Path to save the raw LLM response (default: "/Users/tserakhau/go/src/github.com/gateway/binaries/.gateway/sample.yaml")
+- `tables` - Comma-separated list of tables to include (e.g. 'table1,table2,table3')
+
+
+
+
+
 
 ## Configuration File
 

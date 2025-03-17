@@ -36,6 +36,7 @@ func main() {
 	cli.RegisterCommand(rootCommand, cli.Plugins())
 	cli.RegisterCommand(rootCommand, cli.Discover())
 	cli.RegisterCommand(rootCommand, cli.Connection())
+	cli.RegisterCommand(rootCommand, cli.GenerateReadmeCommand())
 	err := rootCommand.Execute()
 	if err != nil {
 		os.Exit(1)
