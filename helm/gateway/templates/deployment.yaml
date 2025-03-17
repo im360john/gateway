@@ -30,7 +30,6 @@ spec:
             - --servers
             - {{ join "," .Values.gateway.servers }}
             {{- end }}
-            - rest
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}

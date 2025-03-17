@@ -1,96 +1,212 @@
 ---
-title: Gateway Deployment Guide
+title: Deploy Gateway on Kubernetes
 ---
 
-This guide will help you deploy the Gateway demo application with PostgreSQL in Kubernetes.
+# Deploy Gateway on Kubernetes
 
-## Prerequisites
+On this page, you will find instructions for installing and running the Gateway demo application in Kubernetes using Kubernetes manifests.
 
-- Kubernetes cluster
-- Helm v3
-- `kubectl` configured to work with your cluster
-- Access to GitHub Container Registry (ghcr.io)
+## Before you begin
 
-## Setup GitHub Container Registry Secret
+To follow this guide:
 
-Before deploying, create a secret for pulling images from GitHub Container Registry:
+* You need the latest version of Kubernetes running either locally or remotely on a public or private cloud.
+* If you plan to use it in a local environment, you can use various Kubernetes options such as minikube, kind, Docker Desktop, and others.
+* If you plan to use Kubernetes in a production setting, it's recommended to utilize managed cloud services like Google Kubernetes Engine (GKE), Amazon Elastic Kubernetes Service (EKS), or Azure Kubernetes Service (AKS).
+* Configured `kubectl` to work with your cluster
+* Access to GitHub Container Registry (ghcr.io)
+
+## System requirements
+
+This section provides minimum hardware and software requirements.
+
+### Minimum Hardware Requirements
+
+* Disk space: 1 GB
+* Memory: 750 MiB (approx 750 MB)
+* CPU: 250m (approx 0.25 cores)
+
+> Note
+> 
+> Enable the necessary ports in your network environment for Gateway.
+
+## Deploy Gateway on Kubernetes
+
+This section explains how to install Gateway using Kubernetes.
+
+### Create a namespace
+
+It is recommended to create a new namespace in Kubernetes to better manage, organize, allocate, and manage cluster resources:
 
 ```bash
-kubectl create secret docker-registry ghcr-secret \
-  --docker-server=ghcr.io \
-  --docker-username=YOUR_GITHUB_USERNAME \
-  --docker-password=YOUR_GITHUB_PAT \
-  --namespace=demo
+kubectl create namespace demo
 ```
 
-Replace `YOUR_GITHUB_USERNAME` with your GitHub username and `YOUR_GITHUB_PAT` with your GitHub Personal Access Token.
+### Deploy the Gateway application
 
-## Deployment Steps
+1. Create a `gateway.yaml` file, and copy-and-paste the following content into it:
+   ```yaml
+   ---
+   apiVersion: v1
+   kind: ConfigMap
+   metadata:
+     name: gateway-config
+     namespace: demo
+   data:
+     config.yaml: |
+        api:
+            name: Automatic API
+            description: ""
+            version: 1.0.0
+        database:
+             type: postgres
+             connection: "connection-string"
+        plugins: {}
+   ---
+   apiVersion: apps/v1
+   kind: Deployment
+   metadata:
+     name: gateway
+     namespace: demo
+     labels:
+       app: gateway
+   spec:
+     replicas: 1
+     selector:
+       matchLabels:
+         app: gateway
+     template:
+       metadata:
+         labels:
+           app: gateway
+       spec:
+         volumes:
+           - name: config
+             configMap:
+               name: gateway-config
+         containers:
+         - name: gateway
+           image: ghcr.io/your-org/gateway:latest
+           args:
+               - start
+               - --config
+               - /etc/gateway/config.yaml
+               - --addr
+               - ":8080"
+           imagePullPolicy: Always
+           ports:
+           - containerPort: 8080
+             name: http
+           volumeMounts:
+            - name: config
+              mountPath: /etc/gateway
+              readOnly: true
+   ---
+   apiVersion: v1
+   kind: Service
+   metadata:
+     name: gateway
+     namespace: demo
+   spec:
+     ports:
+     - port: 80
+       targetPort: http
+     selector:
+       app: gateway
+   ```
 
-1. Deploy PostgreSQL database:
-```bash
-make install-postgres
-```
+2. Run the following command to send the manifest to the Kubernetes API server:
+   ```bash
+   kubectl apply -f gateway.yaml
+   ```
 
-2. Wait for PostgreSQL to be ready:
-```bash
-kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=postgresql -n demo
-```
+### Verify the deployment
 
-3. Deploy the Gateway application:
-```bash
-make install-gateway
-```
+1. Complete the following steps to verify the deployment status of each object:
+   
+   a. For Pods, run the following command:
+   ```bash
+   kubectl get pods -n demo
+   ```
+   
+   b. For Services, run the following command:
+   ```bash
+   kubectl get svc -n demo -o wide
+   ```
 
-## Verification
+### Access the Gateway API
 
-1. Check if all pods are running:
-```bash
-kubectl get pods -n demo
-```
+To access the Gateway API from your local machine, you can use port forwarding. This allows you to connect to the Gateway service running in your Kubernetes cluster without exposing it externally.
 
-2. Access the API:
-The API will be available at: `http://demo-gw.centralmind.ai`
+1. First, identify the Gateway pod name:
+   ```bash
+   kubectl get pods -n demo -l app=gateway
+   ```
+
+2. Set up port forwarding to the Gateway pod:
+   ```bash
+   kubectl port-forward -n demo svc/gateway 8080:8080
+   ```
+   This command forwards your local port 8080 to port 80 of the Gateway service in the Kubernetes cluster.
+
+3. Now you can access the Gateway API at: `http://localhost:8080`
 
 Example endpoints:
 - GET `/gachi_teams` - List all teams
 - GET `/gachi_personas` - List all personas
 
-## Useful Commands
-
-- Get PostgreSQL password:
-```bash
-make get-password
-```
-
-- Upgrade Gateway configuration:
-```bash
-make upgrade-gateway
-```
-
-- Upgrade PostgreSQL configuration:
-```bash
-make upgrade-postgres
-```
-
-## Cleanup
-
-To remove the deployment:
-
-1. Uninstall Gateway:
-```bash
-make uninstall-gateway
-```
-
-2. Uninstall PostgreSQL:
-```bash
-make uninstall-postgres
-```
+> Note
+> 
+> The port forwarding session will continue until you terminate it with Ctrl+C. If you close the terminal or the connection is interrupted, you'll need to restart the port forwarding.
 
 ## Configuration
 
-The deployment uses two main configuration files:
-- `values.gateway.yaml` - Gateway configuration
-- `values.postgres.yaml` - PostgreSQL configuration
+You can modify the Kubernetes manifests to customize your deployment:
+- `gateway.yaml` - Gateway configuration
 
-Modify these files to customize your deployment. 
+## Update an existing deployment
+
+### Update Gateway configuration
+
+To update the Gateway configuration:
+
+1. Edit the `gateway.yaml` file with your changes
+2. Apply the updated configuration:
+   ```bash
+   kubectl apply -f gateway.yaml
+   ```
+
+## Troubleshooting
+
+### Collecting logs
+
+To collect Gateway logs, run:
+```bash
+kubectl logs -l app=gateway -n demo
+```
+
+### Using the --dry-run command
+
+You can use the `--dry-run=client` flag with kubectl to test your manifests without actually applying them:
+
+```bash
+kubectl apply -f gateway.yaml --dry-run=client
+```
+
+## Remove Gateway
+
+To remove the deployment:
+
+1. Delete Gateway resources:
+   ```bash
+   kubectl delete -f gateway.yaml
+   ```
+
+2. Delete the namespace (optional):
+   ```bash
+   kubectl delete namespace demo
+   ```
+
+## Was this page helpful?
+
+If you have questions or suggestions for improving this documentation, please create an issue in the project repository. 
