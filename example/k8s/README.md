@@ -22,9 +22,8 @@ This section provides minimum hardware and software requirements.
 
 ### Minimum Hardware Requirements
 
-* Disk space: 1 GB
-* Memory: 750 MiB (approx 750 MB)
-* CPU: 250m (approx 0.25 cores)
+* Memory: 250 MiB (approx 250 MB)
+* CPU: 125m (approx 0.125 cores)
 
 > Note
 > 
