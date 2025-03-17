@@ -138,5 +138,9 @@ func SchemaFromConfig(config connectors.Config) string {
 		schema = fmt.Sprintf("%s.%s", generalConfig.ProjectID, generalConfig.Dataset)
 	}
 
+	if config.Type() == "duckdb" && schema == "" {
+		schema = "main"
+	}
+
 	return schema
 }
