@@ -26,6 +26,8 @@ func StartCommand() *cobra.Command {
 	var prefix string
 	var dbDSN string
 	var dbType string
+	var enableMCP bool
+	var enableRestAPI bool
 
 	cmd := &cobra.Command{
 		Use:   "start",
@@ -37,7 +39,7 @@ The server launches two main components:
 2. MCP (Message Communication Protocol) SSE server for real-time event streaming
 
 Upon successful startup, the terminal will display URLs for both services.`,
-		Args:  cobra.MatchAll(cobra.ExactArgs(0)),
+		Args: cobra.MatchAll(cobra.ExactArgs(0)),
 	}
 	cmd.PersistentFlags().StringVar(&gatewayParams, "config", "./gateway.yaml", "Path to YAML file with gateway configuration")
 	cmd.PersistentFlags().StringVar(&addr, "addr", ":9090", "Address and port for the gateway server (e.g., ':9090', '127.0.0.1:8080')")
@@ -47,6 +49,8 @@ Upon successful startup, the terminal will display URLs for both services.`,
 	cmd.Flags().StringVar(&dbType, "type", "postgres", "Type of database to use (default: postgres)")
 	cmd.Flags().BoolVar(&disableSwagger, "disable-swagger", false, "Disable Swagger UI documentation")
 	cmd.Flags().StringVar(&prefix, "prefix", "", "URL prefix for all API endpoints")
+	cmd.Flags().BoolVar(&enableMCP, "mcp", true, "Start MCP SSE server")
+	cmd.Flags().BoolVar(&enableRestAPI, "rest-api", true, "Start Rest API server")
 	cmd.Flags().BoolVar(&rawMode, "raw", true, "Enable raw protocol mode optimized for AI agents")
 	cmd.RunE = func(cmd *cobra.Command, args []string) error {
 		var err error
@@ -121,19 +125,25 @@ Upon successful startup, the terminal will display URLs for both services.`,
 			}
 		}
 
-		// Set up SSE (Server-Sent Events) endpoints for real-time event streaming
-		resURL, _ := url.JoinPath(serverAddresses[0], "/", prefix, "sse")
-		sse := srv.ServeSSE(serverAddresses[0], prefix)
-		mux.Handle(path.Join("/", prefix, "sse"), sse)
-		mux.Handle(path.Join("/", prefix, "message"), sse)
+		if !enableRestAPI && !enableMCP {
+			logrus.Fatal("At least one of protocol must be enabled, nothing to start")
+		}
 
 		logrus.Infof("Gateway server started successfully!")
-		logrus.Infof("MCP SSE server for AI agents is running at: %s", resURL)
-		messageURL, _ := url.JoinPath(serverAddresses[0], "/", prefix, "message")
-		logrus.Infof("MCP message endpoint is available at: %s", messageURL)
-		if !disableSwagger {
-			swaggerURL := fmt.Sprintf("%s/%s", serverAddresses[0], prefix)
-			logrus.Infof("REST API with Swagger UI is available at: %s", swaggerURL)
+		if enableMCP {
+			sse := srv.ServeSSE(serverAddresses[0], prefix)
+			mux.Handle(path.Join("/", prefix, "sse"), sse)
+			mux.Handle(path.Join("/", prefix, "message"), sse)
+			// Set up SSE (Server-Sent Events) endpoints for real-time event streaming
+			resURL, _ := url.JoinPath(serverAddresses[0], "/", prefix, "sse")
+			logrus.Infof("MCP SSE server for AI agents is running at: %s", resURL)
+		}
+
+		if enableRestAPI {
+			if !disableSwagger {
+				swaggerURL := fmt.Sprintf("%s/%s", serverAddresses[0], prefix)
+				logrus.Infof("REST API with Swagger UI is available at: %s", swaggerURL)
+			}
 		}
 
 		return http.ListenAndServe(addr, mux)
@@ -146,7 +156,7 @@ Upon successful startup, the terminal will display URLs for both services.`,
 // RegisterCommand registers a child command to a parent command while properly
 // chaining their PersistentPreRunE and PersistentPreRun hooks.
 // This ensures that both parent and child pre-run hooks are executed in the correct order.
-// 
+//
 // Unlike the standard cobra.Command.AddCommand method, this function properly handles
 // the execution chain of pre-run hooks, making it suitable for complex command hierarchies.
 func RegisterCommand(parent, child *cobra.Command) {

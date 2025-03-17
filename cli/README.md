@@ -159,8 +159,10 @@ gateway start [flags]
 
 - `--connection-string` - Database connection string (DSN) for direct database connection
 - `--disable-swagger` - Disable Swagger UI documentation (default: "false")
+- `--mcp` - Start MCP SSE server (default: "true")
 - `--prefix` - URL prefix for all API endpoints
 - `--raw` - Enable raw protocol mode optimized for AI agents (default: "true")
+- `--rest-api` - Start Rest API server (default: "true")
 - `--type` - Type of database to use (default: postgres) (default: "postgres")
 
 
