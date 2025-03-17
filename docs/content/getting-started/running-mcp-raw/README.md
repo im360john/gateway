@@ -17,14 +17,14 @@ To start Gateway in MCP Raw mode, use the following command:
 
 ```bash
 # Launch Gateway in MCP Raw mode
-./gateway start --config gateway.yaml mcp-raw
+./gateway start --config gateway.yaml --raw
 ```
 
 ### Parameter Descriptions:
 
 - `start`: Initiates the Gateway service
 - `--config gateway.yaml`: Path to your generated API configuration file
-- `mcp-raw`: Specifies that you want to start an MCP Raw server
+- `--raw`: Specifies that you want to start an MCP Raw server
 
 ## Understanding MCP Raw Tools
 

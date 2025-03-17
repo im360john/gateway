@@ -94,5 +94,5 @@ After generating your API:
 2. Customize endpoints and parameters as needed
 3. Run Gateway with your configuration:
    ```bash
-   ./gateway start --config gateway.yaml rest
+   ./gateway start --config gateway.yaml
    ```

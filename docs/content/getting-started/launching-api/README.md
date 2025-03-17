@@ -18,14 +18,13 @@ Once you have your configuration file, you can start the API server with a simpl
 
 ```bash
 # Launch the API using your gateway.yaml configuration
-./gateway start --config gateway.yaml rest
+./gateway start --config gateway.yaml
 ```
 
 ### Parameter Descriptions:
 
 - `start`: Initiates the Gateway service
 - `--config gateway.yaml`: Path to your generated API configuration file
-- `rest`: Specifies that you want to start a REST API server
 
 ### Accessing Your API
 
@@ -47,7 +46,7 @@ If you need to customize the server address or port, you can modify the `gateway
 
 ```bash
 # Launch on a different port
-./gateway start --config gateway.yaml rest --addr :7000
+./gateway start --config gateway.yaml --addr :7000
 ```
 
 #### Managing Secrets with Environment Variables
@@ -82,7 +81,7 @@ export DB_NAME=mydb
 export API_SECRET_KEY=your-secret-key
 
 # Launch the API
-./gateway start --config gateway.yaml rest
+./gateway start --config gateway.yaml
 ```
 
 #### Best Practices for Secrets Management
@@ -98,7 +97,7 @@ To start Gateway in MCP (Message Communication Protocol) SSE server mode, use th
 
 ```bash
 # Launch the API in MCP server mode
-./gateway start --config gateway.yaml mcp
+./gateway start --config gateway.yaml
 ```
 
 By default it will be available on address:
