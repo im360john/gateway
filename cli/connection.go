@@ -3,14 +3,15 @@ package cli
 import (
 	"context"
 	"fmt"
-	"github.com/centralmind/gateway/logger"
-	"github.com/centralmind/gateway/model"
-	"github.com/centralmind/gateway/prompter"
-	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/centralmind/gateway/logger"
+	"github.com/centralmind/gateway/model"
+	"github.com/centralmind/gateway/prompter"
+	"gopkg.in/yaml.v3"
 
 	"github.com/centralmind/gateway/connectors"
 	"github.com/olekukonko/tablewriter"
@@ -27,22 +28,37 @@ func Connection() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "verify",
 		Short: "Verify connection config",
-		Long:  "Verify that connection is valid, by pinging connector",
+		Long: `Verify database connection configuration and inspect table schemas.
+
+This command validates the connection to the database specified in the configuration file,
+retrieves schema information for the specified tables, and displays sample data.
+It's useful for testing database connectivity and exploring table structures
+before configuring the gateway for AI agent access.
+
+The command performs the following steps:
+1. Read and validate the connection configuration
+2. Connect to the database and discover table schemas
+3. Display schema information and sample data for each table
+4. Save the discovered information to a YAML file for reference`,
 		Args:  cobra.MaximumNArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Configure header
 			logrus.Info("\r\n")
 			logrus.Info("🚀 Verify Discovery Process")
 
+			// Read configuration file
 			configRaw, err := os.ReadFile(configPath)
 			if err != nil {
 				return err
 			}
 
+			// Retrieve table data and verify connection
 			tablesData, _, err := TablesData(splitTables(tables), configRaw)
 			if err != nil {
 				return xerrors.Errorf("unable to verify connection: %w", err)
 			}
+			
+			// Display schema and sample data for each table
 			for _, t := range tablesData {
 				logrus.Infof("Schema for: %s", t.Name)
 				printTableSchema(t)
@@ -50,6 +66,7 @@ func Connection() *cobra.Command {
 				printTableSample(t.Columns, t.Sample)
 			}
 
+			// Save discovered information to file
 			if err := saveToFile(samplePath, prompter.Yamlify(tablesData)); err != nil {
 				logrus.Error("Failed to save tables sample data", err)
 			}
@@ -58,9 +75,9 @@ func Connection() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&configPath, "config", "connection.yaml", "Path to connection yaml file")
-	cmd.Flags().StringVar(&tables, "tables", "", "Comma-separated list of tables to include (e.g. 'table1,table2,table3')")
-	cmd.Flags().StringVar(&samplePath, "llm-log", filepath.Join(logger.DefaultLogDir(), "sample.yaml"), "Path to save the raw LLM response")
+	cmd.Flags().StringVar(&configPath, "config", "connection.yaml", "Path to database connection configuration file")
+	cmd.Flags().StringVar(&tables, "tables", "", "Comma-separated list of tables to include (e.g., 'users,products,orders')")
+	cmd.Flags().StringVar(&samplePath, "llm-log", filepath.Join(logger.DefaultLogDir(), "sample.yaml"), "Path to save the discovered table schemas and sample data")
 
 	return cmd
 }

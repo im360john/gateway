@@ -3,13 +3,14 @@ package cli
 import (
 	"context"
 	_ "embed"
-	"github.com/centralmind/gateway/prompter"
-	"github.com/centralmind/gateway/providers"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/centralmind/gateway/prompter"
+	"github.com/centralmind/gateway/providers"
 
 	"github.com/centralmind/gateway/logger"
 	"golang.org/x/xerrors"
@@ -63,6 +64,21 @@ func Discover() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "discover",
 		Short: "Discover generates gateway config",
+		Long: `Automatically generate a gateway configuration using AI.
+
+This command connects to a database, analyzes its schema, and uses AI to generate
+an optimized gateway configuration file. The generated configuration includes
+REST API endpoints and MCP protocol definitions tailored for AI agent access.
+
+The discovery process follows these steps:
+1. Connect to the database and verify the connection
+2. Discover table schemas and sample data
+3. Generate an AI prompt based on the discovered schema
+4. Use the specified AI provider to generate a gateway configuration
+5. Save the generated configuration to a file
+
+This approach significantly reduces the time needed to create gateway configurations
+and ensures they follow best practices for AI agent interactions.`,
 		Args:  cobra.MatchAll(cobra.ExactArgs(0)),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			startTime := time.Now()
@@ -175,27 +191,27 @@ func Discover() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&configPath, "config", "connection.yaml", "Path to connection yaml file")
-	cmd.Flags().StringVar(&tables, "tables", "", "Comma-separated list of tables to include (e.g. 'table1,table2,table3')")
+	cmd.Flags().StringVar(&configPath, "config", "connection.yaml", "Path to database connection configuration file")
+	cmd.Flags().StringVar(&tables, "tables", "", "Comma-separated list of tables to include (e.g., 'users,products,orders')")
 
 	/*
 		AI provider options:
 	*/
-	cmd.Flags().StringVar(&aiProvider, "ai-provider", "openai", "AI provider to use")
-	cmd.Flags().StringVar(&aiEndpoint, "ai-endpoint", "", "Custom OpenAI-compatible API endpoint URL")
-	cmd.Flags().StringVar(&aiAPIKey, "ai-api-key", "", "AI API token")
-	cmd.Flags().StringVar(&bedrockRegion, "bedrock-region", "", "Bedrock region")
-	cmd.Flags().StringVar(&vertexAIRegion, "vertexai-region", "", "Vertex AI region")
-	cmd.Flags().StringVar(&vertexAIProject, "vertexai-project", "", "Vertex AI project")
-	cmd.Flags().StringVar(&aiModel, "ai-model", "", "AI model to use")
-	cmd.Flags().IntVar(&aiMaxTokens, "ai-max-tokens", 0, "Maximum tokens to use")
-	cmd.Flags().Float32Var(&aiTemperature, "ai-temperature", -1.0, "AI temperature")
-	cmd.Flags().BoolVar(&aiReasoning, "ai-reasoning", true, "Enable reasoning")
+	cmd.Flags().StringVar(&aiProvider, "ai-provider", "openai", "AI provider to use (openai, anthropic, bedrock, vertexai, etc.)")
+	cmd.Flags().StringVar(&aiEndpoint, "ai-endpoint", "", "Custom OpenAI-compatible API endpoint URL for self-hosted models")
+	cmd.Flags().StringVar(&aiAPIKey, "ai-api-key", "", "API key for the selected AI provider")
+	cmd.Flags().StringVar(&bedrockRegion, "bedrock-region", "", "AWS region for Amazon Bedrock (required when using bedrock provider)")
+	cmd.Flags().StringVar(&vertexAIRegion, "vertexai-region", "", "Google Cloud region for Vertex AI (required when using vertexai provider)")
+	cmd.Flags().StringVar(&vertexAIProject, "vertexai-project", "", "Google Cloud project ID for Vertex AI (required when using vertexai provider)")
+	cmd.Flags().StringVar(&aiModel, "ai-model", "", "Specific AI model to use (e.g., 'gpt-4', 'claude-3-opus', etc.)")
+	cmd.Flags().IntVar(&aiMaxTokens, "ai-max-tokens", 0, "Maximum tokens to generate in the AI response (0 for model default)")
+	cmd.Flags().Float32Var(&aiTemperature, "ai-temperature", -1.0, "AI temperature for response randomness (0.0-1.0, lower is more deterministic)")
+	cmd.Flags().BoolVar(&aiReasoning, "ai-reasoning", true, "Enable AI reasoning in the response for better explanation of design decisions")
 
-	cmd.Flags().StringVar(&output, "output", "gateway.yaml", "Resulted YAML path")
-	cmd.Flags().StringVar(&extraPrompt, "prompt", "generate reasonable set of APIs for this data", "Custom input to generate APIs")
-	cmd.Flags().StringVar(&promptFile, "prompt-file", filepath.Join(logger.DefaultLogDir(), "prompt_default.txt"), "Path to save the generated prompt")
-	cmd.Flags().StringVar(&llmLogFile, "llm-log", filepath.Join(logger.DefaultLogDir(), "llm_raw_response.log"), "Path to save the raw LLM response")
+	cmd.Flags().StringVar(&output, "output", "gateway.yaml", "Path to save the generated gateway configuration file")
+	cmd.Flags().StringVar(&extraPrompt, "prompt", "generate reasonable set of APIs for this data", "Custom instructions for the AI to guide API generation")
+	cmd.Flags().StringVar(&promptFile, "prompt-file", filepath.Join(logger.DefaultLogDir(), "prompt_default.txt"), "Path to save the generated AI prompt for inspection")
+	cmd.Flags().StringVar(&llmLogFile, "llm-log", filepath.Join(logger.DefaultLogDir(), "llm_raw_response.log"), "Path to save the raw AI response for debugging")
 
 	return cmd
 }

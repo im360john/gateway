@@ -2,13 +2,14 @@ package cli
 
 import (
 	"context"
+	"os"
+	"path/filepath"
+
 	"github.com/centralmind/gateway/logger"
 	"github.com/centralmind/gateway/mcpgenerator"
 	gw_model "github.com/centralmind/gateway/model"
 	"github.com/spf13/cobra"
 	"golang.org/x/xerrors"
-	"os"
-	"path/filepath"
 )
 
 func Stdio(configPath *string) *cobra.Command {
@@ -17,6 +18,12 @@ func Stdio(configPath *string) *cobra.Command {
 	res := &cobra.Command{
 		Use:   "stdio",
 		Short: "MCP gateway via std-io",
+		Long: `Start the MCP (Message Communication Protocol) gateway using standard input/output.
+
+This command enables communication with AI agents through stdin/stdout streams,
+making it ideal for integration with other processes or tools that can communicate
+via standard streams. The MCP protocol provides structured message exchange
+optimized for AI agent interactions.`,
 		Args:  cobra.MatchAll(cobra.ExactArgs(0)),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			gwRaw, err := os.ReadFile(*configPath)
@@ -42,7 +49,7 @@ func Stdio(configPath *string) *cobra.Command {
 		},
 	}
 
-	res.Flags().BoolVar(&rawMode, "raw", false, "enable as raw protocol")
-	res.Flags().StringVar(&logFile, "log-file", filepath.Join(logger.DefaultLogDir(), "mcp.log"), "path to log file")
+	res.Flags().BoolVar(&rawMode, "raw", false, "Enable raw protocol mode optimized for AI agents")
+	res.Flags().StringVar(&logFile, "log-file", filepath.Join(logger.DefaultLogDir(), "mcp.log"), "Path to log file for MCP gateway operations")
 	return res
 }

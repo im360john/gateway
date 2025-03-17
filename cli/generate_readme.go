@@ -66,6 +66,7 @@ func GenerateReadmeCommand() *cobra.Command {
 type CommandDocInfo struct {
 	CommandPath string
 	Short       string
+	Long        string
 	UseLine     string
 	Example     string
 	HasExample  bool
@@ -95,6 +96,10 @@ This document provides information about the available CLI commands and their pa
 
 {{.Short}}
 
+**Description:**
+
+{{.Long}}
+
 **Usage:**
 
 ` + "```" + `
@@ -103,7 +108,7 @@ This document provides information about the available CLI commands and their pa
 
 {{if .HasFlags}}**Flags:**
 
-{{range .Flags}}- ` + "`{{.Name}}`" + ` - {{.Usage}}{{if .DefValue}} (default: "{{.DefValue}}"){{end}}
+{{range .Flags}}- ` + "`--{{.Name}}`" + ` - {{.Usage}}{{if .DefValue}} (default: "{{.DefValue}}"){{end}}
 {{end}}
 {{end}}
 {{if .HasExample}}
@@ -122,7 +127,7 @@ This document provides information about the available CLI commands and their pa
 
 {{if .HasFlags}}**Flags:**
 
-{{range .Flags}}- ` + "`{{.Name}}`" + ` - {{.Usage}}{{if .DefValue}} (default: "{{.DefValue}}"){{end}}
+{{range .Flags}}- ` + "`--{{.Name}}`" + ` - {{.Usage}}{{if .DefValue}} (default: "{{.DefValue}}"){{end}}
 {{end}}
 {{end}}
 {{if .HasExample}}
@@ -194,6 +199,7 @@ func buildCommandDocInfo(cmd *cobra.Command) CommandDocInfo {
 	info := CommandDocInfo{
 		CommandPath: cmd.CommandPath(),
 		Short:       cmd.Short,
+		Long:        cmd.Long,
 		UseLine:     cmd.UseLine(),
 		Example:     cmd.Example,
 		HasExample:  cmd.Example != "",
