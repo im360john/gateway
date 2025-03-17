@@ -8,7 +8,6 @@ import (
 	"github.com/centralmind/gateway/cli"
 	_ "github.com/centralmind/gateway/connectors/bigquery"
 	_ "github.com/centralmind/gateway/connectors/clickhouse"
-	_ "github.com/centralmind/gateway/connectors/duckdb"
 	_ "github.com/centralmind/gateway/connectors/mssql"
 	_ "github.com/centralmind/gateway/connectors/mysql"
 	_ "github.com/centralmind/gateway/connectors/oracle"

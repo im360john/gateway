@@ -12,8 +12,6 @@ GATEWAY ?= gateway
 build:
 	@echo "--------------> Building gateway"
 	go build -o binaries/$(GATEWAY) .
-	@echo "--------------> Generating CLI documentation"
-	./binaries/$(GATEWAY) generate-docs
 
 docker: build
 	cp binaries/$(GATEWAY) . && docker build -t gateway
