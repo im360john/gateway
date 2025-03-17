@@ -86,7 +86,7 @@ kubectl create namespace demo
                name: gateway-config
          containers:
          - name: gateway
-           image: ghcr.io/your-org/gateway:latest
+           image: ghcr.io/centralmind/gateway:latest
            args:
                - start
                - --config
