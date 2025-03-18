@@ -58,7 +58,9 @@ var (
 	configs = map[string]Config{}
 )
 
-func Register[TConfig Config, TPlugin Plugin](f func(cfg TConfig) (TPlugin, error)) {
+type PluginF[TConfig Config, TPlugin Plugin] func(cfg TConfig) (TPlugin, error)
+
+func Register[TConfig Config, TPlugin Plugin](f PluginF[TConfig, TPlugin]) {
 	var t TConfig
 	plugins[t.Tag()] = func(a any) (Plugin, error) {
 		cfg, err := remapper.Remap[TConfig](a)
