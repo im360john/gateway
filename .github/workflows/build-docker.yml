@@ -65,12 +65,14 @@ jobs:
         if: github.event_name == 'release'
         run: |
           docker buildx build --platform linux/amd64 \
-            --build-arg BINARY=gateway-linux-amd64 \
+            --build-arg TARGETARCH=amd64 \
             -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.release.tag_name }} \
+            --file Dockerfile.build \
             --push \
             .
           docker buildx build --platform linux/arm64 \
-            --build-arg BINARY=gateway-linux-arm64 \
+            --build-arg TARGETARCH=arm64 \
             -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.release.tag_name }} \
+            --file Dockerfile.build \
             --push \
             . 
