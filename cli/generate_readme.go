@@ -33,7 +33,7 @@ func GenerateReadmeCommand() *cobra.Command {
 			RegisterCommand(rootCmd, Plugins())
 			RegisterCommand(rootCmd, Discover())
 			RegisterCommand(rootCmd, Connection())
-			
+
 			// Add the generate-docs command itself to the documentation
 			docCmd := GenerateReadmeCommand()
 			RegisterCommand(rootCmd, docCmd)
@@ -172,7 +172,7 @@ For detailed configuration options, please refer to the main documentation.
 		if command.Hidden {
 			continue
 		}
-		
+
 		commands = append(commands, buildCommandDocInfo(command))
 	}
 
@@ -190,7 +190,7 @@ For detailed configuration options, please refer to the main documentation.
 
 	// Clean up the output
 	output := strings.ReplaceAll(buf.String(), "gateway gateway", "gateway")
-	
+
 	return output, nil
 }
 
@@ -209,6 +209,17 @@ func buildCommandDocInfo(cmd *cobra.Command) CommandDocInfo {
 	}
 
 	// Process flags
+	cmd.PersistentFlags().VisitAll(func(flag *pflag.Flag) {
+		if !flag.Hidden {
+			info.Flags = append(info.Flags, FlagInfo{
+				Name:     flag.Name,
+				Usage:    flag.Usage,
+				DefValue: flag.DefValue,
+			})
+			info.HasFlags = true
+		}
+	})
+
 	cmd.Flags().VisitAll(func(flag *pflag.Flag) {
 		if !flag.Hidden {
 			info.Flags = append(info.Flags, FlagInfo{
@@ -223,9 +234,20 @@ func buildCommandDocInfo(cmd *cobra.Command) CommandDocInfo {
 	// Process subcommands
 	for _, subCmd := range cmd.Commands() {
 		if !subCmd.Hidden {
-			info.SubCommands = append(info.SubCommands, buildCommandDocInfo(subCmd))
+			subInfo := buildCommandDocInfo(subCmd)
+			cmd.PersistentFlags().VisitAll(func(flag *pflag.Flag) {
+				if !flag.Hidden {
+					subInfo.Flags = append(subInfo.Flags, FlagInfo{
+						Name:     flag.Name,
+						Usage:    flag.Usage,
+						DefValue: flag.DefValue,
+					})
+					subInfo.HasFlags = true
+				}
+			})
+			info.SubCommands = append(info.SubCommands, subInfo)
 		}
 	}
 
 	return info
-} 
+}

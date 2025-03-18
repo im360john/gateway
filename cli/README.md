@@ -75,10 +75,10 @@ gateway discover [flags]
 - `--ai-temperature` - AI temperature for response randomness (0.0-1.0, lower is more deterministic) (default: "-1")
 - `--bedrock-region` - AWS region for Amazon Bedrock (required when using bedrock provider)
 - `--connection-string` - Database connection string (DSN) for direct database connection
-- `--llm-log` - Path to save the raw AI response for debugging (default: "/Users/tserakhau/go/src/github.com/gateway/binaries/.gateway/llm_raw_response.log")
+- `--llm-log` - Path to save the raw AI response for debugging (default: "/Users/tserakhau/Library/Caches/JetBrains/GoLand2024.3/tmp/GoLand/.gateway/llm_raw_response.log")
 - `--output` - Path to save the generated gateway configuration file (default: "gateway.yaml")
 - `--prompt` - Custom instructions for the AI to guide API generation (default: "generate reasonable set of APIs for this data")
-- `--prompt-file` - Path to save the generated AI prompt for inspection (default: "/Users/tserakhau/go/src/github.com/gateway/binaries/.gateway/prompt_default.txt")
+- `--prompt-file` - Path to save the generated AI prompt for inspection (default: "/Users/tserakhau/Library/Caches/JetBrains/GoLand2024.3/tmp/GoLand/.gateway/prompt_default.txt")
 - `--tables` - Comma-separated list of tables to include (e.g., 'users,products,orders')
 - `--type` - Type of database to use (for example: postgres os mysql)
 - `--vertexai-project` - Google Cloud project ID for Vertex AI (required when using vertexai provider)
@@ -158,6 +158,9 @@ gateway start [flags]
 
 **Flags:**
 
+- `--addr` - Address and port for the gateway server (e.g., ':9090', '127.0.0.1:8080') (default: ":9090")
+- `--config` - Path to YAML file with gateway configuration (default: "./gateway.yaml")
+- `--servers` - Comma-separated list of additional server URLs for Swagger UI (e.g., 'https://dev1.example.com,https://dev2.example.com')
 - `--connection-string` - Database connection string (DSN) for direct database connection
 - `--disable-swagger` - Disable Swagger UI documentation (default: "false")
 - `--mcp` - Start MCP SSE server (default: "true")
@@ -181,8 +184,11 @@ gateway start stdio [flags]
 
 **Flags:**
 
-- `--log-file` - Path to log file for MCP gateway operations (default: "/Users/tserakhau/go/src/github.com/gateway/binaries/.gateway/mcp.log")
+- `--log-file` - Path to log file for MCP gateway operations (default: "/Users/tserakhau/Library/Caches/JetBrains/GoLand2024.3/tmp/GoLand/.gateway/mcp.log")
 - `--raw` - Enable raw protocol mode optimized for AI agents (default: "false")
+- `--addr` - Address and port for the gateway server (e.g., ':9090', '127.0.0.1:8080') (default: ":9090")
+- `--config` - Path to YAML file with gateway configuration (default: "./gateway.yaml")
+- `--servers` - Comma-separated list of additional server URLs for Swagger UI (e.g., 'https://dev1.example.com,https://dev2.example.com')
 
 
 
