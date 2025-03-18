@@ -29,17 +29,6 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: '1.23'
-          cache: true
-
-      - name: Build Linux Binaries
-        run: |
-          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o gateway-linux-amd64 .
-          CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o gateway-linux-arm64 .
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
@@ -57,13 +46,13 @@ jobs:
         run: |
           docker buildx build --platform linux/amd64 \
             --build-arg TARGETARCH=amd64 \
-            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.release.tag_name }} \
+            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
             --file Dockerfile.build \
             --push \
             .
           docker buildx build --platform linux/arm64 \
             --build-arg TARGETARCH=arm64 \
-            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.release.tag_name }} \
+            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
             --file Dockerfile.build \
             --push \
             . 
