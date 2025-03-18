@@ -59,7 +59,7 @@ optimized for AI agent interactions.`,
 		},
 	}
 
-	res.Flags().BoolVar(&rawMode, "raw", false, "Enable raw protocol mode optimized for AI agents")
+	res.Flags().BoolVar(&rawMode, "raw", true, "Enable raw protocol mode optimized for AI agents")
 	res.Flags().StringVar(&logFile, "log-file", filepath.Join(logger.DefaultLogDir(), "mcp.log"), "Path to log file for MCP gateway operations")
 	res.Flags().StringVarP(&dbDSN, "connection-string", "C", "", "Database connection string (DSN) for direct database connection")
 	return res
