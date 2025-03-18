@@ -55,11 +55,18 @@ jobs:
 
       - name: Build and Push Multi-Arch Image
         run: |
-          docker buildx build --platform linux/amd64,linux/arm64 \
-            --build-arg BINARY=gateway-linux-amd64 \
-            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }} \
-            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
-            --push .
+          docker buildx build --platform linux/amd64 \
+            --build-arg TARGETARCH=amd64 \
+            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.release.tag_name }} \
+            --file Dockerfile.build \
+            --push \
+            .
+          docker buildx build --platform linux/arm64 \
+            --build-arg TARGETARCH=arm64 \
+            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.release.tag_name }} \
+            --file Dockerfile.build \
+            --push \
+            . 
 
       - name: Tag Release Images
         if: github.event_name == 'release'
