@@ -17,15 +17,16 @@
 Simple way to expose your database to AI-Agent via MCP or OpenAPI 3.1 protocols.
 
 ```bash
-docker run -p 9090:9090 ghcr.io/centralmind/gateway:v0.1.1 start \
+docker run -p 9090:9090 ghcr.io/centralmind/gateway:v0.2.0 start \
   --connection-string "postgresql://db-user:db-password@db-host/db-name?sslmode=require"
 ```
 
 This will run for you an API:
 
 ```shell
-INFO MCP server is running at: http://localhost:9090/sse 
-INFO Open API is running at: http://localhost:9090/ 
+INFO Gateway server started successfully!         
+INFO MCP SSE server for AI agents is running at: http://localhost:9090/sse 
+INFO REST API with Swagger UI is available at: http://localhost:9090/ 
 ```
 
 Which you can use inside your AI Agent:
