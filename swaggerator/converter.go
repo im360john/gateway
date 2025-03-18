@@ -82,9 +82,18 @@ func Schema(schema model.Config, prefix string, addresses ...string) (*huma.Open
 		}
 
 		var params []*huma.Param
+		bodyProps := map[string]*huma.Schema{}
 		for _, param := range endpoint.Params {
 			if param.Location == "" {
 				param.Location = "query"
+			}
+			if param.Location == "body" {
+				bodyProps[param.Name] = &huma.Schema{
+					Type:    param.Type,
+					Format:  param.Format,
+					Default: param.Default,
+				}
+				continue
 			}
 			params = append(params, &huma.Param{
 				Name:     param.Name,
@@ -94,6 +103,17 @@ func Schema(schema model.Config, prefix string, addresses ...string) (*huma.Open
 					Type:    param.Type,
 					Format:  param.Format,
 					Default: param.Default,
+				},
+			})
+		}
+		if len(bodyProps) > 0 {
+			params = append(params, &huma.Param{
+				Name:     "body",
+				In:       "body",
+				Required: true,
+				Schema: &huma.Schema{
+					Type:       "object",
+					Properties: bodyProps,
 				},
 			})
 		}
