@@ -15,6 +15,7 @@ import (
 func Stdio(configPath *string) *cobra.Command {
 	var logFile string
 	var rawMode bool
+	var dbDSN string
 	res := &cobra.Command{
 		Use:   "stdio",
 		Short: "MCP gateway via std-io",
@@ -24,15 +25,24 @@ This command enables communication with AI agents through stdin/stdout streams,
 making it ideal for integration with other processes or tools that can communicate
 via standard streams. The MCP protocol provides structured message exchange
 optimized for AI agent interactions.`,
-		Args:  cobra.MatchAll(cobra.ExactArgs(0)),
+		Args: cobra.MatchAll(cobra.ExactArgs(0)),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			gwRaw, err := os.ReadFile(*configPath)
-			if err != nil {
-				return xerrors.Errorf("unable to read yaml config file: %w", err)
-			}
-			gw, err := gw_model.FromYaml(gwRaw)
-			if err != nil {
-				return xerrors.Errorf("unable to parse config file: %w", err)
+			var gw *gw_model.Config
+			var err error
+
+			if dbDSN != "" {
+				// If DSN is provided, use it directly
+				gw, err = gw_model.FromDSN(dbDSN)
+			} else {
+				// Otherwise load from config file
+				gwRaw, err := os.ReadFile(*configPath)
+				if err != nil {
+					return xerrors.Errorf("unable to read yaml config file: %w", err)
+				}
+				gw, err = gw_model.FromYaml(gwRaw)
+				if err != nil {
+					return xerrors.Errorf("unable to parse config file: %w", err)
+				}
 			}
 
 			srv, err := mcpgenerator.New(*gw)
@@ -51,5 +61,6 @@ optimized for AI agent interactions.`,
 
 	res.Flags().BoolVar(&rawMode, "raw", false, "Enable raw protocol mode optimized for AI agents")
 	res.Flags().StringVar(&logFile, "log-file", filepath.Join(logger.DefaultLogDir(), "mcp.log"), "Path to log file for MCP gateway operations")
+	res.Flags().StringVarP(&dbDSN, "connection-string", "C", "", "Database connection string (DSN) for direct database connection")
 	return res
 }

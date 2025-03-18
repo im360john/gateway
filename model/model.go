@@ -2,6 +2,7 @@ package model
 
 import (
 	"encoding/json"
+	"strings"
 
 	"golang.org/x/xerrors"
 	"gopkg.in/yaml.v3"
@@ -143,4 +144,24 @@ type EndpointParams struct {
 	Required bool        `yaml:"required" json:"required,omitempty"`
 	Format   string      `yaml:"format,omitempty" json:"format,omitempty"`
 	Default  interface{} `yaml:"default,omitempty" json:"default,omitempty"`
+}
+
+func FromDSN(dsn string) (*Config, error) {
+	// Extract database type from DSN (assuming format like "postgres://..." or "mysql://...")
+	dbType := ""
+	if idx := strings.Index(dsn, "://"); idx != -1 {
+		dbType = dsn[:idx]
+	}
+
+	return &Config{
+		API: APIParams{
+			Name:        "Auto API",
+			Description: "Direct database connection API",
+			Version:     "1.0",
+		},
+		Database: Database{
+			Type:       dbType,
+			Connection: dsn,
+		},
+	}, nil
 }
