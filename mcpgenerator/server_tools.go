@@ -28,43 +28,47 @@ func (s *MCPServer) SetTools(tools []model.Endpoint) {
 		s.server.AddTool(mcp.NewTool(
 			endpoint.MCPMethod,
 			opts...,
-		), func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			arg := request.Params.Arguments
-			for _, param := range endpoint.Params {
-				if _, ok := arg[param.Name]; !ok {
-					arg[param.Name] = nil
-				}
-			}
-			res, err := s.connector.Query(ctx, endpoint, request.Params.Arguments)
-			if err != nil {
-				return &mcp.CallToolResult{
-					Content: []mcp.Content{
-						mcp.TextContent{
-							Type: "text",
-							Text: fmt.Sprintf("Unable to query: %s", err),
-						},
-					},
-					IsError: true,
-				}, nil
-			}
-			var content []mcp.Content
-			content = append(content, mcp.TextContent{
-				Type: "text",
-				Text: fmt.Sprintf("Found a %v row-(s) in %s.", len(res), endpoint.Group),
-			})
-			for _, row := range res {
-				content = append(content, mcp.TextContent{
-					Type: "text",
-					Text: jsonify(row),
-				})
-			}
-
-			return &mcp.CallToolResult{
-				Content: content,
-			}, nil
-		})
+		), s.endpoint(endpoint))
 	}
 	s.tools = tools
+}
+
+func (s *MCPServer) endpoint(endpoint model.Endpoint) func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		arg := request.Params.Arguments
+		for _, param := range endpoint.Params {
+			if _, ok := arg[param.Name]; !ok {
+				arg[param.Name] = nil
+			}
+		}
+		res, err := s.connector.Query(ctx, endpoint, request.Params.Arguments)
+		if err != nil {
+			return &mcp.CallToolResult{
+				Content: []mcp.Content{
+					mcp.TextContent{
+						Type: "text",
+						Text: fmt.Sprintf("Unable to query: %s", err),
+					},
+				},
+				IsError: true,
+			}, nil
+		}
+		var content []mcp.Content
+		content = append(content, mcp.TextContent{
+			Type: "text",
+			Text: fmt.Sprintf("Found a %v row-(s) in %s.", len(res), endpoint.Group),
+		})
+		for _, row := range res {
+			content = append(content, mcp.TextContent{
+				Type: "text",
+				Text: jsonify(row),
+			})
+		}
+
+		return &mcp.CallToolResult{
+			Content: content,
+		}, nil
+	}
 }
 
 func ArgumentOption(col model.EndpointParams, opts ...mcp.PropertyOption) mcp.ToolOption {
