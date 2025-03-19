@@ -15,7 +15,8 @@ type MCPServer struct {
 	connector connectors.Connector
 	tools     []model.Endpoint
 
-	mu sync.Mutex
+	mu    sync.Mutex
+	plugs map[string]any
 }
 
 func New(
@@ -23,18 +24,6 @@ func New(
 	plugs map[string]any,
 ) (*MCPServer, error) {
 	srv := server.NewMCPServer("mcp-data-gateway", "0.0.1")
-	var interceptors []plugins.Interceptor
-	for k, v := range plugs {
-		plugin, err := plugins.New(k, v)
-		if err != nil {
-			return nil, err
-		}
-		interceptor, ok := plugin.(plugins.Interceptor)
-		if !ok {
-			continue
-		}
-		interceptors = append(interceptors, interceptor)
-	}
 	connector, err := connectors.New(db.Type, db.Connection)
 	if err != nil {
 		return nil, xerrors.Errorf("unable to init connector: %w", err)
@@ -47,7 +36,20 @@ func New(
 	return &MCPServer{
 		server:    srv,
 		connector: connector,
+		plugs:     plugs,
 	}, nil
+}
+
+func (s *MCPServer) SetConnector(connector connectors.Connector) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	var err error
+	connector, err = plugins.Wrap(s.plugs, connector)
+	if err != nil {
+		return xerrors.Errorf("unable to init connector plugins: %w", err)
+	}
+	s.connector = connector
+	return nil
 }
 
 func (s *MCPServer) ServeSSE(addr string, prefix string) *server.SSEServer {
