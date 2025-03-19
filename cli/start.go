@@ -118,18 +118,18 @@ Upon successful startup, the terminal will display URLs for both services.`,
 
 		// Initialize the MCP (Message Communication Protocol) generator
 		// This provides real-time communication capabilities optimized for AI agents
-		srv, err := mcpgenerator.New(*gw)
+		srv, err := mcpgenerator.New(gw.Database, gw.Plugins)
 		if err != nil {
 			return xerrors.Errorf("unable to init mcp generator: %w", err)
 		}
 
 		// Enable raw protocol mode for AI agent communication if specified
 		if rawMode {
-			if err := mcpgenerator.AddRawProtocol(*gw, srv.Server()); err != nil {
-				return xerrors.Errorf("unable to add raw mcp protocol: %w", err)
-			}
+			srv.EnableRawProtocol()
 		}
-
+		if len(gw.Database.Endpoints) > 0 {
+			srv.SetTools(gw.Database.Endpoints)
+		}
 		if !enableRestAPI && !enableMCP {
 			logrus.Fatal("At least one of protocol must be enabled, nothing to start")
 		}

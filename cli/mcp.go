@@ -45,14 +45,15 @@ optimized for AI agent interactions.`,
 				}
 			}
 
-			srv, err := mcpgenerator.New(*gw)
+			srv, err := mcpgenerator.New(gw.Database, gw.Plugins)
 			if err != nil {
 				return xerrors.Errorf("unable to init mcp generator: %w", err)
 			}
 			if rawMode {
-				if err := mcpgenerator.AddRawProtocol(*gw, srv.Server()); err != nil {
-					return xerrors.Errorf("unable to add raw mcp protocol: %w", err)
-				}
+				srv.EnableRawProtocol()
+			}
+			if len(gw.Database.Endpoints) > 0 {
+				srv.SetTools(gw.Database.Endpoints)
 			}
 
 			return srv.ServeStdio().Listen(context.Background(), os.Stdin, os.Stdout)

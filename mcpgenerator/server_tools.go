@@ -2,47 +2,20 @@ package mcpgenerator
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-
-	"github.com/centralmind/gateway/connectors"
 	"github.com/centralmind/gateway/mcp"
 	"github.com/centralmind/gateway/model"
-	"github.com/centralmind/gateway/plugins"
-	"github.com/centralmind/gateway/server"
-	"golang.org/x/xerrors"
 )
 
-type MCPServer struct {
-	server *server.MCPServer
-}
-
-func New(
-	schema model.Config,
-) (*MCPServer, error) {
-	srv := server.NewMCPServer("mcp-data-gateway", "0.0.1")
-
-	var interceptors []plugins.Interceptor
-	for k, v := range schema.Plugins {
-		plugin, err := plugins.New(k, v)
-		if err != nil {
-			return nil, err
-		}
-		interceptor, ok := plugin.(plugins.Interceptor)
-		if !ok {
-			continue
-		}
-		interceptors = append(interceptors, interceptor)
+func (s *MCPServer) SetTools(tools []model.Endpoint) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	var names []string
+	for _, t := range tools {
+		names = append(names, t.MCPMethod)
 	}
-	connector, err := connectors.New(schema.Database.Type, schema.Database.Connection)
-	if err != nil {
-		return nil, xerrors.Errorf("unable to init connector: %w", err)
-	}
-	connector, err = plugins.Wrap(schema.Plugins, connector)
-	if err != nil {
-		return nil, xerrors.Errorf("unable to init connector plugins: %w", err)
-	}
-	for _, endpoint := range schema.Database.Endpoints {
+	s.server.DeleteTools(names...)
+	for _, endpoint := range tools {
 		var opts []mcp.ToolOption
 		for _, col := range endpoint.Params {
 			if col.Required {
@@ -52,7 +25,7 @@ func New(
 			}
 		}
 
-		srv.AddTool(mcp.NewTool(
+		s.server.AddTool(mcp.NewTool(
 			endpoint.MCPMethod,
 			opts...,
 		), func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
@@ -62,7 +35,7 @@ func New(
 					arg[param.Name] = nil
 				}
 			}
-			res, err := connector.Query(ctx, endpoint, request.Params.Arguments)
+			res, err := s.connector.Query(ctx, endpoint, request.Params.Arguments)
 			if err != nil {
 				return &mcp.CallToolResult{
 					Content: []mcp.Content{
@@ -91,27 +64,7 @@ func New(
 			}, nil
 		})
 	}
-
-	return &MCPServer{
-		server: srv,
-	}, nil
-}
-
-func jsonify(data any) string {
-	res, _ := json.Marshal(data)
-	return string(res)
-}
-
-func (s *MCPServer) ServeSSE(addr string, prefix string) *server.SSEServer {
-	return server.NewSSEServer(s.server, addr, prefix)
-}
-
-func (s *MCPServer) ServeStdio() *server.StdioServer {
-	return server.NewStdioServer(s.server)
-}
-
-func (s *MCPServer) Server() *server.MCPServer {
-	return s.server
+	s.tools = tools
 }
 
 func ArgumentOption(col model.EndpointParams, opts ...mcp.PropertyOption) mcp.ToolOption {
