@@ -25,3 +25,11 @@ func Header(ctx context.Context, key string) string {
 	}
 	return ""
 }
+
+func Headers(ctx context.Context) map[string][]string {
+	headers, ok := ctx.Value(headersKey).(map[string][]string)
+	if !ok {
+		return map[string][]string{}
+	}
+	return headers
+}

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/centralmind/gateway/mcp"
 	"github.com/centralmind/gateway/model"
+	"github.com/centralmind/gateway/xcontext"
 )
 
 func (s *MCPServer) SetTools(tools []model.Endpoint) {
@@ -57,7 +58,7 @@ func (s *MCPServer) endpoint(endpoint model.Endpoint) func(ctx context.Context, 
 	MAIN:
 		for _, row := range resData {
 			for _, interceptor := range s.interceptors {
-				r, skip := interceptor.Process(row, map[string][]string{})
+				r, skip := interceptor.Process(row, xcontext.Headers(ctx))
 				if skip {
 					continue MAIN
 				}

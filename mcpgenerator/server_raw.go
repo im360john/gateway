@@ -6,6 +6,7 @@ import (
 	"github.com/centralmind/gateway/mcp"
 	"github.com/centralmind/gateway/model"
 	"github.com/centralmind/gateway/prompter"
+	"github.com/centralmind/gateway/xcontext"
 	"golang.org/x/xerrors"
 	"strings"
 )
@@ -56,7 +57,7 @@ func (s *MCPServer) query(ctx context.Context, request mcp.CallToolRequest) (*mc
 MAIN:
 	for _, row := range resData {
 		for _, interceptor := range s.interceptors {
-			r, skip := interceptor.Process(row, map[string][]string{})
+			r, skip := interceptor.Process(row, xcontext.Headers(ctx))
 			if skip {
 				continue MAIN
 			}

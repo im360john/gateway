@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/centralmind/gateway/xcontext"
 	"net/http"
 	"net/http/httptest"
 	"path"
@@ -177,6 +178,7 @@ func (s *SSEServer) handleMessage(w http.ResponseWriter, r *http.Request) {
 		ClientID:  sessionID,
 		SessionID: sessionID,
 	})
+	ctx = xcontext.WithHeader(ctx, r.Header)
 
 	sessionI, ok := s.sessions.Load(sessionID)
 	if !ok {
