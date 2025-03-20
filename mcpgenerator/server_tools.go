@@ -41,7 +41,7 @@ func (s *MCPServer) endpoint(endpoint model.Endpoint) func(ctx context.Context, 
 				arg[param.Name] = nil
 			}
 		}
-		res, err := s.connector.Query(ctx, endpoint, request.Params.Arguments)
+		resData, err := s.connector.Query(ctx, endpoint, request.Params.Arguments)
 		if err != nil {
 			return &mcp.CallToolResult{
 				Content: []mcp.Content{
@@ -52,6 +52,18 @@ func (s *MCPServer) endpoint(endpoint model.Endpoint) func(ctx context.Context, 
 				},
 				IsError: true,
 			}, nil
+		}
+		var res []map[string]interface{}
+	MAIN:
+		for _, row := range resData {
+			for _, interceptor := range s.interceptors {
+				r, skip := interceptor.Process(row, map[string][]string{})
+				if skip {
+					continue MAIN
+				}
+				row = r
+			}
+			res = append(res, row)
 		}
 		var content []mcp.Content
 		content = append(content, mcp.TextContent{

@@ -262,6 +262,19 @@ func (r *Rest) DiscoverDataHandler() gin.HandlerFunc {
 				return
 			}
 
+			var res []map[string]any
+		MAIN:
+			for _, row := range sample {
+				for _, interceptor := range r.interceptors {
+					r, skip := interceptor.Process(row, c.Request.Header)
+					if skip {
+						continue MAIN
+					}
+					row = r
+				}
+				res = append(res, row)
+			}
+
 			// Convert columns to a format suitable for JSON
 			var columns []map[string]interface{}
 			for _, col := range table.Columns {
@@ -331,6 +344,27 @@ func (r *Rest) QueryHandler() gin.HandlerFunc {
 			gw_model.Endpoint{Query: query},
 			make(map[string]any),
 		)
+		if err != nil {
+			code := http.StatusInternalServerError
+			if errors.Is(err, gw_errors.ErrNotAuthorized) {
+				code = http.StatusUnauthorized
+			}
+			c.JSON(code, gin.H{"error": err.Error()})
+			return
+		}
+		var res []map[string]any
+	MAIN:
+		for _, row := range resData {
+			for _, interceptor := range r.interceptors {
+				r, skip := interceptor.Process(row, c.Request.Header)
+				if skip {
+					continue MAIN
+				}
+				row = r
+			}
+			res = append(res, row)
+		}
+		c.JSON(http.StatusOK, res)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("unable to execute query: %v", err)})
 			return

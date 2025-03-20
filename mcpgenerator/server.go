@@ -11,9 +11,10 @@ import (
 )
 
 type MCPServer struct {
-	server    *server.MCPServer
-	connector connectors.Connector
-	tools     []model.Endpoint
+	server       *server.MCPServer
+	connector    connectors.Connector
+	tools        []model.Endpoint
+	interceptors []plugins.Interceptor
 
 	mu    sync.Mutex
 	plugs map[string]any
@@ -32,11 +33,15 @@ func New(
 	if err != nil {
 		return nil, xerrors.Errorf("unable to init connector plugins: %w", err)
 	}
-
+	interceptors, err := plugins.Plugins[plugins.Interceptor](plugs)
+	if err != nil {
+		return nil, xerrors.Errorf("unable to init interceptors: %w", err)
+	}
 	return &MCPServer{
-		server:    srv,
-		connector: connector,
-		plugs:     plugs,
+		server:       srv,
+		connector:    connector,
+		plugs:        plugs,
+		interceptors: interceptors,
 	}, nil
 }
 

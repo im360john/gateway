@@ -51,12 +51,25 @@ func (s *MCPServer) query(ctx context.Context, request mcp.CallToolRequest) (*mc
 	if err != nil {
 		return nil, xerrors.Errorf("unable to infer query: %w", err)
 	}
+
+	var res []map[string]interface{}
+MAIN:
+	for _, row := range resData {
+		for _, interceptor := range s.interceptors {
+			r, skip := interceptor.Process(row, map[string][]string{})
+			if skip {
+				continue MAIN
+			}
+			row = r
+		}
+		res = append(res, row)
+	}
 	var content []mcp.Content
 	content = append(content, mcp.TextContent{
 		Type: "text",
-		Text: fmt.Sprintf("Found %v records-(s).", len(resData)),
+		Text: fmt.Sprintf("Found %v records-(s).", len(res)),
 	})
-	for _, record := range resData {
+	for _, record := range res {
 		content = append(content, mcp.TextContent{
 			Type: "text",
 			Text: prompter.Yamlify(record),
