@@ -42,6 +42,7 @@ export default defineConfig({
           items: [
             { label: 'ChatGPT', slug: 'docs/content/integration/chatgpt' },
             { label: 'LangChain', slug: 'docs/content/integration/langchain' },
+            { label: 'LlamaIndex', slug: 'docs/content/integration/llamaindex' },
             { label: 'Claude Desktop', slug: 'docs/content/integration/claude-desktop' },
             { label: 'Cursor', slug: 'docs/content/integration/cursor' },
           ],

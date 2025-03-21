@@ -62,6 +62,31 @@ response2 = agent.chat("Show me data from Staff table")
 print(response2)
 ```
 
+## Understanding the Code
+
+Let's break down the key components of the integration:
+
+### MCP Client Setup
+```python
+mcp_client = BasicMCPClient("http://localhost:9090/sse")
+```
+This line creates a connection to your gateway's Server-Sent Events (SSE) endpoint. SSE is used for real-time communication between the client and server, allowing the AI agent to interact with your database seamlessly.
+
+### Tool Specification
+```python
+mcp_tool_spec = McpToolSpec(
+    client=mcp_client,    
+    # allowed_tools=["tool1", "tool2"]
+)
+```
+The tool specification configures which API methods will be available to the AI agent. Think of it as creating a toolbox of available commands. You can optionally filter which tools (API methods) the agent can access using the `allowed_tools` parameter.
+
+### Converting to LlamaIndex Tools
+```python
+tools = mcp_tool_spec.to_tool_list()
+```
+This step transforms your API methods into a format that LlamaIndex can understand. Each API method becomes a "tool" that the AI agent can use to interact with your database. These tools are what enable the agent to execute database operations based on natural language requests.
+
 ## Features
 
 - Natural language interaction with your database (aka "chat with your database")
