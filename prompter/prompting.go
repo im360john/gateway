@@ -137,9 +137,12 @@ func SchemaFromConfig(config connectors.Config) string {
 		}
 	}
 
-	// Handle special case for PostgreSQL where public is the default schema
 	if config.Type() == "postgres" && schema == "" {
 		schema = "public"
+	}
+
+	if config.Type() == "mssql" && schema == "" {
+		schema = "dbo"
 	}
 
 	if config.Type() == "bigquery" {
