@@ -3,6 +3,7 @@ package swaggerator
 import (
 	"context"
 	"embed"
+	"fmt"
 	"io/fs"
 	"net/http"
 	"path"
@@ -209,7 +210,7 @@ func AddRawEndpoints(api *huma.OpenAPI, schema model.Config, prefix string) (*hu
 	// List Tables endpoint
 	listTablesOperation := &huma.Operation{
 		Summary:     "List available tables",
-		Description: "Return list of tables that available for data",
+		Description: fmt.Sprintf("Return list of tables that available for data in %s database", schema.Database.Type),
 		OperationID: "list_tables",
 		Tags:        []string{"Raw"},
 		Responses: map[string]*huma.Response{
@@ -259,7 +260,7 @@ func AddRawEndpoints(api *huma.OpenAPI, schema model.Config, prefix string) (*hu
 	// Discover Data endpoint
 	discoverDataOperation := &huma.Operation{
 		Summary:     "Discover data structure",
-		Description: "Discover data structure for connected gateway",
+		Description: fmt.Sprintf("Discover data structure for connected %s gateway", schema.Database.Type),
 		OperationID: "discover_data",
 		Tags:        []string{"Raw"},
 		Parameters: []*huma.Param{
@@ -326,7 +327,7 @@ func AddRawEndpoints(api *huma.OpenAPI, schema model.Config, prefix string) (*hu
 	// Prepare Query endpoint
 	prepareQueryOperation := &huma.Operation{
 		Summary:     "Verify and prepare query",
-		Description: "Verify query and prepare output structure for query",
+		Description: fmt.Sprintf("Verify query and prepare output structure for query in %s database", schema.Database.Type),
 		OperationID: "prepare_query",
 		Tags:        []string{"Raw"},
 		Parameters: []*huma.Param{
@@ -377,7 +378,7 @@ func AddRawEndpoints(api *huma.OpenAPI, schema model.Config, prefix string) (*hu
 	// Query endpoint
 	queryOperation := &huma.Operation{
 		Summary:     "Execute query",
-		Description: "Query data structure for connected gateway",
+		Description: fmt.Sprintf("Query data structure for connected %s gateway", schema.Database.Type),
 		OperationID: "query",
 		Tags:        []string{"Raw"},
 		Parameters: []*huma.Param{

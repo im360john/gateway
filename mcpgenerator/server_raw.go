@@ -3,12 +3,13 @@ package mcpgenerator
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	"github.com/centralmind/gateway/mcp"
 	"github.com/centralmind/gateway/model"
 	"github.com/centralmind/gateway/prompter"
 	"github.com/centralmind/gateway/xcontext"
 	"golang.org/x/xerrors"
-	"strings"
 )
 
 func (s *MCPServer) EnableRawProtocol() {
@@ -17,28 +18,28 @@ func (s *MCPServer) EnableRawProtocol() {
 	s.server.DeleteTools("list_tables", "discover_data", "prepare_query", "query")
 	s.server.AddTool(mcp.NewTool(
 		"list_tables",
-		mcp.WithDescription(`Return list of tables that available for data.
+		mcp.WithDescription(fmt.Sprintf(`Return list of tables that available for data in %s database.
 This is usually first this agent shall call.
-`),
+`, s.connector.Config().Type())),
 	), s.listTables)
 	s.server.AddTool(mcp.NewTool(
 		"discover_data",
-		mcp.WithDescription(`Discover data structure for connected gateway.
+		mcp.WithDescription(fmt.Sprintf(`Discover data structure for connected %s gateway.
 tables_list parameter is comma separated table to fetch data samples.
 Disovery better to call with a list of interested tables, since it will load all their samples.
-`),
+`, s.connector.Config().Type())),
 		mcp.WithString("tables_list"),
 	), s.discoverData)
 	s.server.AddTool(mcp.NewTool(
 		"prepare_query",
-		mcp.WithDescription(`Verify query and prepare output structure for query.
+		mcp.WithDescription(fmt.Sprintf(`Verify query and prepare output structure for query in %s database.
 This tool shall be executed before query, to examine output structure and verify that query is correct.
-`),
+`, s.connector.Config().Type())),
 		mcp.WithString("query", mcp.Required()),
 	), s.prepareQuery)
 	s.server.AddTool(mcp.NewTool(
 		"query",
-		mcp.WithDescription("Query data structure for connected gateway"),
+		mcp.WithDescription(fmt.Sprintf("Query data structure for connected %s gateway", s.connector.Config().Type())),
 		mcp.WithString("query", mcp.Required()),
 	), s.query)
 }
