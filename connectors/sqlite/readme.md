@@ -1,5 +1,6 @@
-# SQLite Connector
-
+---
+title: 'SQLite'
+---
 This connector allows you to connect to SQLite databases. SQLite is a self-contained, serverless, zero-configuration, transactional SQL database engine.
 
 ## Configuration
