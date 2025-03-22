@@ -14,6 +14,7 @@ import (
 	_ "github.com/centralmind/gateway/connectors/oracle"
 	_ "github.com/centralmind/gateway/connectors/postgres"
 	_ "github.com/centralmind/gateway/connectors/snowflake"
+	_ "github.com/centralmind/gateway/connectors/sqlite"
 	_ "github.com/centralmind/gateway/plugins/api_keys"
 	_ "github.com/centralmind/gateway/plugins/lru_cache"
 	_ "github.com/centralmind/gateway/plugins/lua_rls"
