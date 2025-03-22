@@ -365,12 +365,6 @@ func (r *Rest) QueryHandler() gin.HandlerFunc {
 			res = append(res, row)
 		}
 		c.JSON(http.StatusOK, res)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("unable to execute query: %v", err)})
-			return
-		}
-
-		c.JSON(http.StatusOK, resData)
 	}
 }
 

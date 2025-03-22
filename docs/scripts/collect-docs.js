@@ -338,6 +338,53 @@ ${pluginDirs
   }
 }
 
+async function generateLLMFile() {
+  try {
+    // Find all markdown files in the docs directory
+    const files = await glob('**/*.md', {
+      cwd: docsDir,
+      ignore: ['**/assets/**'],
+      nocase: true,
+    });
+
+    // Generate content for llm.txt
+    const content = `# CentralMind Documentation
+
+> CentralMind Gateway Create secured API or MCP Server in Minutes on top of your databases 
+
+## Docs
+
+${files
+  .map((file) => {
+    // Convert file path to URL format
+    const url = file.replace(/\.md$/, '');
+    // Get title from file content
+    const title = file
+      .replace(/\.md$/, '')
+      .split('/')
+      .pop()
+      .replace(/-/g, ' ')
+      .replace(/\b\w/g, (l) => l.toUpperCase());
+    return `- [${title}](https://docs.centralmind.ai/${url})`;
+  })
+  .join('\n')}
+
+## Optional
+
+- [CentralMind Website](https://centralmind.ai/)
+- [CentralMind Gateway GitHub](https://github.com/centralmind/gateway)
+
+`;
+
+    // Write the llm.txt file to the public directory
+    const publicDir = join(__dirname, '../public');
+    await writeFile(join(publicDir, 'llm.txt'), content);
+    console.log('Generated llm.txt file to ' + join(publicDir, 'llm.txt'));
+  } catch (error) {
+    console.error('Error generating llm.txt:', error);
+  }
+}
+
 async function collectDocs() {
   try {
     // Find all README.md files in the project
@@ -359,6 +406,9 @@ async function collectDocs() {
     // Collect plugins and connectors documentation
     await collectPluginsDocs();
     await collectConnectorsDocs();
+
+    // Generate llm.txt file
+    await generateLLMFile();
 
     console.log('Documentation collection completed!');
     return files;
