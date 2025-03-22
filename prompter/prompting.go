@@ -145,6 +145,10 @@ func SchemaFromConfig(config connectors.Config) string {
 		schema = "dbo"
 	}
 
+	if config.Type() == "sqlite" && schema == "" {
+		schema = "main"
+	}
+
 	if config.Type() == "bigquery" {
 		schema = fmt.Sprintf("%s.%s", generalConfig.ProjectID, generalConfig.Dataset)
 	}
