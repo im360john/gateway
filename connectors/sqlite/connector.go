@@ -9,8 +9,8 @@ import (
 	"github.com/centralmind/gateway/castx"
 	"github.com/centralmind/gateway/connectors"
 	"github.com/centralmind/gateway/model"
+	_ "github.com/glebarez/go-sqlite"
 	"github.com/jmoiron/sqlx"
-	_ "github.com/mattn/go-sqlite3"
 	"golang.org/x/xerrors"
 )
 
@@ -29,7 +29,7 @@ func init() {
 			}
 		}
 
-		db, err := sqlx.Connect("sqlite3", connStr)
+		db, err := sqlx.Connect("sqlite", connStr)
 		if err != nil {
 			return nil, fmt.Errorf("unable to connect to sqlite: %v", err)
 		}
