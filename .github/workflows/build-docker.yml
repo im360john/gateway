@@ -50,26 +50,12 @@ jobs:
             --file Dockerfile.build \
             --push \
             .
-          docker buildx build --platform linux/arm64 \
-            --build-arg TARGETARCH=arm64 \
-            --build-arg CGO_ENABLED=0 \
-            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
-            --file Dockerfile.build \
-            --push \
-            .
 
       - name: Tag Release Images
         if: github.event_name == 'release'
         run: |
           docker buildx build --platform linux/amd64 \
             --build-arg TARGETARCH=amd64 \
-            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.release.tag_name }} \
-            --file Dockerfile.build \
-            --push \
-            .
-          docker buildx build --platform linux/arm64 \
-            --build-arg TARGETARCH=arm64 \
-            --build-arg CGO_ENABLED=0 \
             -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.release.tag_name }} \
             --file Dockerfile.build \
             --push \
