@@ -1,6 +1,7 @@
 package plugins
 
 import (
+	"github.com/centralmind/gateway/server"
 	"github.com/danielgtaylor/huma/v2"
 	"net/http"
 
@@ -35,6 +36,15 @@ type Interceptor interface {
 type HTTPServer interface {
 	Plugin
 	RegisterRoutes(mux *http.ServeMux)
+}
+
+type MCPTooler interface {
+	Server() *server.MCPServer
+}
+
+type MCPToolEnricher interface {
+	Plugin
+	EnrichMCP(tooler MCPTooler)
 }
 
 // Wrapper represents a plugin that can wrap and enhance a connector's functionality

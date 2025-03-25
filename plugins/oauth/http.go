@@ -5,7 +5,14 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"net/http"
+	"sync"
 	"time"
+)
+
+// for now - global var, better to replace with shared DB
+var (
+	authorizedSessions   = sync.Map{}
+	authorizedSessionsWG = sync.Map{}
 )
 
 // generateState creates a random state parameter to prevent CSRF
@@ -35,6 +42,14 @@ func (p *Plugin) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     "oauth_state",
 		Value:    state,
+		Path:     "/",
+		Expires:  time.Now().Add(15 * time.Minute),
+		HttpOnly: true,
+		Secure:   r.TLS != nil,
+	})
+	http.SetCookie(w, &http.Cookie{
+		Name:     "mcp_session",
+		Value:    r.URL.Query().Get("mcp_session"),
 		Path:     "/",
 		Expires:  time.Now().Add(15 * time.Minute),
 		HttpOnly: true,
@@ -89,6 +104,29 @@ func (p *Plugin) HandleCallback(w http.ResponseWriter, r *http.Request) {
 		AccessToken: token.AccessToken,
 		TokenType:   "Bearer",
 	}
+
+	if mcpSession, err := r.Cookie("mcp_session"); err == nil {
+		authorizedSessions.LoadOrStore(mcpSession.Value, "Bearer "+token.AccessToken)
+		waiter, ok := authorizedSessionsWG.Load(mcpSession.Value)
+		if ok {
+			_, okok := authorizedSessions.Load(mcpSession.Value)
+			if !okok {
+				waiter.(*sync.WaitGroup).Done()
+			}
+		}
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+		// Read HTML template from embedded resources
+		htmlContent, err := resources.ReadFile("resources/auth_complete.html")
+		if err != nil {
+			http.Error(w, "Failed to load template", http.StatusInternalServerError)
+			return
+		}
+
+		_, _ = w.Write(htmlContent)
+		return
+	}
+
 	if !token.Expiry.IsZero() {
 		response.ExpiresIn = int(time.Until(token.Expiry).Seconds())
 	}
