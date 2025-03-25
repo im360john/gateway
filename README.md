@@ -17,7 +17,8 @@
 Simple way to expose your database to AI-Agent via MCP or OpenAPI 3.1 protocols.
 
 ```bash
-docker run -p 9090:9090 ghcr.io/centralmind/gateway:v0.2.0 start \
+docker run --platform linux/amd64 -p 9090:9090 \
+  ghcr.io/centralmind/gateway:v0.2.6 start \
   --connection-string "postgres://db-user:db-password@db-host/db-name?sslmode=require"
 ```
 
