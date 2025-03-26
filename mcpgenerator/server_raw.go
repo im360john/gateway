@@ -115,7 +115,8 @@ func (s *MCPServer) discoverData(ctx context.Context, request mcp.CallToolReques
 	if err != nil {
 		return nil, xerrors.Errorf("unable to discover all tables: %w", err)
 	}
-	tablesList := request.Params.Arguments["tables_list"].(string)
+
+	tablesList, _ := request.Params.Arguments["tables_list"].(string)
 
 	tableSet := map[string]bool{}
 
