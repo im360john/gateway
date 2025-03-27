@@ -109,6 +109,7 @@ oauth:
   token_header: "Authorization" # Header name for the token (default: "Authorization")
   user_info_url: ""          # User info endpoint URL (required for Auth0)
   introspection_url: ""      # Token introspection endpoint (required for Keycloak/Okta)
+  mcp_protocol_version: "2025-03-26" # If larget than 2025-03-26 - sse URL will return 401, to force OAuth flow 
   authorization_rules:
     # Public access to health check methods
     - methods: ["GetHealth", "GetVersion"]
