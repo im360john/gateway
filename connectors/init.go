@@ -42,6 +42,22 @@ func Register[TConfig Config](f func(cfg TConfig) (Connector, error)) {
 	configs[t.Type()] = t
 }
 
+// RegisterAlias registers additional names for an existing connector type
+func RegisterAlias(typ string, aliases ...string) {
+	f, ok := interceptors[typ]
+	if !ok {
+		return
+	}
+	cfg, ok := configs[typ]
+	if !ok {
+		return
+	}
+	for _, alias := range aliases {
+		interceptors[alias] = f
+		configs[alias] = cfg
+	}
+}
+
 // KnownConnectors returns a list of all registered connector configurations
 func KnownConnectors() []Config {
 	result := make([]Config, 0, len(configs))
