@@ -2,13 +2,10 @@ package connectors
 
 import (
 	"context"
-	"os"
-	"strings"
 
 	"github.com/centralmind/gateway/model"
 	"github.com/centralmind/gateway/remapper"
 	"golang.org/x/xerrors"
-	"gopkg.in/yaml.v3"
 )
 
 type Config interface {
@@ -72,55 +69,9 @@ func KnownConnector(key string) (Config, bool) {
 	return cfg, ok
 }
 
-// expandEnvIfNotQuoted expands environment variables in a string only if it's not quoted
-func expandEnvIfNotQuoted(node *yaml.Node) {
-	if node.Kind == yaml.ScalarNode {
-		value := node.Value
-		// Check if the value is quoted (starts and ends with quotes)
-		isQuoted := (strings.HasPrefix(value, "'") && strings.HasSuffix(value, "'")) ||
-			(strings.HasPrefix(value, "\"") && strings.HasSuffix(value, "\""))
-
-		if !isQuoted {
-			node.Value = os.ExpandEnv(value)
-		}
-	} else if node.Kind == yaml.MappingNode {
-		// Process mapping (key-value pairs)
-		for i := 0; i < len(node.Content); i += 2 {
-			expandEnvIfNotQuoted(node.Content[i+1]) // Process only values, skip keys
-		}
-	} else if node.Kind == yaml.SequenceNode {
-		// Process sequences (arrays)
-		for _, item := range node.Content {
-			expandEnvIfNotQuoted(item)
-		}
-	}
-}
-
 func New(tag string, config any) (Connector, error) {
-	switch v := config.(type) {
-	case string:
-		var node yaml.Node
-		if err := yaml.Unmarshal([]byte(v), &node); err != nil {
-			return nil, err
-		}
-		expandEnvIfNotQuoted(&node)
-		var r any
-		if err := node.Decode(&r); err != nil {
-			return nil, err
-		}
-		config = r
-	case []byte:
-		var node yaml.Node
-		if err := yaml.Unmarshal(v, &node); err != nil {
-			return nil, err
-		}
-		expandEnvIfNotQuoted(&node)
-		var r any
-		if err := node.Decode(&r); err != nil {
-			return nil, err
-		}
-		config = r
-	}
+	// Note: Environment variable expansion is now handled at the model level
+	// in model/model.go, so we no longer need to do it here
 	f, ok := interceptors[tag]
 	if !ok {
 		return nil, xerrors.Errorf("connector: %s not found", tag)

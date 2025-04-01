@@ -2,6 +2,7 @@ package model
 
 import (
 	"encoding/json"
+	"os"
 	"strings"
 
 	"golang.org/x/xerrors"
@@ -80,12 +81,101 @@ type Config struct {
 }
 
 func FromYaml(raw []byte) (*Config, error) {
-	var gw Config
-	err := yaml.Unmarshal(raw, &gw)
+	// Parse YAML and expand environment variables before unmarshaling to final config
+	var node yaml.Node
+	err := yaml.Unmarshal(raw, &node)
 	if err != nil {
 		return nil, xerrors.Errorf("unable to parse yaml: %w", err)
 	}
+
+	// Expand environment variables in the node
+	expandEnvIfNotQuoted(&node)
+
+	// Unmarshal the processed YAML to the Config struct
+	var gw Config
+	if err := node.Decode(&gw); err != nil {
+		return nil, xerrors.Errorf("unable to decode yaml: %w", err)
+	}
+
+	// Process any additional string fields that might need environment variable expansion
+	// This handles cases like SQL strings that might be quoted in the YAML
+	// but still need environment variable expansion
+	expandEnvInConfig(&gw)
+
 	return &gw, nil
+}
+
+// expandEnvIfNotQuoted expands environment variables in a YAML node
+func expandEnvIfNotQuoted(node *yaml.Node) {
+	if node.Kind == yaml.ScalarNode {
+		value := node.Value
+		// Check if the value is quoted (starts and ends with quotes)
+		isQuoted := (strings.HasPrefix(value, "'") && strings.HasSuffix(value, "'")) ||
+			(strings.HasPrefix(value, "\"") && strings.HasSuffix(value, "\""))
+
+		if !isQuoted {
+			node.Value = os.ExpandEnv(value)
+		}
+	} else if node.Kind == yaml.MappingNode {
+		// Process mapping (key-value pairs)
+		for i := 0; i < len(node.Content); i += 2 {
+			expandEnvIfNotQuoted(node.Content[i+1]) // Process only values, skip keys
+		}
+	} else if node.Kind == yaml.SequenceNode {
+		// Process sequences (arrays)
+		for _, item := range node.Content {
+			expandEnvIfNotQuoted(item)
+		}
+	}
+}
+
+// expandEnvInConfig recursively processes a configuration to expand environment variables
+// in all string fields, including map values and nested configurations
+func expandEnvInConfig(cfg *Config) {
+	// Process database connection
+	cfg.Database.Connection = processAnyField(cfg.Database.Connection)
+
+	// Process plugins configs
+	for k, v := range cfg.Plugins {
+		cfg.Plugins[k] = processAnyField(v)
+	}
+}
+
+// processAnyField recursively processes any field, expanding environment variables in strings
+func processAnyField(v interface{}) interface{} {
+	if v == nil {
+		return nil
+	}
+
+	switch val := v.(type) {
+	case string:
+		// Process string value
+		return os.ExpandEnv(val)
+	case map[string]interface{}:
+		// Process map values
+		for k, mv := range val {
+			val[k] = processAnyField(mv)
+		}
+		return val
+	case []interface{}:
+		// Process slice values
+		for i, sv := range val {
+			val[i] = processAnyField(sv)
+		}
+		return val
+	case map[interface{}]interface{}:
+		// Process map with interface keys (sometimes happens with YAML)
+		result := make(map[string]interface{})
+		for k, mv := range val {
+			if kStr, ok := k.(string); ok {
+				result[kStr] = processAnyField(mv)
+			}
+		}
+		return result
+	default:
+		// Other types are returned as is
+		return val
+	}
 }
 
 func (g *Config) ParamRaw() string {
@@ -147,10 +237,13 @@ type EndpointParams struct {
 }
 
 func FromDSN(dsn string) (*Config, error) {
+	// Expand environment variables in DSN string
+	expandedDSN := os.ExpandEnv(dsn)
+
 	// Extract database type from DSN (assuming format like "postgres://..." or "mysql://...")
 	dbType := ""
-	if idx := strings.Index(dsn, "://"); idx != -1 {
-		dbType = dsn[:idx]
+	if idx := strings.Index(expandedDSN, "://"); idx != -1 {
+		dbType = expandedDSN[:idx]
 	}
 
 	return &Config{
@@ -161,7 +254,7 @@ func FromDSN(dsn string) (*Config, error) {
 		},
 		Database: Database{
 			Type:       dbType,
-			Connection: dsn,
+			Connection: expandedDSN,
 		},
 	}, nil
 }
