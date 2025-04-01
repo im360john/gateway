@@ -2,7 +2,6 @@ package duckdb
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"strings"
 
@@ -17,18 +16,28 @@ import (
 func init() {
 	connectors.Register[Config](func(cfg Config) (connectors.Connector, error) {
 		connStr := cfg.ConnectionString()
-		// Remove duckdb:// prefix if present
-		connStr = strings.TrimPrefix(connStr, "duckdb://")
 
-		safetyGuardRails := "access_mode=READ_ONLY&allow_community_extensions=false"
+		// Special handling for memory database - don't modify memory connection strings
+		if connStr == ":memory:" {
+			// Leave it as is - the driver expects exactly ":memory:"
+		} else if strings.HasPrefix(connStr, "memory_") {
+			// For backwards compatibility with tests using memory_{id} format,
+			// convert to proper in-memory format
+			connStr = ":memory:"
+		} else {
+			// Remove duckdb:// prefix if present to standardize
+			connStr = strings.TrimPrefix(connStr, "duckdb://")
 
-		// Add READ_ONLY mode if connection string is not empty and not in-memory
-		if connStr != "" && !strings.Contains(connStr, ":memory:") {
+			// Add safety guard rails for non-memory DB
+			safetyGuardRails := "access_mode=READ_ONLY&allow_community_extensions=false"
 			if strings.Contains(connStr, "?") {
 				connStr += "&" + safetyGuardRails
 			} else {
 				connStr += "?" + safetyGuardRails
 			}
+
+			// Add prefix back
+			connStr = "duckdb://" + connStr
 		}
 
 		db, err := sqlx.Connect("duckdb", connStr)
@@ -232,9 +241,7 @@ func (c Connector) Query(ctx context.Context, endpoint model.Endpoint, params ma
 	}
 
 	// For parameterized queries, use transaction-based approach
-	tx, err := c.db.BeginTxx(ctx, &sql.TxOptions{
-		ReadOnly: c.Config().Readonly(),
-	})
+	tx, err := c.db.BeginTxx(ctx, nil) // No read-only option for DuckDB
 	if err != nil {
 		return nil, xerrors.Errorf("BeginTx failed with error: %w", err)
 	}

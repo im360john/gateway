@@ -54,6 +54,8 @@ func (c Config) ConnectionString() string {
 
 	// For in-memory database
 	if c.Memory {
+		// Return ":memory:" for in-memory database, which is the correct format
+		// for the go-duckdb driver
 		return ":memory:"
 	}
 

@@ -37,6 +37,8 @@ jobs:
           { group: "connectors", name: "snowflake", path: "snowflake" },
           { group: "connectors", name: "bigquery", path: "bigquery" },
           { group: "connectors", name: "mongodb", path: "mongodb" },
+          { group: "connectors", name: "duckdb", path: "duckdb" },
+          { group: "connectors", name: "sqlite", path: "sqlite" },          
           { group: "plugins", name: "plugins", path: "..." },
           { group: "mcp", name: "mcp", path: "..." },
           { group: "server", name: "server", path: "..." },

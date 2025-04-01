@@ -12,6 +12,9 @@ DuckDB connector allows querying DuckDB databases, which is an embedded analytic
 | hosts | string[] | no* | List of paths (only first path is used) |
 | database | string | no* | Database file name, will be opened in readonly mode |
 | init_sql | string | no | SQL commands to execute on connection initialization (e.g. installing extensions, attaching databases) |
+| memory | boolean | no | If true, uses an in-memory database |
+| conn_string | string | no | Direct connection string, overrides other parameters |
+
 
 ## Config Examples
 
@@ -57,26 +60,41 @@ connection:
   database: analytics.duckdb
 ```
 
-5. Using in-memory mode, just leave connection section blank:
+5. Using in-memory mode (recommended format):
 ```yaml
 connection:
-
+  type: duckdb
+  memory: true
 ```
 
-6. Using in-memory mode, or just put ":memory:":
+6. Using in-memory mode with direct connection string:
 ```yaml
-connection: ":memory:"
-  
+connection:
+  type: duckdb
+  conn_string: ":memory:"
+```
+
+7. Using empty connection section (defaults to in-memory):
+```yaml
+connection:
 ```
 
 ## Running Discovery and API
-You can also pass connection string as parameter, eg using absolute path on Linux:
+You can also pass connection string as parameter:
+
+### File-based connection strings
+Using absolute path on Linux:
 ```
 ./gateway discover --ai-provider gemin --connection-string "duckdb:///absolute/path/to/duckdb-demo.duckdb"
 ```
 or on Windows
 ```
-.\gateway discover --ai-provider gemini --connection-string  "duckdb://C:/path/duckdb-demo.duckdb"
+.\gateway discover --ai-provider gemini --connection-string "duckdb://C:/path/duckdb-demo.duckdb"
+```
+
+### In-memory connection strings
+```
+./gateway discover --ai-provider openai --connection-string ":memory:"
 ```
 
 Start server, it will use `gateway.yaml` generated from prev step:
@@ -84,13 +102,14 @@ Start server, it will use `gateway.yaml` generated from prev step:
 ./gateway start
 ```
 
-
 ## Path Resolution
 
 The final database path is determined as follows:
-1. If `hosts[0]` and `database` are provided: `hosts[0]/database`
-2. If only `hosts[0]` is provided: uses it as the complete path
-3. If only `database` is provided: uses it as a local path
+1. If `conn_string` is provided: uses it directly
+2. If `memory` is true: uses in-memory database (`:memory:`)
+3. If `hosts[0]` and `database` are provided: `hosts[0]/database`
+4. If only `hosts[0]` is provided: uses it as the complete path
+5. If only `database` is provided: uses it as a local path
 
 
 ## Notes
@@ -99,5 +118,7 @@ The final database path is determined as follows:
 - Only the first path in `hosts` is used (others are ignored)
 - Both forward slashes `/` and backslashes `\` are supported for Windows paths
 - Relative paths are resolved relative to the current working directory
-- Database works only in Read-only mode
+- File-based databases are opened in read-only mode by default
+- For in-memory databases, use the `memory: true` flag or `conn_string: ":memory:"`
+- In-memory databases still create temporary files for persistence, which is normal behavior
 - The `init_sql` field allows executing multiple SQL commands on connection initialization, separated by semicolons
