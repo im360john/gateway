@@ -21,25 +21,16 @@ type MCPServer struct {
 }
 
 func New(
-	db model.Database,
 	plugs map[string]any,
 ) (*MCPServer, error) {
 	srv := server.NewMCPServer("mcp-data-gateway", "0.0.1")
-	connector, err := connectors.New(db.Type, db.Connection)
-	if err != nil {
-		return nil, xerrors.Errorf("unable to init connector: %w", err)
-	}
-	connector, err = plugins.Wrap(plugs, connector)
-	if err != nil {
-		return nil, xerrors.Errorf("unable to init connector plugins: %w", err)
-	}
 	interceptors, err := plugins.Plugins[plugins.Interceptor](plugs)
 	if err != nil {
 		return nil, xerrors.Errorf("unable to init interceptors: %w", err)
 	}
 	return &MCPServer{
 		server:       srv,
-		connector:    connector,
+		connector:    nil,
 		plugs:        plugs,
 		interceptors: interceptors,
 	}, nil

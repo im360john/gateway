@@ -2,6 +2,7 @@ package cli
 
 import (
 	"context"
+	"github.com/centralmind/gateway/connectors"
 	"os"
 	"path/filepath"
 
@@ -45,9 +46,16 @@ optimized for AI agent interactions.`,
 				}
 			}
 
-			srv, err := mcpgenerator.New(gw.Database, gw.Plugins)
+			srv, err := mcpgenerator.New(gw.Plugins)
 			if err != nil {
 				return xerrors.Errorf("unable to init mcp generator: %w", err)
+			}
+			connector, err := connectors.New(gw.Database.Type, gw.Database.Connection)
+			if err != nil {
+				return xerrors.Errorf("unable to init connector: %w", err)
+			}
+			if err := srv.SetConnector(connector); err != nil {
+				return xerrors.Errorf("unable to set connector: %w", err)
 			}
 			if rawMode {
 				srv.EnableRawProtocol()

@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"github.com/centralmind/gateway/connectors"
 	"github.com/centralmind/gateway/plugins"
 	"net/http"
 	"net/url"
@@ -119,11 +120,17 @@ Upon successful startup, the terminal will display URLs for both services.`,
 
 		// Initialize the MCP (Message Communication Protocol) generator
 		// This provides real-time communication capabilities optimized for AI agents
-		srv, err := mcpgenerator.New(gw.Database, gw.Plugins)
+		srv, err := mcpgenerator.New(gw.Plugins)
 		if err != nil {
 			return xerrors.Errorf("unable to init mcp generator: %w", err)
 		}
-
+		connector, err := connectors.New(gw.Database.Type, gw.Database.Connection)
+		if err != nil {
+			return xerrors.Errorf("unable to init connector: %w", err)
+		}
+		if err := srv.SetConnector(connector); err != nil {
+			return xerrors.Errorf("unable to set connector: %w", err)
+		}
 		// Enable raw protocol mode for AI agent communication if specified
 		if rawMode {
 			srv.EnableRawProtocol()
