@@ -164,7 +164,7 @@ func (c Connector) Discovery(ctx context.Context) ([]model.Table, error) {
 		}
 
 		table := model.Table{
-			Name:     tableName,
+			Name:     qualifiedTableName,
 			Columns:  columns,
 			RowCount: rowCount, // Store the row count in the table struct
 		}
