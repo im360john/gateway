@@ -135,7 +135,7 @@ func SchemaFromConfig(config connectors.Config) string {
 	}
 
 	if config.Type() == "postgres" && schema == "" {
-		schema = "public"
+		schema = ""
 	}
 
 	if config.Type() == "mssql" && schema == "" {
