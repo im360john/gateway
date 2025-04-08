@@ -94,7 +94,7 @@ or on Windows
 
 ### In-memory connection strings
 ```
-./gateway discover --ai-provider openai --connection-string ":memory:"
+./gateway discover --ai-provider openai --connection-string "duckdb://:memory:"
 ```
 
 Start server, it will use `gateway.yaml` generated from prev step:
@@ -111,6 +111,15 @@ The final database path is determined as follows:
 4. If only `hosts[0]` is provided: uses it as the complete path
 5. If only `database` is provided: uses it as a local path
 
+## Safety Features
+
+For security reasons, the connector automatically adds the following safety guard rails to connection strings:
+
+1. For all file-based databases (non-memory), the `access_mode=READ_ONLY` parameter is applied to prevent write operations
+2. For all database connections, `allow_community_extensions=false` is added to prevent loading potentially unsafe extensions
+3. These parameters are automatically added as query parameters (after `?` or `&` as appropriate) to the connection string
+
+Memory databases (:memory: or memory=true) do not have the READ_ONLY restriction, but still have community extensions disabled.
 
 ## Notes
 
