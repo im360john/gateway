@@ -17,6 +17,11 @@ func init() {
 	connectors.Register[Config](func(cfg Config) (connectors.Connector, error) {
 		connStr := cfg.ConnectionString()
 
+		// Remove duckdb:// prefix if present to standardize
+		connStr = strings.TrimPrefix(connStr, "duckdb://")
+
+		safetyGuardRails := "allow_community_extensions=false"
+
 		// Special handling for memory database - don't modify memory connection strings
 		if connStr == ":memory:" {
 			// Leave it as is - the driver expects exactly ":memory:"
@@ -25,20 +30,18 @@ func init() {
 			// convert to proper in-memory format
 			connStr = ":memory:"
 		} else {
-			// Remove duckdb:// prefix if present to standardize
-			connStr = strings.TrimPrefix(connStr, "duckdb://")
 
-			// Add safety guard rails for non-memory DB
-			safetyGuardRails := "access_mode=READ_ONLY&allow_community_extensions=false"
-			if strings.Contains(connStr, "?") {
-				connStr += "&" + safetyGuardRails
-			} else {
-				connStr += "?" + safetyGuardRails
-			}
-
-			// Add prefix back
-			connStr = "duckdb://" + connStr
+			safetyGuardRails = "access_mode=READ_ONLY&" + safetyGuardRails
 		}
+
+		//Lets add some safety guard rails
+		if strings.Contains(connStr, "?") {
+			connStr += "&" + safetyGuardRails
+		} else {
+			connStr += "?" + safetyGuardRails
+		}
+
+		print(connStr)
 
 		db, err := sqlx.Connect("duckdb", connStr)
 		if err != nil {
