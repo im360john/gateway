@@ -1,34 +1,36 @@
-# Build stage
+#############################################
+# Builder stage: сборка в окружении Debian
+#############################################
 FROM golang:1.24-bullseye AS builder
 
 WORKDIR /app
 
-# Install build dependencies and UPX
+# Устанавливаем необходимые инструменты сборки и UPX
 RUN apt-get update && \
     apt-get install -y --no-install-recommends git gcc build-essential upx && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy go mod and sum files
+# Копируем файлы модулей и загружаем зависимости
 COPY go.mod go.sum ./
-
-# Download dependencies
 RUN go mod download
 
-# Copy the source code
+# Копируем исходный код
 COPY . .
 
-# Build the binary with optimizations
+# Собираем бинарный файл с включённым CGO (необходимо для duckdb-go-bindings)
 RUN CGO_ENABLED=1 GOOS=linux go build -ldflags="-w -s" -o gateway
 
-# Compress the binary with UPX
+# Сжимаем бинарный файл с помощью UPX
 RUN upx --best --lzma gateway
 
-# Final stage
+#############################################
+# Final stage: минимальный образ на базе Debian
+#############################################
 FROM debian:bullseye-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install timezone data and CA certificates, then configure timezone
+# Устанавливаем tzdata и ca-certificates, настраиваем часовой пояс
 RUN apt-get update && \
     apt-get install -y --no-install-recommends tzdata ca-certificates && \
     rm -rf /var/lib/apt/lists/* && \
@@ -37,15 +39,15 @@ RUN apt-get update && \
     groupadd --system gateway && \
     useradd --system --create-home --home-dir /home/gateway --gid gateway gateway
 
-# Copy the compressed binary from builder
-COPY --from=builder /app/gateway /usr/local/bin/gateway
-
-# Set timezone environment variables
+# Устанавливаем необходимые переменные окружения
 ENV TZ=Etc/UTC
 ENV ROTATION_TZ=Etc/UTC
 ENV HOME=/home/gateway
 
-# Switch to the non-root user
+# Копируем собранный бинарный файл из этапа сборки
+COPY --from=builder /app/gateway /usr/local/bin/gateway
+
+# Переключаемся на непривилегированного пользователя
 USER gateway
 
 ENTRYPOINT ["/usr/local/bin/gateway"]
