@@ -23,7 +23,7 @@ func init() {
 		safetyGuardRails := "allow_community_extensions=false"
 
 		// Special handling for memory database - don't modify memory connection strings
-		if connStr == ":memory:" {
+		if connStr == ":memory:" || connStr == "" {
 			// Leave it as is - the driver expects exactly ":memory:"
 		} else if strings.HasPrefix(connStr, "memory_") {
 			// For backwards compatibility with tests using memory_{id} format,
@@ -40,8 +40,6 @@ func init() {
 		} else {
 			connStr += "?" + safetyGuardRails
 		}
-
-		print(connStr)
 
 		db, err := sqlx.Connect("duckdb", connStr)
 		if err != nil {
