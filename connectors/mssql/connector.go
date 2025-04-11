@@ -2,7 +2,6 @@ package mssql
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"strconv"
 	"strings"
@@ -98,15 +97,7 @@ func (c Connector) Sample(ctx context.Context, table model.Table) ([]map[string]
 	// Create schema-qualified table name
 	qualifiedTableName := fmt.Sprintf("[%s].[%s]", schema, table.Name)
 
-	tx, err := c.db.BeginTxx(ctx, &sql.TxOptions{
-		ReadOnly: true,
-	})
-	if err != nil {
-		return nil, xerrors.Errorf("BeginTx failed with error: %w", err)
-	}
-	defer tx.Commit()
-
-	rows, err := tx.NamedQuery(fmt.Sprintf("SELECT TOP 5 * FROM %s", qualifiedTableName), map[string]any{})
+	rows, err := c.db.NamedQuery(fmt.Sprintf("SELECT TOP 5 * FROM %s", qualifiedTableName), map[string]any{})
 	if err != nil {
 		return nil, xerrors.Errorf("unable to query db: %w", err)
 	}
@@ -259,15 +250,7 @@ func (c Connector) Query(ctx context.Context, endpoint model.Endpoint, params ma
 		}
 	}
 
-	tx, err := c.db.BeginTxx(ctx, &sql.TxOptions{
-		ReadOnly: c.Config().Readonly(),
-	})
-	if err != nil {
-		return nil, xerrors.Errorf("BeginTx failed with error: %w", err)
-	}
-	defer tx.Commit()
-
-	rows, err := tx.NamedQuery(endpoint.Query, processed)
+	rows, err := c.db.NamedQuery(endpoint.Query, processed)
 	if err != nil {
 		return nil, xerrors.Errorf("unable to query db: %w", err)
 	}
@@ -290,15 +273,7 @@ func (c Connector) LoadsColumns(ctx context.Context, tableName string) ([]model.
 		schema = c.config.Schema
 	}
 
-	tx, err := c.db.BeginTxx(ctx, &sql.TxOptions{
-		ReadOnly: true,
-	})
-	if err != nil {
-		return nil, xerrors.Errorf("BeginTx failed with error: %w", err)
-	}
-	defer tx.Commit()
-
-	rows, err := tx.QueryContext(
+	rows, err := c.db.QueryContext(
 		ctx,
 		`SELECT 
 			c.COLUMN_NAME,

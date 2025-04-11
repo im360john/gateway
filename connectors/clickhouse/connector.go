@@ -10,8 +10,6 @@ import (
 
 	"github.com/centralmind/gateway/connectors"
 
-	"database/sql"
-
 	_ "github.com/ClickHouse/clickhouse-go/v2"
 	"github.com/centralmind/gateway/castx"
 	"github.com/centralmind/gateway/model"
@@ -124,15 +122,7 @@ func (c Connector) Config() connectors.Config {
 }
 
 func (c Connector) Sample(ctx context.Context, table model.Table) ([]map[string]any, error) {
-	tx, err := c.db.BeginTxx(ctx, &sql.TxOptions{
-		ReadOnly: true,
-	})
-	if err != nil {
-		return nil, xerrors.Errorf("BeginTx failed with error: %w", err)
-	}
-	defer tx.Commit()
-
-	rows, err := tx.NamedQuery(fmt.Sprintf("SELECT * FROM %s LIMIT 5", table.Name), map[string]any{})
+	rows, err := c.db.NamedQuery(fmt.Sprintf("SELECT * FROM %s LIMIT 5", table.Name), map[string]any{})
 	if err != nil {
 		return nil, xerrors.Errorf("unable to query db: %w", err)
 	}
@@ -228,15 +218,7 @@ func (c Connector) Query(ctx context.Context, endpoint model.Endpoint, params ma
 		return nil, xerrors.Errorf("unable to process params: %w", err)
 	}
 
-	tx, err := c.db.BeginTxx(ctx, &sql.TxOptions{
-		ReadOnly: c.Config().Readonly(),
-	})
-	if err != nil {
-		return nil, xerrors.Errorf("BeginTx failed with error: %w", err)
-	}
-	defer tx.Commit()
-
-	rows, err := tx.NamedQuery(endpoint.Query, processed)
+	rows, err := c.db.NamedQuery(endpoint.Query, processed)
 	if err != nil {
 		return nil, xerrors.Errorf("unable to query db: %w", err)
 	}
@@ -254,15 +236,7 @@ func (c Connector) Query(ctx context.Context, endpoint model.Endpoint, params ma
 }
 
 func (c Connector) LoadsColumns(ctx context.Context, tableName string) ([]model.ColumnSchema, error) {
-	tx, err := c.db.BeginTxx(ctx, &sql.TxOptions{
-		ReadOnly: true,
-	})
-	if err != nil {
-		return nil, xerrors.Errorf("BeginTx failed with error: %w", err)
-	}
-	defer tx.Commit()
-
-	rows, err := tx.QueryContext(
+	rows, err := c.db.QueryContext(
 		ctx,
 		`SELECT 
 			name,
