@@ -7,10 +7,7 @@
 
 <h2 align="center">CentralMind Gateway: Create API or MCP Server in Minutes</h2>
 
-
-🚀 Interactive Demo via GitHub Codespaces
-
-[![Deploy with GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/centralmind/sample_databases)
+🚀 Interactive Demo avialable here: https://centralmind.ai
 
 ## What is Centralmind/Gateway
 
