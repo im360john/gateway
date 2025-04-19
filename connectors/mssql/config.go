@@ -61,21 +61,21 @@ func (c Config) ConnectionString() string {
 		// For now, just use the first one
 	}
 
-	// Set default schema if not specified
-	schema := c.Schema
-	if schema == "" {
-		schema = "dbo"
-	}
-
-	// Build connection string using URL format with port and schema
-	return fmt.Sprintf("sqlserver://%s:%s@%s:%d?database=%s&schema=%s",
+	// Build connection string using DSN format with explicit options
+	// This format is more reliable for handling special characters in passwords
+	connStr := fmt.Sprintf("server=%s;user id=%s;password=%s;port=%d;database=%s;TrustServerCertificate=true",
+		server,
 		c.User,
 		c.Password,
-		server,
 		c.Port,
-		c.Database,
-		schema,
-	)
+		c.Database)
+
+	// Add schema if specified
+	if c.Schema != "" {
+		connStr += fmt.Sprintf(";defaultSchema=%s", c.Schema)
+	}
+
+	return connStr
 }
 
 // Validate checks if the configuration is valid
