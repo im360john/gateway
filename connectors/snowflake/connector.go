@@ -2,7 +2,6 @@ package snowflake
 
 import (
 	"context"
-	"database/sql"
 	_ "embed"
 	"fmt"
 	"strings"
@@ -110,15 +109,7 @@ func (c Connector) Config() connectors.Config {
 }
 
 func (c Connector) Sample(ctx context.Context, table model.Table) ([]map[string]any, error) {
-	tx, err := c.db.BeginTxx(ctx, &sql.TxOptions{
-		ReadOnly: true,
-	})
-	if err != nil {
-		return nil, xerrors.Errorf("BeginTx failed with error: %w", err)
-	}
-	defer tx.Commit()
-
-	rows, err := tx.NamedQuery(fmt.Sprintf("SELECT * FROM %s LIMIT 5", table.Name), map[string]any{})
+	rows, err := c.db.NamedQuery(fmt.Sprintf("SELECT * FROM %s LIMIT 5", table.Name), map[string]any{})
 	if err != nil {
 		return nil, xerrors.Errorf("unable to query db: %w", err)
 	}

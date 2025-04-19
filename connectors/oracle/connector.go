@@ -2,7 +2,6 @@ package oracle
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"strconv"
 	"strings"
@@ -59,9 +58,15 @@ func (c *Connector) GuessColumnType(sqlType string) model.ColumnType {
 		return model.TypeNumber
 	}
 
-	// Integer types (special case of NUMBER)
-	if strings.Contains(upperType, "NUMBER(") && !strings.Contains(upperType, ",") {
-		return model.TypeInteger
+	// Check for NUMBER with precision
+	if strings.HasPrefix(upperType, "NUMBER(") {
+		if strings.Contains(upperType, ",") {
+			// NUMBER with decimal places (e.g., NUMBER(10,2))
+			return model.TypeNumber
+		} else {
+			// NUMBER without decimal places (e.g., NUMBER(10))
+			return model.TypeInteger
+		}
 	}
 
 	// Date/Time types
@@ -84,15 +89,7 @@ func (c Connector) Sample(ctx context.Context, table model.Table) ([]map[string]
 	// Create schema-qualified table name
 	qualifiedTableName := fmt.Sprintf("%s.%s", c.config.Schema, table.Name)
 
-	tx, err := c.db.BeginTxx(ctx, &sql.TxOptions{
-		ReadOnly: true,
-	})
-	if err != nil {
-		return nil, xerrors.Errorf("BeginTx failed with error: %w", err)
-	}
-	defer tx.Commit()
-
-	rows, err := tx.NamedQuery(fmt.Sprintf("SELECT * FROM %s WHERE ROWNUM <= 5", qualifiedTableName), map[string]any{})
+	rows, err := c.db.NamedQuery(fmt.Sprintf("SELECT * FROM %s WHERE ROWNUM <= 5", qualifiedTableName), map[string]any{})
 	if err != nil {
 		return nil, xerrors.Errorf("unable to query db: %w", err)
 	}
@@ -249,16 +246,8 @@ func (c Connector) Query(ctx context.Context, endpoint model.Endpoint, params ma
 		query = strings.Replace(query, name, fmt.Sprintf(":%d", i+1), -1)
 	}
 
-	tx, err := c.db.BeginTxx(ctx, &sql.TxOptions{
-		ReadOnly: c.Config().Readonly(),
-	})
-	if err != nil {
-		return nil, xerrors.Errorf("BeginTx failed with error: %w", err)
-	}
-	defer tx.Commit()
-
 	// Execute query with numbered parameters
-	rows, err := tx.Queryx(query, paramValues...)
+	rows, err := c.db.Queryx(query, paramValues...)
 	if err != nil {
 		return nil, xerrors.Errorf("unable to execute query: %w", err)
 	}
@@ -276,15 +265,7 @@ func (c Connector) Query(ctx context.Context, endpoint model.Endpoint, params ma
 }
 
 func (c Connector) LoadsColumns(ctx context.Context, tableName string) ([]model.ColumnSchema, error) {
-	tx, err := c.db.BeginTxx(ctx, &sql.TxOptions{
-		ReadOnly: true,
-	})
-	if err != nil {
-		return nil, xerrors.Errorf("BeginTx failed with error: %w", err)
-	}
-	defer tx.Commit()
-
-	rows, err := tx.QueryContext(
+	rows, err := c.db.QueryContext(
 		ctx,
 		`SELECT 
 			c.COLUMN_NAME,
