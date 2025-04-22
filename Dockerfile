@@ -5,7 +5,8 @@ ENV TZ=Etc/UTC, ROTATION_TZ=Etc/UTC
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN echo $TZ > /etc/timezone && \
-    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
+    apk add --no-cache ca-certificates
 
 # Create a non-root user and group
 RUN addgroup --system cligroup && adduser --system --ingroup cligroup cliuser

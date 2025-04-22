@@ -25,7 +25,10 @@ ENV TZ=Etc/UTC \
     DEBIAN_FRONTEND=noninteractive
 
 RUN echo $TZ > /etc/timezone && \
-    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
 
 # Create a non-root user and group
 RUN groupadd -r cligroup && useradd -r -g cligroup -m -d /home/cliuser cliuser
