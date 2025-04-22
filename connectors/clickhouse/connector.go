@@ -88,6 +88,11 @@ func (c *Config) MakeDSN() string {
 		return c.ConnString
 	}
 
+	// If database is empty, use "default"
+	if c.Database == "" {
+		c.Database = "default"
+	}
+
 	protocol := "http"
 	if c.Secure {
 		protocol = "https"
@@ -148,6 +153,12 @@ func (c Connector) Discovery(ctx context.Context, tablesList []string) ([]model.
 		}
 	}
 
+	// Use default database if not specified
+	dbName := c.config.Database
+	if dbName == "" {
+		dbName = "default"
+	}
+
 	var query string
 	var args []interface{}
 
@@ -156,7 +167,7 @@ func (c Connector) Discovery(ctx context.Context, tablesList []string) ([]model.
 		SELECT name 
 		FROM system.tables 
 		WHERE database = ?`
-	args = append(args, c.config.Database)
+	args = append(args, dbName)
 
 	if len(tablesList) > 0 {
 		// If specific tables are requested, add an IN clause
@@ -180,6 +191,7 @@ func (c Connector) Discovery(ctx context.Context, tablesList []string) ([]model.
 	var tables []model.Table
 	for rows.Next() {
 		var tableName string
+
 		if err := rows.Scan(&tableName); err != nil {
 			return nil, xerrors.Errorf("unable to scan table name: %w", err)
 		}
@@ -191,7 +203,7 @@ func (c Connector) Discovery(ctx context.Context, tablesList []string) ([]model.
 
 		// Get the total row count for this table
 		var rowCount int
-		qualifiedTableName := fmt.Sprintf("`%s`.`%s`", c.config.Database, tableName)
+		qualifiedTableName := fmt.Sprintf("`%s`.`%s`", dbName, tableName)
 		countQuery := fmt.Sprintf("SELECT COUNT(*) FROM %s", qualifiedTableName)
 		err = c.db.Get(&rowCount, countQuery)
 		if err != nil {
@@ -236,6 +248,12 @@ func (c Connector) Query(ctx context.Context, endpoint model.Endpoint, params ma
 }
 
 func (c Connector) LoadsColumns(ctx context.Context, tableName string) ([]model.ColumnSchema, error) {
+	// Use default database if not specified
+	dbName := c.config.Database
+	if dbName == "" {
+		dbName = "default"
+	}
+
 	rows, err := c.db.QueryContext(
 		ctx,
 		`SELECT 
@@ -245,7 +263,7 @@ func (c Connector) LoadsColumns(ctx context.Context, tableName string) ([]model.
 		FROM system.columns 
 		WHERE table = ? 
 		AND database = ?`,
-		tableName, c.config.Database,
+		tableName, dbName,
 	)
 	if err != nil {
 		return nil, xerrors.Errorf("unable to query columns: %w", err)

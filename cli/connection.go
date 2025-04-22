@@ -107,6 +107,7 @@ func TablesData(tablesList []string, connector connectors.Connector) ([]prompter
 
 	logrus.Info("Step 2: Discover data")
 	allTables, err := connector.Discovery(ctx, tablesList)
+
 	if err != nil {
 		return nil, err
 	}
