@@ -36,9 +36,16 @@ RUN groupadd -r cligroup && useradd -r -g cligroup -m -d /home/cliuser cliuser
 # Copy the binary from builder
 COPY --from=builder /app/gateway /usr/local/bin/gw
 
-RUN chmod +x /usr/local/bin/gw && \
-    chown cliuser:cligroup /usr/local/bin/gw
+# Create necessary directories with proper permissions
+RUN mkdir -p /var/log/gateway /etc/gateway && \
+    chown -R cliuser:cligroup /var/log/gateway /etc/gateway /usr/local/bin && \
+    chmod 755 /var/log/gateway /etc/gateway && \
+    chmod +x /usr/local/bin/gw
 
+# Create a working directory for the application with proper permissions
+WORKDIR /app
+RUN chown -R cliuser:cligroup /app && \
+    chmod 755 /app
 
 ENV HOME=/home/cliuser
 # Switch to the non-root user

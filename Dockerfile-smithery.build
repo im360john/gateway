@@ -47,6 +47,17 @@ ENV HOME=/home/gateway
 # Копируем собранный бинарный файл из этапа сборки
 COPY --from=builder /app/gateway /usr/local/bin/gateway
 
+# Create necessary directories with proper permissions
+RUN mkdir -p /var/log/gateway /etc/gateway && \
+    chown -R gateway:gateway /var/log/gateway /etc/gateway /usr/local/bin && \
+    chmod 755 /var/log/gateway /etc/gateway && \
+    chmod +x /usr/local/bin/gateway
+
+# Create a working directory for the application with proper permissions
+WORKDIR /app
+RUN chown -R gateway:gateway /app && \
+    chmod 755 /app
+
 # Переключаемся на непривилегированного пользователя
 USER gateway
 

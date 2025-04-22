@@ -22,7 +22,13 @@ COPY ${BINARY} /usr/local/bin/gw
 RUN chmod +x /usr/local/bin/gw
 
 # Set ownership of the binary to the non-root user
-RUN chown cliuser:cligroup /usr/local/bin/gw
+RUN chown cliuser:cligroup /usr/local/bin/gw && \
+    chmod -R 755 /usr/local/bin
+
+# Create a working directory for the application with proper permissions
+WORKDIR /app
+RUN chown -R cliuser:cligroup /app && \
+    chmod 755 /app
 
 # Switch to the non-root user
 USER cliuser
