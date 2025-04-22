@@ -15,7 +15,7 @@ Simple way to expose your database to AI-Agent via MCP or OpenAPI 3.1 protocols.
 
 ```bash
 docker run --platform linux/amd64 -p 9090:9090 \
-  ghcr.io/centralmind/gateway:v0.2.6 start \
+  ghcr.io/centralmind/gateway:v0.2.14 start \
   --connection-string "postgres://db-user:db-password@db-host/db-name?sslmode=require"
 ```
 
@@ -36,15 +36,15 @@ Gateway will generate AI optimized API.
 
 ## Why Centralmind/Gateway
 
-AI agents and LLM-powered applications need fast, secure access to data, but traditional APIs and databases aren't built for this purpose. We're building an API layer that automatically generates secure, LLM-optimized APIs for your structured data.
-
-Our solution:
-
+AI agents and LLM-powered applications need fast, secure access to data. We're building an API layer that automatically generates secure, LLM-optimized APIs for your structured data.
+- Quickly start with MCP or OpenAPI, or use Direct/Raw SQL APIs
 - Filters out PII and sensitive data to ensure compliance with GDPR, CPRA, SOC 2, and other regulations
-- Adds traceability and auditing capabilities, ensuring AI applications aren't black boxes and security teams maintain control
-- Optimizes for AI workloads, supporting Model Context Protocol (MCP) with enhanced meta information to help AI agents understand APIs, along with built-in caching and security features
+- Adds traceability and auditing capabilities, ensuring AI applications aren't black boxes and allowing security teams to maintain control
+- Optimized for AI workloads: supports the Model Context Protocol (MCP) with enhanced metadata to help AI agents understand APIs, along with built-in caching and security features
 
-Our primary users are companies deploying AI agents for customer support, analytics, where they need models to access the data without direct SQL access to databases elemenating security, compliance and peformance risks.
+It can be useful during development, when an LLM needs to create, adjust, or query data from your database.
+In analytical scenarios, it enables you to chat with your database or data warehouse.
+Enrich your AI agents with data from your database using remote function/tool calling.
 
 ![demo](/assets/demo.gif)
 
@@ -158,7 +158,7 @@ export GEMINI_API_KEY='yourkey'
   --prompt "Generate for me awesome readonly API"
 ```
 
-3. Monitor the generation process:
+3. Enjoy the generation process:
 
 ```shell
 INFO 🚀 API Discovery Process
@@ -211,7 +211,7 @@ database:
 ### Run locally
 
 ```shell
-./gateway start --config gateway.yaml rest
+./gateway start --config gateway.yaml
 ```
 
 ### Docker Compose
@@ -224,13 +224,7 @@ docker compose -f ./example/simple/docker-compose.yml up
 
 Gateway implements the MCP protocol for seamless integration with Claude and other tools. For detailed setup instructions, see our <a href="https://docs.centralmind.ai/docs/content/integration/claude-desktop/">Claude integration guide</a>.
 
-1. Build the gateway binary:
-
-```shell
-go build .
-```
-
-2. Configure Claude Desktop tool configuration:
+To add MCP Tool to Claude Desktop just adjust Claude's config :
 
 ```json
 {
