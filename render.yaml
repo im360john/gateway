@@ -5,11 +5,11 @@ services:
     dockerfilePath: ./Dockerfile
     dockerContext: .
     envVars:
-      - key: ANTHROPIC_API_KEY
+	- key: ANTHROPIC_API_KEY
         value: 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
-	  - key: ANTHROPIC_MODEL_ID
+	- key: ANTHROPIC_MODEL_ID
         value: claude-3-7-sonnet-latest
-	  - key: ANTHROPIC_ENDPOINT
+	- key: ANTHROPIC_ENDPOINT
         value: https://api.anthropic.com	
     disk:
       name: gateway-config
